@@ -1,0 +1,6 @@
+{
+  "name": "Solarpunk Farm",
+  "description": "A 3D Solarpunk farming and clean energy simulation with real-time day/night cycles, regenerative agriculture, clean power grids, and livestock management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
