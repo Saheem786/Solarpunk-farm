@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -53,9 +55,42 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
+      - name: Verify and prepare APK for release
+        id: prepare_apk
+        run: |
+          APK_FILE=$(find app/build/outputs/apk/debug -name "*.apk" -type f | head -n 1)
+          if [ -z "$APK_FILE" ] || [ ! -f "$APK_FILE" ]; then
+            echo "ERROR: Debug APK not found in app/build/outputs/apk/debug/"
+            exit 1
+          fi
+          echo "Found APK: $APK_FILE"
+          cp "$APK_FILE" solarpunk-farm-debug.apk
+          echo "apk_path=solarpunk-farm-debug.apk" >> $GITHUB_OUTPUT
+          echo "tag_name=v1.0.0-${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: solarpunk-farm-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.prepare_apk.outputs.tag_name }}
+          name: "Solarpunk Farm Debug ${{ steps.prepare_apk.outputs.tag_name }}"
+          body: |
+            ### Solarpunk Farm - Automated Debug Release
+            - **Commit:** ${{ github.sha }}
+            - **Build Run:** [#${{ github.run_number }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - **Package:** `com.aistudio.solarpunkfarm.krzmvq`
+            - **Target SDK:** 36
+            - **JDK:** 17 (Temurin)
+            - **Gradle:** 9.3.1
+          files: ${{ steps.prepare_apk.outputs.apk_path }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
