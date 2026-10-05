@@ -11,19 +11,19 @@ class ThirdPersonCamera(
     var targetZ: Float = 0.0f
 ) {
     var yawDeg: Float = 45.0f // Orbit around Y axis
-    var pitchDeg: Float = 35.0f // Elevation angle
-    var distance: Float = 18.0f // Distance from target
+    var pitchDeg: Float = 24.0f // Elevation angle (15-30 degrees)
+    var distance: Float = 7.5f // Default distance (6-9 meters)
 
-    private val minDistance = 8.0f
-    private val maxDistance = 32.0f
-    private val minPitch = 15.0f
-    private val maxPitch = 70.0f
+    val minDistance = 3.0f
+    val maxDistance = 12.0f
+    val minPitch = 12.0f
+    val maxPitch = 60.0f
 
     fun updateTarget(targetPlayerX: Float, targetPlayerY: Float, targetPlayerZ: Float, deltaSec: Float) {
         // Smooth target follow interpolation
-        val lerpFactor = min(1.0f, 10.0f * deltaSec)
+        val lerpFactor = min(1.0f, 12.0f * deltaSec)
         targetX += (targetPlayerX - targetX) * lerpFactor
-        targetY += (targetPlayerY + 1.2f - targetY) * lerpFactor
+        targetY += (targetPlayerY + 1.25f - targetY) * lerpFactor
         targetZ += (targetPlayerZ - targetZ) * lerpFactor
     }
 

@@ -1,29 +1,20 @@
 package com.example.ui.game3d
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import android.opengl.GLSurfaceView
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,15 +23,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.data.model.WeatherType
-import com.example.game3d.renderer.WorldRenderer
+import com.example.game3d.opengl.GLWorldRenderer
 import com.example.ui.FarmViewModel
 import com.example.ui.components.SolarpunkNotificationBanner
 import com.example.ui.components.ToolSelectorDock
@@ -68,31 +58,38 @@ fun Game3DScreen(
     val bannerNotification by viewModel.bannerNotification.collectAsStateWithLifecycle()
     val animTime by viewModel.animTime.collectAsStateWithLifecycle()
 
-    val worldRenderer = remember { WorldRenderer() }
+    val glRenderer = remember { GLWorldRenderer() }
+
+    // Synchronize latest state with GLWorldRenderer
+    glRenderer.playerRef = viewModel.player
+    glRenderer.cameraRef = viewModel.camera
+    glRenderer.lightingRef = lightingState
+    glRenderer.plotsRef = plots
+    glRenderer.energyNodesRef = energyNodes
+    glRenderer.livestockRef = livestock
+    glRenderer.animTimeSec = animTime
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .testTag("game_3d_screen")
     ) {
-        // 1. 3D Canvas World Rendering
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            worldRenderer.renderWorld(
-                drawScope = this,
-                player = viewModel.player,
-                camera = viewModel.camera,
-                lighting = lightingState,
-                weather = gameState?.currentWeather ?: WeatherType.SUNNY_CLEAR,
-                plots = plots,
-                energyNodes = energyNodes,
-                livestock = livestock,
-                animTimeSec = animTime
-            )
-        }
+        // 1. Hardware Accelerated OpenGL ES 2.0/3.0 3D World View
+        AndroidView(
+            factory = { ctx ->
+                GLSurfaceView(ctx).apply {
+                    setEGLContextClientVersion(2)
+                    setRenderer(glRenderer)
+                    renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
 
-        // 2. Camera Touch Drag Area
+        // 2. Camera Touch Drag & Pinch Zoom Area
         CameraTouchArea(
             onRotate = { dy, dp -> viewModel.rotateCamera(dy, dp) },
+            onZoom = { dz -> viewModel.zoomCamera(dz) },
             modifier = Modifier.fillMaxSize()
         )
 
