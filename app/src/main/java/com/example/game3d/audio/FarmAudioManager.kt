@@ -68,22 +68,104 @@ class FarmAudioManager(
     // ========================================================================
 
     /**
-     * Footstep cadence: plays soft thud every 0.5s walking, faster/punchier every 0.3s running.
+     * Surface-specific footstep audio: grass, dirt, wood, water.
      */
-    fun playFootstep(isRunning: Boolean) {
+    fun playFootstepOnSurface(surfaceType: String, isRunning: Boolean) {
         val now = System.currentTimeMillis()
         val interval = if (isRunning) 290L else 490L
         if (now - lastFootstepTime < interval) return
         lastFootstepTime = now
 
         val vol = (if (isRunning) 0.38f else 0.22f) * sfxVolume * masterVolume
-        val baseFreq = if (isRunning) 115f else 88f
+        val frequencies = when (surfaceType.lowercase()) {
+            "wood" -> floatArrayOf(220f, 180f)
+            "water" -> floatArrayOf(600f, 450f, 300f)
+            "dirt" -> floatArrayOf(130f, 90f)
+            else -> floatArrayOf(115f, 75f) // grass
+        }
         synthesizeShortPulse(
             durationMs = 45,
-            frequencies = floatArrayOf(baseFreq, baseFreq * 0.65f),
+            frequencies = frequencies,
             volume = vol,
             noiseMod = true
         )
+    }
+
+    fun playFootstep(isRunning: Boolean) {
+        playFootstepOnSurface("grass", isRunning)
+    }
+
+    /**
+     * Heavy "thunk" sound when chopping wood with an axe.
+     */
+    fun playChopWood() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.58f * sfxVolume * masterVolume
+            synthesizeShortPulse(durationMs = 80, frequencies = floatArrayOf(210f, 150f, 90f), volume = vol, noiseMod = true)
+        }
+    }
+
+    /**
+     * Sharp "clink" sound when mining stone or ore with a pickaxe.
+     */
+    fun playMineStone() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.60f * sfxVolume * masterVolume
+            generateTone(1200f, 40, vol)
+            generateTone(850f, 60, vol * 0.8f)
+        }
+    }
+
+    /**
+     * Happy chime on level up / skill increase.
+     */
+    fun playLevelUp() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.65f * sfxVolume * masterVolume
+            val chord = floatArrayOf(523.25f, 659.25f, 783.99f, 1046.50f, 1318.51f, 1567.98f)
+            for (note in chord) {
+                generateTone(note, 80, vol)
+                delay(30)
+            }
+        }
+    }
+
+    /**
+     * Triumphant fanfare upon mission complete.
+     */
+    fun playMissionComplete() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.70f * sfxVolume * masterVolume
+            val notes = floatArrayOf(587.33f, 739.99f, 880.00f, 1174.66f)
+            for (n in notes) {
+                generateTone(n, 100, vol)
+                delay(45)
+            }
+        }
+    }
+
+    /**
+     * Magical sparkle chime when discovering a point of interest.
+     */
+    fun playDiscoverySparkle() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.62f * sfxVolume * masterVolume
+            val notes = floatArrayOf(1046.50f, 1318.51f, 1567.98f, 2093.00f)
+            for (n in notes) {
+                generateTone(n, 60, vol)
+                delay(35)
+            }
+        }
+    }
+
+    /**
+     * Power cut electric zap sound.
+     */
+    fun playPowerCut() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.65f * sfxVolume * masterVolume
+            synthesizeShortPulse(durationMs = 120, frequencies = floatArrayOf(1500f, 800f, 300f, 100f), volume = vol, noiseMod = true)
+        }
     }
 
     /**

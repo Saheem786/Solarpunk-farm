@@ -12,17 +12,64 @@ import java.io.File
 object SaveLoadSystem {
     private const val SAVE_FILE_NAME = "savegame.json"
 
-    fun hasSave(context: Context): Boolean {
-        val file = File(context.filesDir, SAVE_FILE_NAME)
+    data class SaveSlotInfo(
+        val slotId: Int,
+        val exists: Boolean,
+        val day: Int = 1,
+        val coins: Int = 0,
+        val timestampMs: Long = 0L,
+        val formattedDate: String = "Empty Slot"
+    )
+
+    private fun getSlotFileName(slotId: Int): String {
+        return if (slotId <= 1) SAVE_FILE_NAME else "savegame_slot_$slotId.json"
+    }
+
+    fun hasSave(context: Context, slotId: Int = 1): Boolean {
+        val file = File(context.filesDir, getSlotFileName(slotId))
         return file.exists() && file.length() > 0
     }
 
-    fun deleteSave(context: Context): Boolean {
-        val file = File(context.filesDir, SAVE_FILE_NAME)
+    fun deleteSave(context: Context, slotId: Int = 1): Boolean {
+        val file = File(context.filesDir, getSlotFileName(slotId))
         return if (file.exists()) file.delete() else false
     }
 
-    suspend fun saveGame(context: Context, dao: FarmDao): Boolean {
+    fun duplicateSaveSlot(context: Context, fromSlot: Int, toSlot: Int): Boolean {
+        return try {
+            val srcFile = File(context.filesDir, getSlotFileName(fromSlot))
+            if (!srcFile.exists()) return false
+            val destFile = File(context.filesDir, getSlotFileName(toSlot))
+            srcFile.copyTo(destFile, overwrite = true)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun getAllSlotsInfo(context: Context): List<SaveSlotInfo> {
+        val slots = mutableListOf<SaveSlotInfo>()
+        for (i in 1..3) {
+            val file = File(context.filesDir, getSlotFileName(i))
+            if (file.exists() && file.length() > 0) {
+                try {
+                    val json = JSONObject(file.readText())
+                    val day = json.optInt("day", 1)
+                    val coins = json.optJSONObject("economy")?.optInt("money", 0) ?: 0
+                    val ts = json.optLong("timestamp", System.currentTimeMillis() / 1000L) * 1000L
+                    val dateStr = java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(ts))
+                    slots.add(SaveSlotInfo(i, true, day, coins, ts, dateStr))
+                } catch (e: Exception) {
+                    slots.add(SaveSlotInfo(i, true, 1, 0, System.currentTimeMillis(), "Slot $i"))
+                }
+            } else {
+                slots.add(SaveSlotInfo(i, false))
+            }
+        }
+        return slots
+    }
+
+    suspend fun saveGame(context: Context, dao: FarmDao, slotId: Int = 1): Boolean {
         return try {
             val state = dao.getGameState().firstOrNull() ?: return false
             val plots = dao.getAllPlots().firstOrNull() ?: emptyList()
@@ -31,6 +78,7 @@ object SaveLoadSystem {
 
             val json = JSONObject()
             json.put("version", 1)
+            json.put("slotId", slotId)
             json.put("timestamp", System.currentTimeMillis() / 1000L)
             
             // World
@@ -169,9 +217,9 @@ object SaveLoadSystem {
             json.put("livestock", lArray)
 
             // Write to file
-            val file = File(context.filesDir, SAVE_FILE_NAME)
+            val file = File(context.filesDir, getSlotFileName(slotId))
             file.writeText(json.toString(2))
-            Log.d("SaveLoadSystem", "Saved game state successfully to private storage")
+            Log.d("SaveLoadSystem", "Saved game state successfully to slot $slotId")
             true
         } catch (e: Exception) {
             Log.e("SaveLoadSystem", "Save failed", e)
@@ -179,9 +227,9 @@ object SaveLoadSystem {
         }
     }
 
-    suspend fun loadGame(context: Context, dao: FarmDao): Boolean {
+    suspend fun loadGame(context: Context, dao: FarmDao, slotId: Int = 1): Boolean {
         return try {
-            val file = File(context.filesDir, SAVE_FILE_NAME)
+            val file = File(context.filesDir, getSlotFileName(slotId))
             if (!file.exists()) return false
 
             val jsonStr = file.readText()

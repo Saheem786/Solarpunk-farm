@@ -151,6 +151,55 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     val sfxVolume = MutableStateFlow(prefs.getFloat("sfx_vol", 0.9f))
     val vibrationEnabled = MutableStateFlow(prefs.getBoolean("vibration_on", true))
 
+    // Phase 7: Main Menu, Tutorial, Achievements & Radial Quick Access Wheel StateFlows
+    val isMainMenuVisible = MutableStateFlow(true)
+    val showTutorialOverlay = MutableStateFlow(false)
+    val tutorialStep = MutableStateFlow(1)
+    val unlockedAchievements = MutableStateFlow<Set<String>>(setOf("ach_first_steps"))
+    val isQuickWheelVisible = MutableStateFlow(false)
+
+    fun closeMainMenu() {
+        isMainMenuVisible.value = false
+        if (prefs.getBoolean("show_tutorial_first", true)) {
+            showTutorialOverlay.value = true
+        }
+    }
+
+    fun openMainMenu() {
+        isMainMenuVisible.value = true
+    }
+
+    fun nextTutorialStep() {
+        if (tutorialStep.value < 5) {
+            tutorialStep.value += 1
+            audioSystem.playButtonTap()
+        } else {
+            skipTutorial()
+        }
+    }
+
+    fun skipTutorial() {
+        showTutorialOverlay.value = false
+        prefs.edit().putBoolean("show_tutorial_first", false).apply()
+        audioSystem.playBuildingComplete()
+        showNotification("Welcome to Solarpunk Farm!", "Explore Green Valley, harvest crops & build solar panels.", "eco")
+    }
+
+    fun unlockAchievement(achId: String) {
+        if (!unlockedAchievements.value.contains(achId)) {
+            val updated = unlockedAchievements.value + achId
+            unlockedAchievements.value = updated
+            audioSystem.playDiscoverySparkle()
+            haptics.vibrateSuccess()
+            showNotification("ACHIEVEMENT UNLOCKED!", achId.replace("ach_", "").replace("_", " ").uppercase(), "trophy")
+        }
+    }
+
+    fun toggleQuickWheel() {
+        isQuickWheelVisible.value = !isQuickWheelVisible.value
+        audioSystem.playMenuWhoosh()
+    }
+
     // Floating Texts
     private val _floatingTexts = MutableStateFlow<List<FloatingTextData>>(emptyList())
     val floatingTexts: StateFlow<List<FloatingTextData>> = _floatingTexts.asStateFlow()

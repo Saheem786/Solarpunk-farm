@@ -61,6 +61,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -82,6 +83,8 @@ import com.example.ui.components.ToolSelectorDock
 import com.example.ui.components.TopGameStatsBar
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Science
+import com.example.data.repository.SaveLoadSystem
+import com.example.ui.screens.AchievementsModal
 import com.example.ui.screens.EndingSequenceModal
 import com.example.ui.screens.EnergyTabModal
 import com.example.ui.screens.JournalTabModal
@@ -99,6 +102,7 @@ fun Game3DScreen(
     viewModel: FarmViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val gameState by viewModel.gameState.collectAsStateWithLifecycle()
     val plots by viewModel.plots.collectAsStateWithLifecycle()
     val energyNodes by viewModel.energyNodes.collectAsStateWithLifecycle()
@@ -152,15 +156,22 @@ fun Game3DScreen(
     val storyEndingUnlocked by viewModel.storyEndingUnlocked.collectAsStateWithLifecycle()
     val activeTerminalForModal by viewModel.activeTerminalForModal.collectAsStateWithLifecycle()
 
+    val isMainMenuVisible by viewModel.isMainMenuVisible.collectAsStateWithLifecycle()
+    val showTutorialOverlay by viewModel.showTutorialOverlay.collectAsStateWithLifecycle()
+    val tutorialStep by viewModel.tutorialStep.collectAsStateWithLifecycle()
+    val unlockedAchievements by viewModel.unlockedAchievements.collectAsStateWithLifecycle()
+    val isQuickWheelVisible by viewModel.isQuickWheelVisible.collectAsStateWithLifecycle()
+
     var showActionsMenu by remember { mutableStateOf(false) }
 
     val glRenderer = remember { GLWorldRenderer() }
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
 
     DisposableEffect(glView) {
-        glView?.onResume()
         onDispose {
-            glView?.onPause()
+            try {
+                glView?.onPause()
+            } catch (_: Exception) {}
         }
     }
 
@@ -192,7 +203,8 @@ fun Game3DScreen(
                 GLSurfaceView(ctx).apply {
                     preserveEGLContextOnPause = true
                     setEGLContextClientVersion(2)
-                    holder.setFormat(android.graphics.PixelFormat.RGBA_8888)
+                    setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+                    holder.setFormat(android.graphics.PixelFormat.OPAQUE)
                     setRenderer(glRenderer)
                     renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
                     glView = this
@@ -584,6 +596,50 @@ fun Game3DScreen(
                 npc = selectedNpcForDialogue,
                 viewModel = viewModel,
                 onDismiss = { viewModel.openModal(null) }
+            )
+        }
+
+        if (activeModal == "achievements") {
+            AchievementsModal(
+                unlockedAchievementIds = unlockedAchievements,
+                onDismiss = { viewModel.openModal(null) }
+            )
+        }
+
+        if (isQuickWheelVisible) {
+            QuickActionWheelModal(
+                onEat = { viewModel.eat() },
+                onDrink = { viewModel.drink() },
+                onRest = { viewModel.restInFarmhouse() },
+                onOpenBuild = { viewModel.toggleBuildMode() },
+                onOpenInventory = { viewModel.openModal("inventory") },
+                onOpenResearch = { viewModel.openModal("research") },
+                onOpenJournal = { viewModel.openModal("journal") },
+                onOpenEnergy = { viewModel.openModal("energy_grid") },
+                onDismiss = { viewModel.toggleQuickWheel() }
+            )
+        }
+
+        if (showTutorialOverlay && !isMainMenuVisible) {
+            TutorialOverlay(
+                currentStep = tutorialStep,
+                onNextStep = { viewModel.nextTutorialStep() },
+                onSkipTutorial = { viewModel.skipTutorial() }
+            )
+        }
+
+        if (isMainMenuVisible) {
+            MainMenuOverlay(
+                hasSaveGame = SaveLoadSystem.hasSave(context),
+                onContinueGame = { viewModel.closeMainMenu() },
+                onNewGame = {
+                    viewModel.startNewGameFresh()
+                    viewModel.closeMainMenu()
+                },
+                onOpenSaveSlots = { viewModel.openModal("settings_menu") },
+                onOpenAchievements = { viewModel.openModal("achievements") },
+                onOpenSettings = { viewModel.openModal("settings_menu") },
+                onOpenCredits = {}
             )
         }
 
