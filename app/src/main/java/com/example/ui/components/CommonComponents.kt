@@ -37,6 +37,9 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Whatshot
+import androidx.compose.material.icons.filled.LocalFlorist
+import com.example.data.local.PlotEntity
+import com.example.data.model.CropStage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -68,6 +71,7 @@ import kotlin.math.roundToInt
 fun TopGameStatsBar(
     state: GameStateEntity?,
     onAdvanceTimeClick: () -> Unit,
+    plots: List<PlotEntity> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     if (state == null) return
@@ -167,7 +171,9 @@ fun TopGameStatsBar(
                         text = "${weather.displayName.split(" ")[0]} • Solar $solarPercent%",
                         color = Color.White,
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -189,6 +195,47 @@ fun TopGameStatsBar(
                 secondaryLabel = "$chargePercent%",
                 testTag = "stat_energy"
             )
+        }
+
+        // Crops Ready Overlay Pill (glows green when > 0)
+        val readyCropsCount = plots.count { it.stage == CropStage.HARVEST_READY }
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            val glowColor = if (readyCropsCount > 0) Color(0xFF00E676) else Color(0xFF90A4AE)
+            val borderColor = if (readyCropsCount > 0) Color(0xFF00E676).copy(alpha = 0.8f) else Color.White.copy(alpha = 0.2f)
+            val backgroundColor = if (readyCropsCount > 0) Color(0x3300E676) else Color(0xCC112224)
+            Surface(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .testTag("hud_crops_ready"),
+                color = backgroundColor,
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocalFlorist,
+                        contentDescription = "Crops Ready",
+                        tint = glowColor,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Crops Ready: $readyCropsCount",
+                        color = if (readyCropsCount > 0) Color(0xFFB9F6CA) else Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+            }
         }
     }
 }

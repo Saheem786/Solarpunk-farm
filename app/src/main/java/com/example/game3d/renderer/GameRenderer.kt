@@ -7,6 +7,7 @@ import com.example.data.local.LivestockEntity
 import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.data.model.BuildableType
+import com.example.data.model.WeatherType
 import com.example.game3d.opengl.GLMesh
 import com.example.game3d.opengl.GLModelBuilder
 import com.example.game3d.opengl.GLShader
@@ -285,7 +286,9 @@ class GameRenderer {
         placedBuildings: List<PlacedBuildingEntity> = emptyList(),
         ghostBuilding: GhostBuildingState? = null,
         livestock: List<LivestockEntity>,
-        animTimeSec: Float
+        animTimeSec: Float,
+        hour: Float = 12.0f,
+        weather: WeatherType = WeatherType.SUNNY_CLEAR
     ) {
         if (!isInitialized) {
             create()
@@ -336,7 +339,7 @@ class GameRenderer {
         modelBatch.begin(camera, environment)
 
         // A. Draw Environment (Terrain, Roads, River, Bridge, Pond, Trees, Grass, Wildlife)
-        environmentModels?.drawEnvironment(sh, camera.viewMatrix, camera.projectionMatrix, animTimeSec)
+        environmentModels?.drawEnvironment(sh, camera.viewMatrix, camera.projectionMatrix, animTimeSec, hour, weather)
 
         // B. Draw Buildings (Farmhouse, Barn, Workshop, Market, Solar Arrays, Wind Turbine, Placed Buildings, Fences)
         buildingModels?.drawBuildings(sh, camera.viewMatrix, camera.projectionMatrix, energyNodes, placedBuildings, animTimeSec)

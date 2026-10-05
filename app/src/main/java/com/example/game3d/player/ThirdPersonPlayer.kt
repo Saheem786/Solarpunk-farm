@@ -28,18 +28,36 @@ class ThirdPersonPlayer(
             val speedFactor = (if (input.isSprinting) 11.0f else 6.5f) * speedMultiplier
             currentSpeed = speedFactor * min(1.0f, inputMagnitude)
 
-            // Calculate movement relative to camera angle
-            val inputAngleRad = atan2(input.moveX, input.moveZ)
-            val cameraAngleRad = Math.toRadians(cameraYawDeg.toDouble()).toFloat()
-            val totalAngleRad = inputAngleRad + cameraAngleRad
+            val yawRad = Math.toRadians(cameraYawDeg.toDouble()).toFloat()
 
-            val dx = kotlin.math.sin(totalAngleRad) * currentSpeed * deltaSec
-            val dz = kotlin.math.cos(totalAngleRad) * currentSpeed * deltaSec
+            // Project camera-relative directions onto the ground plane (X-Z)
+            // Camera forward unit vector projected on ground: (-sin, -cos)
+            // Camera right unit vector projected on ground: (cos, -sin)
+            val moveDirX = input.moveX * kotlin.math.cos(yawRad) - input.moveZ * kotlin.math.sin(yawRad)
+            val moveDirZ = -input.moveX * kotlin.math.sin(yawRad) - input.moveZ * kotlin.math.cos(yawRad)
+
+            val moveDirMag = sqrt(moveDirX * moveDirX + moveDirZ * moveDirZ)
+            val unitDirX = if (moveDirMag > 0.001f) moveDirX / moveDirMag else 0f
+            val unitDirZ = if (moveDirMag > 0.001f) moveDirZ / moveDirMag else 0f
+
+            val dx = unitDirX * currentSpeed * deltaSec
+            val dz = unitDirZ * currentSpeed * deltaSec
 
             posX = max(minBoundX, min(maxBoundX, posX + dx))
             posZ = max(minBoundZ, min(maxBoundZ, posZ + dz))
 
-            orientationAngleDeg = Math.toDegrees(totalAngleRad.toDouble()).toFloat()
+            // Smoothly rotate character to face the direction of movement (Shortest path lerp)
+            val targetAngleDeg = Math.toDegrees(atan2(unitDirX.toDouble(), unitDirZ.toDouble())).toFloat()
+            var diff = targetAngleDeg - orientationAngleDeg
+            while (diff < -180.0f) diff += 360.0f
+            while (diff > 180.0f) diff -= 360.0f
+
+            val lerpFactor = (10.0f * deltaSec).coerceIn(0.0f, 1.0f)
+            orientationAngleDeg = (orientationAngleDeg + diff * lerpFactor) % 360.0f
+            if (orientationAngleDeg < 0.0f) {
+                orientationAngleDeg += 360.0f
+            }
+
             walkAnimPhase = (walkAnimPhase + deltaSec * (if (input.isSprinting) 12.0f else 8.0f)) % (2.0f * Math.PI.toFloat())
         } else {
             isMoving = false

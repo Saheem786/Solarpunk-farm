@@ -25,8 +25,8 @@ enum class CropType(
         waterNeed = 0.3f,
         sunNeed = 0.7f,
         harvestYield = 3,
-        baseSellPrice = 35,
-        seedCost = 12,
+        baseSellPrice = 30,
+        seedCost = 5,
         energyBonusKwh = 1.0f,
         primaryColor = 0xFFFFE082,
         secondaryColor = 0xFF8D6E63
@@ -38,8 +38,8 @@ enum class CropType(
         waterNeed = 0.5f,
         sunNeed = 0.85f,
         harvestYield = 2,
-        baseSellPrice = 55,
-        seedCost = 18,
+        baseSellPrice = 50,
+        seedCost = 10,
         energyBonusKwh = 2.0f,
         primaryColor = 0xFFFFCA28,
         secondaryColor = 0xFF388E3C
@@ -51,8 +51,8 @@ enum class CropType(
         waterNeed = 0.6f,
         sunNeed = 0.75f,
         harvestYield = 4,
-        baseSellPrice = 48,
-        seedCost = 15,
+        baseSellPrice = 40,
+        seedCost = 8,
         energyBonusKwh = 1.5f,
         primaryColor = 0xFFFF5252,
         secondaryColor = 0xFF2E7D32
@@ -64,8 +64,8 @@ enum class CropType(
         waterNeed = 0.4f,
         sunNeed = 0.6f,
         harvestYield = 3,
-        baseSellPrice = 38,
-        seedCost = 14,
+        baseSellPrice = 25,
+        seedCost = 4,
         energyBonusKwh = 1.2f,
         primaryColor = 0xFFFF9800,
         secondaryColor = 0xFF4CAF50
@@ -77,8 +77,8 @@ enum class CropType(
         waterNeed = 0.35f,
         sunNeed = 0.5f,
         harvestYield = 5,
-        baseSellPrice = 28,
-        seedCost = 10,
+        baseSellPrice = 60,
+        seedCost = 15,
         energyBonusKwh = 0.8f,
         primaryColor = 0xFF81C784,
         secondaryColor = 0xFF00E676
@@ -186,7 +186,17 @@ enum class CropType(
         energyBonusKwh = 0.6f,
         primaryColor = 0xFF81C784,
         secondaryColor = 0xFF388E3C
-    )
+    );
+
+    val growthDays: Int
+        get() = when (this) {
+            WHEAT -> 3
+            CORN -> 4
+            TOMATO -> 3
+            CARROT -> 2
+            HERBS -> 5
+            else -> 3
+        }
 }
 
 /**

@@ -471,6 +471,39 @@ class WorldRenderer {
                     center = Offset(sx, sy - plantHeight),
                     style = Stroke(width = 3.0f)
                 )
+
+                // Golden coin sparkles and green leaf particles floating up
+                for (i in 0 until 3) {
+                    val sparkTime = (animTime * 1.5f + i * 1.0f) % 2.0f
+                    val progressY = sparkTime / 2.0f
+                    val syOffset = -plantHeight - (progressY * scale * 0.7f)
+                    val sxOffset = (cos(i * 2.1f + animTime) * scale * 0.5f)
+                    val pSize = 3.5f * (1.0f - progressY)
+                    drawScope.drawCircle(
+                        color = if (i % 2 == 0) Color(0xFFFFD54F) else Color(0xFF00E676), // Gold Sparkle or Green Leaf
+                        radius = pSize,
+                        center = Offset(sx + sxOffset, sy + syOffset)
+                    )
+                }
+            }
+        }
+
+        // Real-time Water Splash particles above watered soil
+        if (plot.moisture > 0.4f) {
+            val particleCount = 3
+            for (i in 0 until particleCount) {
+                val pTime = (animTime * 2.5f + i * 1.2f) % 2.0f
+                val hProgress = pTime / 2.0f
+                val dy = hProgress * -scale * 0.8f // Rise upwards
+                val dx = (sin(i * 1.57f) * (scale * 0.4f)) * (1.0f - hProgress)
+                val px = sx + dx
+                val py = sy + dy
+                val pSize = (4f * (1.0f - hProgress)).coerceAtLeast(1f)
+                drawScope.drawCircle(
+                    color = Color(0xAA00E5FF), // Splash Cyan-Blue
+                    radius = pSize,
+                    center = Offset(px, py)
+                )
             }
         }
 

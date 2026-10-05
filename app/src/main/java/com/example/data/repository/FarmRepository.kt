@@ -27,6 +27,8 @@ import kotlin.random.Random
 
 class FarmRepository(private val dao: FarmDao) {
 
+    val farmDao: FarmDao get() = dao
+
     val gameState: Flow<GameStateEntity?> = dao.getGameState()
     val plots: Flow<List<PlotEntity>> = dao.getAllPlots()
     val energyNodes: Flow<List<EnergyNodeEntity>> = dao.getAllEnergyNodes()
@@ -68,28 +70,22 @@ class FarmRepository(private val dao: FarmDao) {
             )
             dao.saveGameState(initialState)
 
-            // Seed 12 Farm Plots in a 3x4 Solarpunk grid
+            // Seed exactly 6 Farm Plots in a 2x3 grid near the greenhouse
             val defaultPlots = mutableListOf<PlotEntity>()
             val plotLayout = listOf(
-                Pair(PlotType.PERMACULTURE_BED, CropType.SOLAR_SUNFLOWER),
-                Pair(PlotType.PERMACULTURE_BED, CropType.TERRACED_WHEAT),
-                Pair(PlotType.BIO_DOME, CropType.BIOLUMINESCENT_MUSHROOM),
-                Pair(PlotType.HYDROPONIC_TOWER, CropType.SKY_SPIRULINA),
-                Pair(PlotType.PERMACULTURE_BED, CropType.CYBER_BERRIES),
-                Pair(PlotType.PERMACULTURE_BED, CropType.NITRO_BEANS),
-                Pair(PlotType.SOLAR_SOIL_PATCH, CropType.SOLAR_CORN),
-                Pair(PlotType.HYDROPONIC_TOWER, CropType.HYDROPONIC_MELON),
+                Pair(PlotType.PERMACULTURE_BED, CropType.WHEAT),
+                Pair(PlotType.PERMACULTURE_BED, CropType.CORN),
+                Pair(PlotType.PERMACULTURE_BED, CropType.TOMATO),
                 Pair(PlotType.PERMACULTURE_BED, null),
                 Pair(PlotType.PERMACULTURE_BED, null),
-                Pair(PlotType.BIO_DOME, null),
-                Pair(PlotType.SOLAR_SOIL_PATCH, null)
+                Pair(PlotType.PERMACULTURE_BED, null)
             )
 
             plotLayout.forEachIndexed { index, pair ->
-                val row = index / 4
-                val col = index % 4
-                val posX = (col - 1.5f) * 6.5f - 4.0f
-                val posZ = (row - 1.0f) * 6.5f - 6.0f
+                val row = index / 3
+                val col = index % 3
+                val posX = -4.0f + (col - 1.0f) * 4.5f
+                val posZ = -6.0f + (row - 0.5f) * 4.5f
                 val isSeeded = pair.second != null
                 defaultPlots.add(
                     PlotEntity(
@@ -97,7 +93,7 @@ class FarmRepository(private val dao: FarmDao) {
                         plotType = pair.first,
                         cropType = pair.second,
                         stage = if (isSeeded) CropStage.VEGETATIVE else CropStage.EMPTY,
-                        progress = if (isSeeded) 0.55f else 0.0f,
+                        progress = if (isSeeded) 1.5f else 0.0f,
                         moisture = 0.85f,
                         compostLevel = 0.7f,
                         posX = posX,
@@ -889,53 +885,75 @@ class FarmRepository(private val dao: FarmDao) {
             )
         )
 
-        // 5. Update Crop Plots with Rain Hydration, Greenhouse Boost and Sunlight
+        // 5. Update Crop Plots with Rain Hydration and Day-Start Growth at 6:00 AM
+        val oldHour = state.gameTimeHour
+        val crossed6AM = (oldHour < 6.0f && newHour >= 6.0f) || (newHour < oldHour && (oldHour < 6.0f || newHour >= 6.0f))
+
         val greenhouses = placedList.filter { it.buildingType == BuildableType.GREENHOUSE }
-        val updatedPlots = plotsList.map { plot ->
-            if (plot.cropType != null && plot.stage != CropStage.HARVEST_READY && plot.stage != CropStage.WITHERED) {
-                val crop = plot.cropType
-                val isRaining = currentWeather.autoWaterRain
+        var updatedPlots = plotsList
 
-                // Check Greenhouse proximity (within 9 meters)
-                val isNearGreenhouse = greenhouses.any { gh ->
-                    val dx = plot.posX - gh.posX
-                    val dz = plot.posZ - gh.posZ
-                    (dx * dx + dz * dz) < 81.0f
-                } || plot.plotType == PlotType.BIO_DOME
+        // Rain auto-waters plots in real-time
+        val isRaining = currentWeather.autoWaterRain
+        if (isRaining) {
+            updatedPlots = updatedPlots.map { it.copy(moisture = 1.0f) }
+        }
 
-                // Crops grow only during daylight hours (5 AM to 7 PM)
-                val isCropsDay = newHour in 5.0f..19.0f
-                val hasSun = isCropsDay || isNearGreenhouse
-                val hasWater = plot.moisture > 0.1f || isRaining || isNearGreenhouse
-
-                // Moisture drains 2x faster during Heatwave
-                val moistureMultiplier = if (currentWeather == WeatherType.HEATWAVE) 2.0f else 1.0f
-                val moistureDrain = 0.006f * moistureMultiplier
-                val newMoisture = if (isRaining) {
-                    min(1.0f, plot.moisture + 0.25f * deltaSec)
-                } else {
-                    max(0.0f, plot.moisture - moistureDrain * deltaSec)
-                }
-
-                if (hasWater && hasSun) {
-                    val weatherGrowthBoost = currentWeather.cropGrowthMultiplier
-                    val greenhouseBoost = if (isNearGreenhouse) 1.50f else 1.0f
-                    val soilQualityBoost = 1.0f + plot.compostLevel * 0.6f
-                    val growthRate = (1.0f / crop.growthDurationSec) * soilQualityBoost * weatherGrowthBoost * greenhouseBoost
-                    val newProgress = min(1.0f, plot.progress + growthRate * deltaSec)
-                    val newStage = when {
-                        newProgress >= 1.0f -> CropStage.HARVEST_READY
-                        newProgress >= 0.75f -> CropStage.FLOWERING
-                        newProgress >= 0.45f -> CropStage.VEGETATIVE
-                        newProgress >= 0.15f -> CropStage.SPROUT
-                        else -> CropStage.SEEDLING
+        if (crossed6AM) {
+            updatedPlots = updatedPlots.map { plot ->
+                if (plot.cropType != null && plot.stage != CropStage.HARVEST_READY && plot.stage != CropStage.WITHERED) {
+                    val crop = plot.cropType
+                    
+                    // Was watered? (moisture > 0.4f)
+                    val wasWatered = plot.moisture > 0.4f
+                    
+                    if (wasWatered) {
+                        // Growth rate multiplier
+                        val rainBonus = if (isRaining) 1.5f else 1.0f
+                        val isNearGreenhouse = greenhouses.any { gh ->
+                            val dx = plot.posX - gh.posX
+                            val dz = plot.posZ - gh.posZ
+                            (dx * dx + dz * dz) < 81.0f
+                        } || plot.plotType == PlotType.BIO_DOME
+                        val greenhouseBonus = if (isNearGreenhouse) 1.3f else 1.0f
+                        
+                        val increment = 1.0f * rainBonus * greenhouseBonus
+                        val newProgress = min(crop.growthDays.toFloat(), plot.progress + increment)
+                        
+                        val ratio = newProgress / crop.growthDays.toFloat()
+                        val newStage = when {
+                            ratio >= 0.99f -> CropStage.HARVEST_READY
+                            ratio >= 0.50f -> CropStage.VEGETATIVE // Growing (medium)
+                            ratio >= 0.20f -> CropStage.SPROUT      // Sprout (small)
+                            else -> CropStage.SEEDLING              // Seed (tiny)
+                        }
+                        
+                        plot.copy(
+                            progress = newProgress,
+                            stage = newStage,
+                            moisture = 0.0f // reset to unwatered at 6:00 AM
+                        )
+                    } else {
+                        // not watered, does not grow, reset moisture to 0
+                        plot.copy(moisture = 0.0f)
                     }
-                    plot.copy(progress = newProgress, stage = newStage, moisture = newMoisture)
                 } else {
-                    plot.copy(moisture = newMoisture)
+                    // Empty or ready/withered, reset moisture to 0
+                    plot.copy(moisture = 0.0f)
                 }
-            } else {
-                plot
+            }
+        } else {
+            // Gradual evaporation of water during dry hot daytime (7 AM - 5 PM)
+            val isHotDay = newHour in 7.0f..17.0f && !isRaining
+            if (isHotDay) {
+                val moistureMultiplier = if (currentWeather == WeatherType.HEATWAVE) 2.0f else 1.0f
+                val moistureDrain = 0.006f * moistureMultiplier * deltaSec
+                updatedPlots = updatedPlots.map { plot ->
+                    if (plot.cropType != null && plot.stage != CropStage.HARVEST_READY && plot.stage != CropStage.WITHERED) {
+                        plot.copy(moisture = max(0.0f, plot.moisture - moistureDrain))
+                    } else {
+                        plot
+                    }
+                }
             }
         }
         dao.insertPlots(updatedPlots)

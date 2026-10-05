@@ -20,6 +20,7 @@ import com.example.data.model.PlayerTool
 import com.example.data.model.TimeOfDayPhase
 import com.example.data.model.WeatherType
 import com.example.data.repository.FarmRepository
+import com.example.data.repository.SaveLoadSystem
 import com.example.game3d.audio.SpatialLivestockAudioSystem
 import com.example.game3d.interaction.InteractionPrompt
 import com.example.game3d.interaction.InteractionSystem
@@ -128,9 +129,16 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     private val _animTime = MutableStateFlow(0.0f)
     val animTime: StateFlow<Float> = _animTime.asStateFlow()
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.initializeDefaultDataIfEmpty()
+            if (SaveLoadSystem.hasSave(getApplication())) {
+                SaveLoadSystem.loadGame(getApplication(), repository.farmDao)
+            } else {
+                repository.initializeDefaultDataIfEmpty()
+            }
             val savedState = repository.gameState.firstOrNull()
             if (savedState != null) {
                 player.posX = savedState.playerX
@@ -148,33 +156,108 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             while (isActive) {
                 delay(120_000) // Auto-save every 2 minutes
-                val success = repository.saveGameSnapshot(
+                // Sync player position to database first
+                repository.saveGameSnapshot(
                     playerX = player.posX,
                     playerY = player.posY,
                     playerZ = player.posZ,
                     playerAngle = player.orientationAngleDeg
                 )
+                // Export full database state to private JSON archive
+                val success = SaveLoadSystem.saveGame(getApplication(), repository.farmDao)
                 if (success) {
-                    showNotification("Auto-Saved", "Game progress, crops & structures saved", "save")
+                    showNotification("Auto-Saved", "Game progress, crops & structures saved to JSON archive", "save")
+                }
+            }
+        }
+    }
+
+    fun executeFullSaveFlow() {
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. Sync player position to Room database first
+            repository.saveGameSnapshot(
+                playerX = player.posX,
+                playerY = player.posY,
+                playerZ = player.posZ,
+                playerAngle = player.orientationAngleDeg
+            )
+            // 2. Export full Room database to private JSON file
+            val success = SaveLoadSystem.saveGame(getApplication(), repository.farmDao)
+            
+            // 3. Show toast and notification
+            viewModelScope.launch(Dispatchers.Main) {
+                if (success) {
+                    audioSystem.playCraftSuccess()
+                    android.widget.Toast.makeText(getApplication(), "Saved!", android.widget.Toast.LENGTH_SHORT).show()
+                    showNotification("Game Saved", "Your progress, crops & structures are archived in JSON format", "save")
+                } else {
+                    android.widget.Toast.makeText(getApplication(), "Save failed. Please try again.", android.widget.Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
     fun manualSave() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val success = repository.saveGameSnapshot(
-                playerX = player.posX,
-                playerY = player.posY,
-                playerZ = player.posZ,
-                playerAngle = player.orientationAngleDeg
-            )
+        openModal("settings_menu")
+    }
+
+    fun loadSaveGame() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _activeModal.value = null
+            
+            // Show Loading Screen for 1.5 seconds
+            delay(1500)
+            
+            val success = SaveLoadSystem.loadGame(getApplication(), repository.farmDao)
             if (success) {
-                audioSystem.playCraftSuccess()
-                showNotification("Game Saved", "Player position, coins, crops & energy stored", "save")
+                // Restore player state
+                val savedState = repository.gameState.firstOrNull()
+                if (savedState != null) {
+                    player.posX = savedState.playerX
+                    player.posY = savedState.playerY
+                    player.posZ = savedState.playerZ
+                    player.orientationAngleDeg = savedState.playerAngle
+                    camera.updateTarget(savedState.playerX, savedState.playerY, savedState.playerZ, 1.0f)
+                }
+                showNotification("Save Restored", "Your farm state has been loaded successfully", "save")
             } else {
-                showNotification("Save Failed", "Could not persist game state", "error")
+                android.widget.Toast.makeText(getApplication(), "Save file corrupted. Starting new game.", android.widget.Toast.LENGTH_LONG).show()
+                startNewGameFresh()
             }
+            _isLoading.value = false
+        }
+    }
+
+    fun startNewGameFresh() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _activeModal.value = null
+            
+            // Show Loading Screen for 1.5 seconds
+            delay(1500)
+            
+            SaveLoadSystem.deleteSave(getApplication())
+            
+            val dao = repository.farmDao
+            dao.deleteAllPlots()
+            dao.deleteAllInventory()
+            dao.deleteAllPlacedBuildings()
+            dao.deleteAllEnergyNodes()
+            dao.deleteAllLivestock()
+            
+            // Now seed defaults
+            repository.initializeDefaultDataIfEmpty()
+            
+            // Reset player position
+            player.posX = 0.0f
+            player.posY = 0.0f
+            player.posZ = 0.0f
+            player.orientationAngleDeg = 0.0f
+            camera.updateTarget(0.0f, 0.0f, 0.0f, 1.0f)
+            
+            showNotification("New Game Started", "The farm has been reset to Day 1, 6:00 AM", "eco")
+            _isLoading.value = false
         }
     }
 

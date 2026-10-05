@@ -99,4 +99,20 @@ interface FarmDao {
 
     @Query("DELETE FROM placed_buildings WHERE id = :id")
     suspend fun deletePlacedBuilding(id: Int)
+
+    // Clear Tables for Loading Overwrite
+    @Query("DELETE FROM farm_plots")
+    suspend fun deleteAllPlots()
+
+    @Query("DELETE FROM inventory")
+    suspend fun deleteAllInventory()
+
+    @Query("DELETE FROM placed_buildings")
+    suspend fun deleteAllPlacedBuildings()
+
+    @Query("DELETE FROM energy_nodes")
+    suspend fun deleteAllEnergyNodes()
+
+    @Query("DELETE FROM livestock")
+    suspend fun deleteAllLivestock()
 }

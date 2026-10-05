@@ -73,6 +73,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.executeFullSaveFlow()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.executeFullSaveFlow()
+    }
 }
 
 @Composable

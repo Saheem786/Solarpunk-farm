@@ -1,12 +1,15 @@
 package com.example.ui.game3d
 
 import android.opengl.GLSurfaceView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.model.WeatherType
 import com.example.game3d.opengl.GLWorldRenderer
 import com.example.ui.FarmViewModel
 import com.example.ui.components.SolarpunkNotificationBanner
@@ -72,6 +76,7 @@ fun Game3DScreen(
     val isFainted by viewModel.isFainted.collectAsStateWithLifecycle()
     val faintCountdown by viewModel.faintCountdown.collectAsStateWithLifecycle()
     val animTime by viewModel.animTime.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     val glRenderer = remember { GLWorldRenderer() }
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
@@ -93,6 +98,8 @@ fun Game3DScreen(
     glRenderer.ghostBuildingRef = ghostBuilding
     glRenderer.livestockRef = livestock
     glRenderer.animTimeSec = animTime
+    glRenderer.weatherRef = gameState?.currentWeather ?: WeatherType.SUNNY_CLEAR
+    glRenderer.hourRef = gameState?.gameTimeHour ?: 12.0f
 
     Box(
         modifier = modifier
@@ -127,7 +134,8 @@ fun Game3DScreen(
         ) {
             TopGameStatsBar(
                 state = gameState,
-                onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) }
+                onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
+                plots = plots
             )
             SurvivalStatsHUD(
                 state = gameState,
@@ -296,9 +304,66 @@ fun Game3DScreen(
             )
         }
 
+        if (activeModal == "settings_menu") {
+            SettingsMenuModal(
+                onSaveClick = { viewModel.executeFullSaveFlow() },
+                onLoadClick = { viewModel.loadSaveGame() },
+                onNewGameClick = { viewModel.startNewGameFresh() },
+                onDismiss = { viewModel.openModal(null) }
+            )
+        }
+
         // 8. Fainted Screen Overlay
         if (isFainted) {
             FaintedOverlay(countdownSec = faintCountdown)
+        }
+
+        // 9. Saving/Loading Progress Screen Overlay
+        if (isLoading) {
+            LoadingScreenOverlay()
+        }
+    }
+}
+
+@Composable
+private fun LoadingScreenOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF091215))
+            .clickable(enabled = false) {}, // absorb touch events
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "SOLARPUNK FARM",
+                color = SolarEmerald,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Restoring world state...",
+                color = SunGold,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            androidx.compose.material3.CircularProgressIndicator(
+                color = CleanCyan,
+                strokeWidth = 3.dp,
+                modifier = Modifier.size(40.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Loading...",
+                color = Color.White.copy(alpha = 0.6f),
+                fontSize = 14.sp
+            )
         }
     }
 }

@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.local.ContractEntity
 import com.example.data.local.InventoryEntity
+import com.example.data.model.CropType
+import androidx.compose.material.icons.filled.LocalFlorist
 import com.example.ui.FarmViewModel
 import com.example.ui.components.SolarpunkProgressBar
 import com.example.ui.theme.CleanCyan
@@ -136,6 +138,34 @@ fun MarketScreen(
                 availableCount = inventoryCount,
                 isOpen = isOpen,
                 onClaim = { viewModel.claimContract(contract.id) }
+            )
+        }
+
+        // Buy Seeds Section
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Buy Organic Seeds",
+                color = CleanCyan,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        val seedCropTypes = listOf(
+            CropType.WHEAT,
+            CropType.CORN,
+            CropType.TOMATO,
+            CropType.CARROT,
+            CropType.HERBS
+        )
+
+        items(seedCropTypes) { crop ->
+            BuySeedCard(
+                crop = crop,
+                isOpen = isOpen,
+                playerCoins = gameState?.solCoins ?: 0,
+                onBuy = { viewModel.buySeed(crop, 1) }
             )
         }
 
@@ -404,6 +434,78 @@ private fun SellItemCard(
                 ) {
                     Text(text = "All", color = if (isOpen) Color(0xFF091215) else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BuySeedCard(
+    crop: CropType,
+    isOpen: Boolean,
+    playerCoins: Int,
+    onBuy: () -> Unit
+) {
+    val canAfford = playerCoins >= crop.seedCost
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("market_buy_seed_${crop.name.lowercase()}"),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF112529)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x2280D8FF))
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(Color(crop.primaryColor).copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalFlorist,
+                    contentDescription = null,
+                    tint = Color(crop.primaryColor),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "${crop.displayName} Seeds",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Cost: ${crop.seedCost} 🪙 • Growth Time: ${crop.growthDays} Days",
+                    color = SunGold,
+                    fontSize = 11.sp
+                )
+            }
+
+            Button(
+                onClick = onBuy,
+                enabled = isOpen && canAfford,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CleanCyan,
+                    disabledContainerColor = Color(0xFF1B2E2A)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.testTag("btn_buy_seed_${crop.name.lowercase()}")
+            ) {
+                Text(
+                    text = if (!canAfford) "Poor" else "Buy 1x",
+                    color = if (isOpen && canAfford) Color(0xFF091215) else Color(0xFF90A4AE),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

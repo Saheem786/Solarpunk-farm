@@ -103,7 +103,14 @@ fun CropPlantModal(
                     modifier = Modifier.height(340.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    items(CropType.values()) { crop ->
+                    val coreCrops = listOf(
+                        CropType.WHEAT,
+                        CropType.CORN,
+                        CropType.TOMATO,
+                        CropType.CARROT,
+                        CropType.HERBS
+                    )
+                    items(coreCrops) { crop ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -155,10 +162,10 @@ fun CropPlantModal(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                         Text(
-                                            text = "⏱ ${(crop.growthDurationSec).toInt()}s",
+                                            text = "⏱ ${crop.growthDays} Days",
                                             color = SunGold,
                                             fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold
+                                            fontWeight = FontWeight.Bold
                                         )
                                         Text(
                                             text = "⚡ +${crop.energyBonusKwh} kWh",
