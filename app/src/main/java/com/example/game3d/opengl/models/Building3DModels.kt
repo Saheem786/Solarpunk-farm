@@ -22,6 +22,9 @@ class Building3DModels {
     val solarArrayMesh: GLMesh
     val batteryHubMesh: GLMesh
     val fenceSegmentMesh: GLMesh
+    val wellMesh: GLMesh
+    val compostBinMesh: GLMesh
+    val chickenCoopMesh: GLMesh
 
     // Building Shadow Meshes (Soft Dark Charcoal Ground Contacts)
     val shadowLargeMesh: GLMesh
@@ -51,61 +54,61 @@ class Building3DModels {
         builder.addBox(0f, 0.015f, 0f, 3.2f, 0.01f, 2.6f, 0.05f, 0.10f, 0.08f, 0.55f)
         shadowSmallMesh = builder.build()
 
-        // 1. FARM HOUSE / CABIN
+        // 1. FARM HOUSE / CABIN (Height = 3.5 units)
         builder.reset()
         // Stone Foundation
-        builder.addBox(0f, 0.20f, 0f, 7.4f, 0.40f, 5.2f, 0.48f, 0.48f, 0.50f)
+        builder.addBox(0f, 0.15f, 0f, 7.4f, 0.30f, 5.2f, 0.48f, 0.48f, 0.50f)
         // Timber/Clapboard Walls
-        builder.addBox(0f, 1.80f, 0f, 7.0f, 2.80f, 4.8f, 0.92f, 0.88f, 0.78f)
+        builder.addBox(0f, 1.30f, 0f, 7.0f, 2.00f, 4.8f, 0.92f, 0.88f, 0.78f)
         // Pitched Roof
-        builder.addRoofPrism(0f, 3.20f, 0f, 7.6f, 2.20f, 5.4f, 0.82f, 0.38f, 0.22f)
+        builder.addRoofPrism(0f, 2.30f, 0f, 7.6f, 1.20f, 5.4f, 0.82f, 0.38f, 0.22f)
         // Chimney
-        builder.addBox(2.2f, 4.50f, -0.8f, 0.70f, 1.80f, 0.70f, 0.65f, 0.28f, 0.22f)
+        builder.addBox(2.2f, 3.10f, -0.8f, 0.70f, 1.00f, 0.70f, 0.65f, 0.28f, 0.22f)
         // Front Door & Windows
-        builder.addBox(0f, 1.25f, 2.42f, 1.10f, 2.10f, 0.08f, 0.42f, 0.26f, 0.16f)
-        builder.addBox(-1.8f, 1.70f, 2.42f, 1.20f, 1.20f, 0.06f, 0.98f, 0.92f, 0.50f)
-        builder.addBox(1.8f, 1.70f, 2.42f, 1.20f, 1.20f, 0.06f, 0.98f, 0.92f, 0.50f)
+        builder.addBox(0f, 0.90f, 2.42f, 1.10f, 1.50f, 0.08f, 0.42f, 0.26f, 0.16f)
+        builder.addBox(-1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.98f, 0.92f, 0.50f)
+        builder.addBox(1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.98f, 0.92f, 0.50f)
         // Covered Porch
-        builder.addBox(0f, 0.18f, 3.30f, 5.4f, 0.36f, 1.8f, 0.55f, 0.38f, 0.24f)
-        builder.addCylinder(-2.4f, 0.36f, 4.0f, 0.12f, 2.30f, 6, 0.88f, 0.85f, 0.78f)
-        builder.addCylinder(2.4f, 0.36f, 4.0f, 0.12f, 2.30f, 6, 0.88f, 0.85f, 0.78f)
-        builder.addRoofPrism(0f, 2.60f, 3.30f, 5.6f, 0.90f, 2.0f, 0.82f, 0.38f, 0.22f)
+        builder.addBox(0f, 0.15f, 3.30f, 5.4f, 0.30f, 1.8f, 0.55f, 0.38f, 0.24f)
+        builder.addCylinder(-2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.88f, 0.85f, 0.78f)
+        builder.addCylinder(2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.88f, 0.85f, 0.78f)
+        builder.addRoofPrism(0f, 1.90f, 3.30f, 5.6f, 0.60f, 2.0f, 0.82f, 0.38f, 0.22f)
         farmhouseMesh = builder.build()
 
-        // 2. RUSTIC BARN
+        // 2. RUSTIC BARN (Height = 3.8 units)
         builder.reset()
-        builder.addBox(0f, 1.80f, 0f, 9.2f, 3.60f, 7.2f, 0.78f, 0.20f, 0.18f)
-        builder.addBox(-4.55f, 1.80f, -3.55f, 0.30f, 3.65f, 0.30f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(4.55f, 1.80f, -3.55f, 0.30f, 3.65f, 0.30f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(-4.55f, 1.80f, 3.55f, 0.30f, 3.65f, 0.30f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(4.55f, 1.80f, 3.55f, 0.30f, 3.65f, 0.30f, 0.95f, 0.95f, 0.95f)
-        builder.addRoofPrism(0f, 3.60f, 0f, 9.8f, 3.20f, 7.6f, 0.28f, 0.30f, 0.34f)
-        builder.addBox(0f, 1.50f, 3.62f, 3.2f, 3.00f, 0.10f, 0.95f, 0.95f, 0.95f)
+        builder.addBox(0f, 1.10f, 0f, 7.2f, 2.20f, 5.6f, 0.78f, 0.20f, 0.18f)
+        builder.addBox(-3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
+        builder.addBox(3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
+        builder.addBox(-3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
+        builder.addBox(3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
+        builder.addRoofPrism(0f, 2.20f, 0f, 7.6f, 1.60f, 6.0f, 0.28f, 0.30f, 0.34f)
+        builder.addBox(0f, 1.00f, 2.82f, 2.4f, 2.00f, 0.08f, 0.95f, 0.95f, 0.95f)
         barnMesh = builder.build()
 
-        // 3. ARTISAN ECO-WORKSHOP
+        // 3. ARTISAN ECO-WORKSHOP (Height = 3.5 units)
         builder.reset()
-        builder.addBox(0f, 1.60f, 0f, 6.6f, 3.20f, 5.4f, 0.88f, 0.92f, 0.88f)
-        builder.addRoofPrism(0f, 3.20f, 0f, 7.0f, 1.60f, 5.8f, 0.10f, 0.65f, 0.85f)
-        builder.addBox(0f, 1.30f, -2.72f, 3.0f, 2.60f, 0.08f, 0.40f, 0.50f, 0.55f)
+        builder.addBox(0f, 1.10f, 0f, 5.8f, 2.20f, 4.6f, 0.88f, 0.92f, 0.88f)
+        builder.addRoofPrism(0f, 2.20f, 0f, 6.2f, 1.30f, 5.0f, 0.10f, 0.65f, 0.85f)
+        builder.addBox(0f, 1.00f, -2.32f, 2.4f, 2.00f, 0.06f, 0.40f, 0.50f, 0.55f)
         workshopMesh = builder.build()
 
-        // 4. GREENHOUSE / BIO-DOME
+        // 4. GREENHOUSE / BIO-DOME (Height = 3.0 units)
         builder.reset()
         // Low concrete wall base
-        builder.addBox(0f, 0.25f, 0f, 5.2f, 0.50f, 4.4f, 0.45f, 0.50f, 0.52f)
+        builder.addBox(0f, 0.15f, 0f, 5.2f, 0.30f, 4.4f, 0.45f, 0.50f, 0.52f)
         // Geodesic Glass Arches / Dome (Translucent Cyan: 0.15, 0.80, 0.90)
-        builder.addBox(0f, 1.80f, 0f, 4.8f, 2.60f, 4.0f, 0.15f, 0.80f, 0.90f)
+        builder.addBox(0f, 1.15f, 0f, 4.8f, 1.70f, 4.0f, 0.15f, 0.80f, 0.90f)
         // Metal Structural Frame Trusses (Emerald: 0.0, 0.85, 0.45)
-        builder.addBox(-2.38f, 1.80f, 0f, 0.12f, 2.65f, 4.02f, 0.00f, 0.85f, 0.45f)
-        builder.addBox(2.38f, 1.80f, 0f, 0.12f, 2.65f, 4.02f, 0.00f, 0.85f, 0.45f)
-        builder.addBox(0f, 1.80f, -1.98f, 4.82f, 2.65f, 0.12f, 0.00f, 0.85f, 0.45f)
-        builder.addBox(0f, 1.80f, 1.98f, 4.82f, 2.65f, 0.12f, 0.00f, 0.85f, 0.45f)
+        builder.addBox(-2.38f, 1.15f, 0f, 0.12f, 1.75f, 4.02f, 0.00f, 0.85f, 0.45f)
+        builder.addBox(2.38f, 1.15f, 0f, 0.12f, 1.75f, 4.02f, 0.00f, 0.85f, 0.45f)
+        builder.addBox(0f, 1.15f, -1.98f, 4.82f, 1.75f, 0.12f, 0.00f, 0.85f, 0.45f)
+        builder.addBox(0f, 1.15f, 1.98f, 4.82f, 1.75f, 0.12f, 0.00f, 0.85f, 0.45f)
         // Slanted Glass Roof Cap
-        builder.addRoofPrism(0f, 3.10f, 0f, 5.0f, 1.20f, 4.2f, 0.20f, 0.88f, 0.95f)
+        builder.addRoofPrism(0f, 2.00f, 0f, 5.0f, 1.00f, 4.2f, 0.20f, 0.88f, 0.95f)
         // Interior Hydroponic Planters
-        builder.addBox(-1.2f, 0.60f, 0f, 1.2f, 0.40f, 2.8f, 0.22f, 0.75f, 0.25f)
-        builder.addBox(1.2f, 0.60f, 0f, 1.2f, 0.40f, 2.8f, 0.22f, 0.75f, 0.25f)
+        builder.addBox(-1.2f, 0.45f, 0f, 1.2f, 0.30f, 2.8f, 0.22f, 0.75f, 0.25f)
+        builder.addBox(1.2f, 0.45f, 0f, 1.2f, 0.30f, 2.8f, 0.22f, 0.75f, 0.25f)
         greenhouseMesh = builder.build()
 
         // Turbine Blade (Length = 2.4m)
@@ -147,6 +150,39 @@ class Building3DModels {
         builder.addBox(0f, 0.85f, 0f, 2.90f, 0.12f, 0.08f, 0.68f, 0.48f, 0.30f)
         builder.addBox(0f, 0.45f, 0f, 2.90f, 0.12f, 0.08f, 0.68f, 0.48f, 0.30f)
         fenceSegmentMesh = builder.build()
+
+        // 9. WATER WELL
+        builder.reset()
+        builder.addBox(0f, 0.40f, 0f, 2.0f, 0.80f, 2.0f, 0.50f, 0.50f, 0.50f)
+        builder.addBox(-0.8f, 1.30f, 0f, 0.15f, 1.80f, 0.15f, 0.60f, 0.40f, 0.20f)
+        builder.addBox(0.8f, 1.30f, 0f, 0.15f, 1.80f, 0.15f, 0.60f, 0.40f, 0.20f)
+        builder.addRoofPrism(0f, 2.20f, 0f, 2.4f, 0.70f, 1.8f, 0.82f, 0.38f, 0.22f)
+        wellMesh = builder.build()
+
+        // 10. COMPOST BIN
+        builder.reset()
+        builder.addBox(0f, 0.50f, 0.90f, 1.8f, 1.00f, 0.10f, 0.45f, 0.35f, 0.25f)
+        builder.addBox(0f, 0.50f, -0.90f, 1.8f, 1.00f, 0.10f, 0.45f, 0.35f, 0.25f)
+        builder.addBox(0.90f, 0.50f, 0f, 0.10f, 1.00f, 1.8f, 0.45f, 0.35f, 0.25f)
+        builder.addBox(-0.90f, 0.50f, 0f, 0.10f, 1.00f, 1.8f, 0.45f, 0.35f, 0.25f)
+        builder.addBox(0f, 0.30f, 0f, 1.6f, 0.60f, 1.6f, 0.25f, 0.18f, 0.10f)
+        compostBinMesh = builder.build()
+
+        // 11. CHICKEN COOP
+        builder.reset()
+        // Wooden base posts
+        builder.addBox(-0.55f, 0.15f, -0.55f, 0.12f, 0.30f, 0.12f, 0.45f, 0.30f, 0.15f)
+        builder.addBox(0.55f, 0.15f, -0.55f, 0.12f, 0.30f, 0.12f, 0.45f, 0.30f, 0.15f)
+        builder.addBox(-0.55f, 0.15f, 0.55f, 0.12f, 0.30f, 0.12f, 0.45f, 0.30f, 0.15f)
+        builder.addBox(0.55f, 0.15f, 0.55f, 0.12f, 0.30f, 0.12f, 0.45f, 0.30f, 0.15f)
+        // Red Barn-wood Hen House
+        builder.addBox(0f, 0.75f, 0f, 1.35f, 0.90f, 1.35f, 0.82f, 0.22f, 0.18f)
+        // Pitched Roof
+        builder.addRoofPrism(0f, 1.30f, 0f, 1.55f, 0.45f, 1.55f, 0.22f, 0.48f, 0.45f)
+        // Little chicken door & wooden ramp
+        builder.addBox(0f, 0.55f, 0.69f, 0.36f, 0.45f, 0.04f, 0.35f, 0.22f, 0.12f)
+        builder.addBox(0f, 0.16f, 0.95f, 0.30f, 0.04f, 0.60f, 0.62f, 0.45f, 0.28f)
+        chickenCoopMesh = builder.build()
     }
 
     fun drawBuildings(
@@ -261,6 +297,21 @@ class Building3DModels {
                         renderMesh(shader, turbineBladeMesh, partMatrix, viewMatrix, projMatrix)
                     }
                 }
+                BuildableType.WELL -> {
+                    renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
+                    Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
+                    renderMesh(shader, wellMesh, modelMatrix, viewMatrix, projMatrix)
+                }
+                BuildableType.FENCE -> {
+                    renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
+                    Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
+                    renderMesh(shader, fenceSegmentMesh, modelMatrix, viewMatrix, projMatrix)
+                }
+                BuildableType.COMPOST_BIN -> {
+                    renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
+                    Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
+                    renderMesh(shader, compostBinMesh, modelMatrix, viewMatrix, projMatrix)
+                }
             }
         }
 
@@ -268,6 +319,12 @@ class Building3DModels {
         drawFenceLine(shader, viewMatrix, projMatrix, -16f, 2f, -8f, 2f)
         drawFenceLine(shader, viewMatrix, projMatrix, -8f, 2f, -8f, 8f)
         drawFenceLine(shader, viewMatrix, projMatrix, -16f, 2f, -16f, 14f)
+
+        // 8. Draw Chicken Coop at X = 4.5, Z = 4.0
+        Matrix.setIdentityM(modelMatrix, 0)
+        Matrix.translateM(modelMatrix, 0, 4.5f, 0.0f, 4.0f)
+        renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, chickenCoopMesh, modelMatrix, viewMatrix, projMatrix)
     }
 
     fun drawGhostPreview(
@@ -280,7 +337,7 @@ class Building3DModels {
         posZ: Float,
         rotationDeg: Float,
         animTime: Float,
-        canAfford: Boolean
+        isValid: Boolean
     ) {
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, posX, posY, posZ)
@@ -295,11 +352,14 @@ class Building3DModels {
             BuildableType.SOLAR_PANEL -> solarArrayMesh
             BuildableType.STORAGE -> batteryHubMesh
             BuildableType.WINDMILL -> batteryHubMesh
+            BuildableType.WELL -> wellMesh
+            BuildableType.FENCE -> fenceSegmentMesh
+            BuildableType.COMPOST_BIN -> compostBinMesh
         }
 
-        val eR = if (canAfford) 0.0f else 0.85f
-        val eG = if (canAfford) 0.85f else 0.15f
-        val eB = if (canAfford) 0.70f else 0.10f
+        val eR = if (isValid) 0.0f else 0.85f
+        val eG = if (isValid) 0.85f else 0.15f
+        val eB = if (isValid) 0.70f else 0.10f
 
         renderGhostMesh(shader, mesh, modelMatrix, viewMatrix, projMatrix, eR, eG, eB)
     }

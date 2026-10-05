@@ -99,11 +99,21 @@ object InteractionSystem {
                 closestDist = dist
                 closestPrompt = when {
                     animal.readyToHarvest -> {
+                        val actionTitle = when (animal.type) {
+                            com.example.data.model.LivestockType.CHICKEN -> "Collect Egg"
+                            com.example.data.model.LivestockType.CYBER_BOVINE -> "Milk Cow"
+                            else -> "Collect ${animal.type.productProduced}"
+                        }
+                        val actionSubtitle = when (animal.type) {
+                            com.example.data.model.LivestockType.CHICKEN -> "Layed by ${animal.name}"
+                            com.example.data.model.LivestockType.CYBER_BOVINE -> "Fresh milk from ${animal.name}"
+                            else -> "Ready from ${animal.name}"
+                        }
                         InteractionPrompt(
                             targetType = InteractionTargetType.LIVESTOCK,
                             targetId = animal.id,
-                            title = "Collect ${animal.type.productProduced}",
-                            subtitle = "Ready from ${animal.name}",
+                            title = actionTitle,
+                            subtitle = actionSubtitle,
                             recommendedTool = PlayerTool.SHEARS,
                             distance = dist
                         )
@@ -112,7 +122,7 @@ object InteractionSystem {
                         InteractionPrompt(
                             targetType = InteractionTargetType.LIVESTOCK,
                             targetId = animal.id,
-                            title = "Feed ${animal.name}",
+                            title = "Feed ${animal.name} (${animal.type.displayName})",
                             subtitle = "Hungry! Provide organic grain",
                             recommendedTool = PlayerTool.HAND,
                             distance = dist
@@ -122,7 +132,7 @@ object InteractionSystem {
                         InteractionPrompt(
                             targetType = InteractionTargetType.LIVESTOCK,
                             targetId = animal.id,
-                            title = "Pet ${animal.name}",
+                            title = "Pet ${animal.name} (${animal.type.displayName})",
                             subtitle = "Happiness: ${animal.happiness.toInt()}%",
                             recommendedTool = PlayerTool.HAND,
                             distance = dist

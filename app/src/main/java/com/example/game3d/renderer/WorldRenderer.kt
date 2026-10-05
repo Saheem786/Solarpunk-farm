@@ -703,6 +703,26 @@ class WorldRenderer {
                     strokeWidth = scale * 0.35f
                 )
             }
+            LivestockType.CHICKEN -> {
+                // Low-poly Chicken body & comb
+                drawScope.drawOval(
+                    color = tint,
+                    topLeft = Offset(sx - scale * 0.35f, sy - scale * 0.45f + bob),
+                    size = Size(scale * 0.7f, scale * 0.5f)
+                )
+                // Red Comb
+                drawScope.drawCircle(
+                    color = Color(0xFFE53935),
+                    radius = scale * 0.12f,
+                    center = Offset(sx + scale * 0.25f, sy - scale * 0.55f + bob)
+                )
+                // Yellow Beak
+                drawScope.drawCircle(
+                    color = Color(0xFFFFB300),
+                    radius = scale * 0.08f,
+                    center = Offset(sx + scale * 0.35f, sy - scale * 0.35f + bob)
+                )
+            }
         }
 
         // Ready to Harvest Indicator

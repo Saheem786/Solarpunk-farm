@@ -1,27 +1,46 @@
 package com.example.ui.game3d
 
 import android.opengl.GLSurfaceView
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bed
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +51,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +64,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.WeatherType
 import com.example.game3d.opengl.GLWorldRenderer
 import com.example.ui.FarmViewModel
+import com.example.ui.components.FloatingTextOverlay
 import com.example.ui.components.SolarpunkNotificationBanner
 import com.example.ui.components.SurvivalStatsHUD
 import com.example.ui.components.ToolSelectorDock
@@ -77,6 +99,20 @@ fun Game3DScreen(
     val faintCountdown by viewModel.faintCountdown.collectAsStateWithLifecycle()
     val animTime by viewModel.animTime.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isInitialLoading by viewModel.isInitialLoading.collectAsStateWithLifecycle()
+    val ecosystemHealth by viewModel.ecosystemHealth.collectAsStateWithLifecycle()
+    val floatingTexts by viewModel.floatingTexts.collectAsStateWithLifecycle()
+    val playerActionAnim by viewModel.playerActionAnim.collectAsStateWithLifecycle()
+    val playerActionProgress by viewModel.playerActionProgress.collectAsStateWithLifecycle()
+    val screenShake by viewModel.screenShake.collectAsStateWithLifecycle()
+    val fadeBlackAlpha by viewModel.fadeBlackAlpha.collectAsStateWithLifecycle()
+
+    val masterVol by viewModel.masterVolume.collectAsStateWithLifecycle()
+    val musicVol by viewModel.musicVolume.collectAsStateWithLifecycle()
+    val sfxVol by viewModel.sfxVolume.collectAsStateWithLifecycle()
+    val vibrationOn by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+
+    var showActionsMenu by remember { mutableStateOf(false) }
 
     val glRenderer = remember { GLWorldRenderer() }
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
@@ -100,6 +136,10 @@ fun Game3DScreen(
     glRenderer.animTimeSec = animTime
     glRenderer.weatherRef = gameState?.currentWeather ?: WeatherType.SUNNY_CLEAR
     glRenderer.hourRef = gameState?.gameTimeHour ?: 12.0f
+    glRenderer.particleSystemRef = viewModel.particleSystem
+    glRenderer.actionAnimRef = playerActionAnim
+    glRenderer.actionProgressRef = playerActionProgress
+    glRenderer.screenShakeRef = screenShake
 
     Box(
         modifier = modifier
@@ -135,7 +175,8 @@ fun Game3DScreen(
             TopGameStatsBar(
                 state = gameState,
                 onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
-                plots = plots
+                plots = plots,
+                ecosystemScore = ecosystemHealth
             )
             SurvivalStatsHUD(
                 state = gameState,
@@ -147,78 +188,170 @@ fun Game3DScreen(
             )
         }
 
-        // 4. Quick Actions Floating Column (Right Top)
-        Column(
+        // 4. Streamlined Primary Right-Side Controls & Collapsable Secondary Menu
+        Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 110.dp, end = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.End
+                .padding(top = 100.dp, end = 12.dp)
         ) {
-            // Build Mode Toggle Button
-            QuickActionCircleButton(
-                icon = Icons.Default.Construction,
-                label = if (isBuildMode) "Cancel" else "Build",
-                color = if (isBuildMode) SunGold else SolarEmerald,
-                active = isBuildMode,
-                testTag = "btn_build_mode",
-                onClick = { viewModel.toggleBuildMode() }
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                // Secondary Actions Collapsable Panel (Flys in to the left of the main column)
+                AnimatedVisibility(
+                    visible = showActionsMenu,
+                    enter = fadeIn() + scaleIn(initialScale = 0.85f),
+                    exit = fadeOut() + scaleOut(targetScale = 0.85f)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .testTag("secondary_actions_panel"),
+                        color = Color(0xF20F2420),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald.copy(alpha = 0.6f))
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "QUICK ACTIONS",
+                                color = SunGold,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 1.sp
+                            )
 
-            // Eat Button
-            QuickActionCircleButton(
-                icon = Icons.Default.Restaurant,
-                label = "Eat",
-                color = Color(0xFFFF9800),
-                testTag = "btn_eat",
-                onClick = { viewModel.eat() }
-            )
+                            // Grid / Row layout for secondary action buttons
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                // Eat
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.Restaurant,
+                                    label = "Eat",
+                                    color = Color(0xFFFF9800),
+                                    testTag = "btn_menu_eat",
+                                    onClick = {
+                                        viewModel.eat()
+                                        showActionsMenu = false
+                                    }
+                                )
 
-            // Drink Button
-            QuickActionCircleButton(
-                icon = Icons.Default.WaterDrop,
-                label = "Drink",
-                color = Color(0xFF00E5FF),
-                testTag = "btn_drink",
-                onClick = { viewModel.drink() }
-            )
+                                // Drink
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.WaterDrop,
+                                    label = "Drink",
+                                    color = Color(0xFF00E5FF),
+                                    testTag = "btn_menu_drink",
+                                    onClick = {
+                                        viewModel.drink()
+                                        showActionsMenu = false
+                                    }
+                                )
+                            }
 
-            // Inventory Bag Button
-            QuickActionCircleButton(
-                icon = Icons.Default.Inventory2,
-                label = "Bag",
-                color = CleanCyan,
-                testTag = "btn_inventory",
-                onClick = { viewModel.openModal("inventory") }
-            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                // Walk / Sprint Toggle
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.DirectionsRun,
+                                    label = if (inputState.isSprinting) "Fast" else "Walk",
+                                    color = if (inputState.isSprinting) SunGold else Color.White,
+                                    active = inputState.isSprinting,
+                                    testTag = "btn_menu_sprint",
+                                    onClick = { viewModel.setSprinting(!inputState.isSprinting) }
+                                )
 
-            // Manual Save Button
-            QuickActionCircleButton(
-                icon = Icons.Default.Save,
-                label = "Save",
-                color = SolarEmerald,
-                testTag = "btn_manual_save",
-                onClick = { viewModel.manualSave() }
-            )
+                                // Fast-Forward (+2h)
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.FastForward,
+                                    label = "+2h",
+                                    color = SolarEmerald,
+                                    testTag = "btn_menu_fast_forward",
+                                    onClick = {
+                                        viewModel.advanceTimeOfDay(2.0f)
+                                        showActionsMenu = false
+                                    }
+                                )
+                            }
 
-            // Sprint Toggle Button
-            QuickActionCircleButton(
-                icon = Icons.Default.DirectionsRun,
-                label = if (inputState.isSprinting) "Fast" else "Walk",
-                color = if (inputState.isSprinting) SunGold else Color.White,
-                active = inputState.isSprinting,
-                testTag = "btn_sprint",
-                onClick = { viewModel.setSprinting(!inputState.isSprinting) }
-            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                // Rest at Farmhouse
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.Bed,
+                                    label = "Rest",
+                                    color = CleanCyan,
+                                    testTag = "btn_menu_rest",
+                                    onClick = {
+                                        viewModel.restInFarmhouse()
+                                        showActionsMenu = false
+                                    }
+                                )
 
-            // Fast-Forward Time
-            QuickActionCircleButton(
-                icon = Icons.Default.FastForward,
-                label = "+2h",
-                color = SolarEmerald,
-                testTag = "btn_fast_forward",
-                onClick = { viewModel.advanceTimeOfDay(2.0f) }
-            )
+                                // Settings Audio & Preferences
+                                QuickActionCircleButton(
+                                    icon = Icons.Default.Settings,
+                                    label = "Settings",
+                                    color = SunGold,
+                                    testTag = "btn_settings_gear",
+                                    onClick = {
+                                        viewModel.openModal("settings_menu")
+                                        showActionsMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Primary Action Buttons Column (Always Visible)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // 1. Build Mode Toggle
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Construction,
+                        label = if (isBuildMode) "Exit" else "Build",
+                        color = if (isBuildMode) SunGold else SolarEmerald,
+                        active = isBuildMode,
+                        testTag = "btn_build_mode",
+                        onClick = { viewModel.toggleBuildMode() }
+                    )
+
+                    // 2. Backpack Bag Button
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Inventory2,
+                        label = "Bag",
+                        color = CleanCyan,
+                        testTag = "btn_inventory",
+                        onClick = { viewModel.openModal("inventory") }
+                    )
+
+                    // 3. Quick Save Button
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Save,
+                        label = "Save",
+                        color = SolarEmerald,
+                        testTag = "btn_manual_save",
+                        onClick = { viewModel.executeFullSaveFlow() }
+                    )
+
+                    // 4. Expandable Menu Toggle Button
+                    QuickActionCircleButton(
+                        icon = if (showActionsMenu) Icons.Default.Close else Icons.Default.Menu,
+                        label = if (showActionsMenu) "Close" else "Menu",
+                        color = if (showActionsMenu) SunGold else Color.White,
+                        active = showActionsMenu,
+                        testTag = "btn_expand_menu",
+                        onClick = {
+                            showActionsMenu = !showActionsMenu
+                            viewModel.audioSystem.playButtonTap()
+                        }
+                    )
+                }
+            }
         }
 
         // 5. Context Action Prompt (Bottom Right, above dock when not in Build Mode)
@@ -300,12 +433,21 @@ fun Game3DScreen(
             QuickInventoryModal(
                 inventory = inventory,
                 onSellItem = { id, qty -> viewModel.sellItem(id, qty) },
+                onConsumeItem = { id -> viewModel.consumeInventoryItem(id) },
                 onDismiss = { viewModel.openModal(null) }
             )
         }
 
         if (activeModal == "settings_menu") {
             SettingsMenuModal(
+                masterVolume = masterVol,
+                musicVolume = musicVol,
+                sfxVolume = sfxVol,
+                vibrationEnabled = vibrationOn,
+                onMasterVolumeChange = { viewModel.setMasterVolume(it) },
+                onMusicVolumeChange = { viewModel.setMusicVolume(it) },
+                onSfxVolumeChange = { viewModel.setSfxVolume(it) },
+                onVibrationToggle = { viewModel.setVibrationEnabled(it) },
                 onSaveClick = { viewModel.executeFullSaveFlow() },
                 onLoadClick = { viewModel.loadSaveGame() },
                 onNewGameClick = { viewModel.startNewGameFresh() },
@@ -313,25 +455,41 @@ fun Game3DScreen(
             )
         }
 
-        // 8. Fainted Screen Overlay
+        // 8. Floating Text FX Overlay
+        FloatingTextOverlay(
+            floatingTexts = floatingTexts,
+            onComplete = { viewModel.removeFloatingText(it) }
+        )
+
+        // 9. Day / Sleep Fade To Black Transition
+        if (fadeBlackAlpha > 0.01f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(fadeBlackAlpha)
+                    .background(Color.Black)
+            )
+        }
+
+        // 10. Fainted Screen Overlay
         if (isFainted) {
             FaintedOverlay(countdownSec = faintCountdown)
         }
 
-        // 9. Saving/Loading Progress Screen Overlay
-        if (isLoading) {
-            LoadingScreenOverlay()
+        // 11. Initial & Reload Loading Screen Overlay
+        if (isInitialLoading || isLoading) {
+            LoadingScreenOverlay(title = if (isInitialLoading) "ECO FARM SIMULATOR" else "SOLARPUNK FARM")
         }
     }
 }
 
 @Composable
-private fun LoadingScreenOverlay() {
+private fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF091215))
-            .clickable(enabled = false) {}, // absorb touch events
+            .clickable(enabled = false) {},
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -339,7 +497,7 @@ private fun LoadingScreenOverlay() {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "SOLARPUNK FARM",
+                text = title,
                 color = SolarEmerald,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -347,22 +505,22 @@ private fun LoadingScreenOverlay() {
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Restoring world state...",
+                text = "Regenerative 3D Agriculture & Clean Power",
                 color = SunGold,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium
             )
-            Spacer(modifier = Modifier.height(24.dp))
-            androidx.compose.material3.CircularProgressIndicator(
+            Spacer(modifier = Modifier.height(28.dp))
+            CircularProgressIndicator(
                 color = CleanCyan,
                 strokeWidth = 3.dp,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(42.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Loading...",
-                color = Color.White.copy(alpha = 0.6f),
-                fontSize = 14.sp
+                text = "Loading world...",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 13.sp
             )
         }
     }
@@ -377,10 +535,26 @@ private fun QuickActionCircleButton(
     testTag: String,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.92f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "btn_scale"
+    )
+
     Surface(
         modifier = Modifier
+            .size(48.dp)
+            .scale(scale)
             .clip(CircleShape)
-            .clickable { onClick() }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.material3.ripple(bounded = true, radius = 24.dp)
+            ) { onClick() }
             .testTag(testTag),
         color = if (active) Color(0xEE1A3D34) else Color(0xCC112224),
         shape = CircleShape,
@@ -388,8 +562,8 @@ private fun QuickActionCircleButton(
     ) {
         Column(
             modifier = Modifier
-                .size(48.dp)
-                .padding(4.dp),
+                .fillMaxSize()
+                .padding(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -397,12 +571,12 @@ private fun QuickActionCircleButton(
                 imageVector = icon,
                 contentDescription = label,
                 tint = color,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(19.dp)
             )
             Text(
                 text = label,
                 color = Color.White,
-                fontSize = 9.sp,
+                fontSize = 8.5.sp,
                 fontWeight = FontWeight.Bold
             )
         }

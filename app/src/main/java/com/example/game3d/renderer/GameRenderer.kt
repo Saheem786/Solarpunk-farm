@@ -7,6 +7,7 @@ import com.example.data.local.LivestockEntity
 import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.data.model.BuildableType
+import com.example.data.model.EnergyNodeType
 import com.example.data.model.WeatherType
 import com.example.game3d.opengl.GLMesh
 import com.example.game3d.opengl.GLModelBuilder
@@ -213,7 +214,9 @@ data class GhostBuildingState(
     val posY: Float = 0.0f,
     val posZ: Float,
     val rotationDeg: Float = 0.0f,
-    val canAfford: Boolean = true
+    val canAfford: Boolean = true,
+    val isValid: Boolean = true,
+    val reasonMessage: String = "Ready to place"
 )
 
 /**
@@ -239,6 +242,7 @@ class GameRenderer {
         private set
 
     private var isInitialized: Boolean = false
+    private var lastAnimTimeSec: Float = 0.0f
 
     // Obstacle coordinates for camera occlusion prevention
     private val obstacles = listOf(
@@ -288,7 +292,11 @@ class GameRenderer {
         livestock: List<LivestockEntity>,
         animTimeSec: Float,
         hour: Float = 12.0f,
-        weather: WeatherType = WeatherType.SUNNY_CLEAR
+        weather: WeatherType = WeatherType.SUNNY_CLEAR,
+        particleSystem: com.example.game3d.particles.ParticleSystem3D? = null,
+        actionAnim: com.example.game3d.opengl.models.PlayerActionAnim = com.example.game3d.opengl.models.PlayerActionAnim.NONE,
+        actionProgress: Float = 0.0f,
+        screenShake: Float = 0.0f
     ) {
         if (!isInitialized) {
             create()
@@ -304,32 +312,57 @@ class GameRenderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
 
         // 3. Compute Third-Person Camera Targeting & Collision Pullback
-        val targetX = player?.posX ?: 0.0f
-        val targetY = (player?.posY ?: 0.0f) + 1.25f
+        val shakeX = if (screenShake > 0f) sin(animTimeSec * 45.0f) * screenShake * 0.25f else 0f
+        val shakeY = if (screenShake > 0f) cos(animTimeSec * 35.0f) * screenShake * 0.25f else 0f
+
+        val targetX = (player?.posX ?: 0.0f) + shakeX
+        val targetY = ((player?.posY ?: 0.0f) + 1.25f) + shakeY
         val targetZ = player?.posZ ?: 0.0f
 
         val yawDeg = thirdPersonCamera?.yawDeg ?: 45.0f
         val pitchDeg = (thirdPersonCamera?.pitchDeg ?: 24.0f).coerceIn(12.0f, 65.0f)
-        var desiredDist = (thirdPersonCamera?.distance ?: 7.5f).coerceIn(3.0f, 12.0f)
 
         val yawRad = Math.toRadians(yawDeg.toDouble())
         val pitchRad = Math.toRadians(pitchDeg.toDouble())
 
-        // Camera collision avoidance against building bounding spheres
-        for (obstacle in obstacles) {
-            val ox = obstacle.first
-            val oz = obstacle.second
-            val toOx = ox - targetX
-            val toOz = oz - targetZ
-            val obstacleDist = kotlin.math.sqrt(toOx * toOx + toOz * toOz)
-            if (obstacleDist < desiredDist + 3.0f) {
-                desiredDist = min(desiredDist, max(3.0f, obstacleDist - 1.5f))
+        // 1. Calculate deltaSec based on animTimeSec
+        val deltaSec = if (lastAnimTimeSec == 0.0f) 0.016f else (animTimeSec - lastAnimTimeSec).coerceIn(0.001f, 0.1f)
+        lastAnimTimeSec = animTimeSec
+
+        // 2. Camera direction unit vector
+        val dirX = (cos(pitchRad) * sin(yawRad)).toFloat()
+        val dirY = (sin(pitchRad)).toFloat()
+        val dirZ = (cos(pitchRad) * cos(yawRad)).toFloat()
+
+        // 3. Desired distance chosen by player (clamped between 2.0 and 6.0 units, default is 5.0)
+        val desiredDist = (thirdPersonCamera?.desiredDistance ?: 5.0f).coerceIn(2.0f, 6.0f)
+
+        // 4. Perform raycast sampling to find maximum allowed distance without clipping any solid structure
+        var maxAllowedDist = desiredDist
+        val step = 0.40f
+        var d = 0.3f // Start slightly away from player to avoid self-clipping
+        while (d <= desiredDist) {
+            val sx = targetX + d * dirX
+            val sy = targetY + d * dirY
+            val sz = targetZ + d * dirZ
+
+            if (checkCameraCollision(sx, sy, sz, placedBuildings, energyNodes)) {
+                maxAllowedDist = max(2.0f, d - 0.3f)
+                break
             }
+            d += step
         }
 
-        val camX = targetX + (desiredDist * cos(pitchRad) * sin(yawRad)).toFloat()
-        val camY = targetY + (desiredDist * sin(pitchRad)).toFloat()
-        val camZ = targetZ + (desiredDist * cos(pitchRad) * cos(yawRad)).toFloat()
+        // 5. Interpolate actual camera distance towards the allowed collision distance smoothly over 0.2s
+        if (thirdPersonCamera != null) {
+            val lerpFactor = (deltaSec / 0.2f).coerceIn(0.0f, 1.0f)
+            thirdPersonCamera.distance += (maxAllowedDist - thirdPersonCamera.distance) * lerpFactor
+        }
+
+        val currentDist = thirdPersonCamera?.distance ?: maxAllowedDist
+        val camX = targetX + (currentDist * dirX)
+        val camY = targetY + (currentDist * dirY)
+        val camZ = targetZ + (currentDist * dirZ)
 
         camera.setPosition(camX, camY, camZ)
         camera.lookAt(targetX, targetY, targetZ)
@@ -356,7 +389,7 @@ class GameRenderer {
                 posZ = ghostBuilding.posZ,
                 rotationDeg = ghostBuilding.rotationDeg,
                 animTime = animTimeSec,
-                canAfford = ghostBuilding.canAfford
+                isValid = ghostBuilding.isValid
             )
         }
 
@@ -366,7 +399,7 @@ class GameRenderer {
         // D. Draw 3D Livestock (Cows, Sheep, Chickens, Pigs, Goats, Beehive)
         animalModels?.drawLivestock(sh, camera.viewMatrix, camera.projectionMatrix, livestock, animTimeSec)
 
-        // E. Draw 3D Player Humanoid Character
+        // E. Draw 3D Player Humanoid Character with Procedural Animation
         if (player != null) {
             playerModel?.draw(
                 shader = sh,
@@ -377,11 +410,150 @@ class GameRenderer {
                 posZ = player.posZ,
                 rotationDeg = player.orientationAngleDeg,
                 walkPhase = player.walkAnimPhase,
-                isMoving = player.isMoving
+                isMoving = player.isMoving,
+                isRunning = player.currentSpeed > 7.0f,
+                animTime = animTimeSec,
+                actionAnim = actionAnim,
+                actionProgress = actionProgress
             )
         }
 
+        // F. Update & Render 3D Particle Effects (Footstep dust, water droplets, harvest leaves, coin sparkles)
+        particleSystem?.update(deltaSec)
+        particleSystem?.render(sh, camera.viewMatrix, camera.projectionMatrix)
+
         modelBatch.end()
+    }
+
+    private fun checkCameraCollision(
+        x: Float,
+        y: Float,
+        z: Float,
+        placedBuildings: List<PlacedBuildingEntity>,
+        energyNodes: List<EnergyNodeEntity>
+    ): Boolean {
+        // 1. Terrain/Ground collision
+        if (y < 0.2f) {
+            return true
+        }
+
+        // 2. Farmhouse (6.0, 0.0)
+        if (x >= 6.0f - 3.7f && x <= 6.0f + 3.7f &&
+            z >= 0.0f - 2.6f && z <= 0.0f + 2.6f &&
+            y <= 3.5f) {
+            return true
+        }
+
+        // 3. Rustic Barn (-12.0, 10.0)
+        if (x >= -12.0f - 4.6f && x <= -12.0f + 4.6f &&
+            z >= 10.0f - 3.6f && z <= 10.0f + 3.6f &&
+            y <= 6.0f) {
+            return true
+        }
+
+        // 4. Artisan Eco-Workshop (0.0, 14.0)
+        if (x >= 0.0f - 3.3f && x <= 0.0f + 3.3f &&
+            z >= 14.0f - 2.7f && z <= 14.0f + 2.7f &&
+            y <= 4.5f) {
+            return true
+        }
+
+        // 5. Sol City Market Stall (-14.0, -14.0)
+        val toStallX = x - (-14.0f)
+        val toStallZ = z - (-14.0f)
+        if (toStallX * toStallX + toStallZ * toStallZ < 1.8f * 1.8f && y <= 2.5f) {
+            return true
+        }
+
+        // 6. Stone Well (8.0, -3.5)
+        val toWellX = x - 8.0f
+        val toWellZ = z - (-3.5f)
+        if (toWellX * toWellX + toWellZ * toWellZ < 1.0f * 1.0f && y <= 2.0f) {
+            return true
+        }
+
+        // 7. Trees (canopy has radius 1.2f, trunk has radius 0.4f. We block camera if within 1.2f to avoid leaves clipping)
+        val trees = listOf(
+            Pair(-18.0f, -12.0f), Pair(-22.0f, -6.0f), Pair(-16.0f, -2.0f), Pair(-22.0f, 4.0f),
+            Pair(-18.0f, 12.0f), Pair(-22.0f, 18.0f), Pair(-14.0f, 22.0f), Pair(-6.0f, 22.0f),
+            Pair(2.0f, 22.0f), Pair(10.0f, 22.0f), Pair(18.0f, 22.0f), Pair(10.0f, 6.0f),
+            Pair(12.0f, 14.0f), Pair(-6.0f, -16.0f), Pair(4.0f, -18.0f), Pair(-2.0f, -22.0f),
+            Pair(12.0f, -14.5f), Pair(6.0f, -11.0f), Pair(16.0f, -4.0f), Pair(18.0f, 4.0f),
+            Pair(18.0f, -18.0f)
+        )
+        for (tree in trees) {
+            val dx = x - tree.first
+            val dz = z - tree.second
+            val distSq = dx * dx + dz * dz
+            // Quick prune: skip if camera sample point is more than 2.0 units away from tree center
+            if (distSq > 4.00f) continue
+            if (y <= 5.0f) {
+                return true
+            }
+        }
+
+        // 8. Placed Buildings with fast bounding box pruning
+        for (building in placedBuildings) {
+            val size = when (building.buildingType) {
+                BuildableType.CABIN -> 4.0f
+                BuildableType.GREENHOUSE -> 5.0f
+                BuildableType.SOLAR_PANEL -> 2.0f
+                BuildableType.WINDMILL -> 3.0f
+                BuildableType.STORAGE -> 3.0f
+                BuildableType.WELL -> 2.0f
+                BuildableType.FENCE -> 1.0f
+                BuildableType.COMPOST_BIN -> 2.0f
+            }
+            val halfSize = size / 2.0f
+            val height = when (building.buildingType) {
+                BuildableType.CABIN -> 3.5f
+                BuildableType.GREENHOUSE -> 3.0f
+                BuildableType.SOLAR_PANEL -> 1.5f
+                BuildableType.WINDMILL -> 4.5f
+                BuildableType.STORAGE -> 2.5f
+                BuildableType.WELL -> 2.2f
+                BuildableType.FENCE -> 1.15f
+                BuildableType.COMPOST_BIN -> 1.5f
+            }
+            if (building.buildingType == BuildableType.FENCE) {
+                continue
+            }
+            
+            // Fast bounding box check
+            if (x < building.posX - halfSize || x > building.posX + halfSize ||
+                z < building.posZ - halfSize || z > building.posZ + halfSize) {
+                continue
+            }
+            
+            if (y <= height) {
+                return true
+            }
+        }
+
+        // 9. Energy Generation Nodes with fast bounding box pruning
+        for (node in energyNodes) {
+            val size = when (node.nodeType) {
+                EnergyNodeType.PHOTOVOLTAIC_ARRAY -> 3.0f
+                EnergyNodeType.VERTICAL_WIND_TURBINE -> 2.0f
+                EnergyNodeType.BATTERY_STORAGE_BANK -> 2.0f
+                EnergyNodeType.BIOGAS_DIGESTER -> 3.0f
+                else -> 2.5f
+            }
+            val halfSize = size / 2.0f
+            val height = 2.5f
+            
+            // Fast bounding box check
+            if (x < node.posX - halfSize || x > node.posX + halfSize ||
+                z < node.posZ - halfSize || z > node.posZ + halfSize) {
+                continue
+            }
+            
+            if (y <= height) {
+                return true
+            }
+        }
+
+        return false
     }
 
     fun dispose() {

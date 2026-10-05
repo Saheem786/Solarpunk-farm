@@ -7,6 +7,8 @@ import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.data.model.BuildableType
 import com.example.data.model.WeatherType
+import com.example.game3d.opengl.models.PlayerActionAnim
+import com.example.game3d.particles.ParticleSystem3D
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
 import com.example.game3d.renderer.GameRenderer
@@ -31,9 +33,13 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
     @Volatile var animTimeSec: Float = 0.0f
     @Volatile var weatherRef: WeatherType = WeatherType.SUNNY_CLEAR
     @Volatile var hourRef: Float = 12.0f
+    @Volatile var particleSystemRef: ParticleSystem3D? = null
+    @Volatile var actionAnimRef: PlayerActionAnim = PlayerActionAnim.NONE
+    @Volatile var actionProgressRef: Float = 0.0f
+    @Volatile var screenShakeRef: Float = 0.0f
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        gameRenderer.dispose() // Force cleanup of handles from previous EGL Context
+        gameRenderer.dispose()
         gameRenderer.create()
     }
 
@@ -53,7 +59,11 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
             livestock = livestockRef,
             animTimeSec = animTimeSec,
             hour = hourRef,
-            weather = weatherRef
+            weather = weatherRef,
+            particleSystem = particleSystemRef,
+            actionAnim = actionAnimRef,
+            actionProgress = actionProgressRef,
+            screenShake = screenShakeRef
         )
     }
 }

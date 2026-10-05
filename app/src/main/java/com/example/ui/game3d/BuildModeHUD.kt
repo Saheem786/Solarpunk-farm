@@ -26,6 +26,9 @@ import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -70,7 +73,7 @@ fun BuildModeHUD(
     val materialItem = inventory.find { it.itemId == selectedType.requiredMaterialId }
     val materialQty = materialItem?.quantity ?: 0
     val hasEnoughCoins = coins >= selectedType.costCoins
-    val hasEnoughMaterials = materialQty >= selectedType.requiredMaterialQty
+    val hasEnoughMaterials = selectedType.requiredMaterialQty == 0 || materialQty >= selectedType.requiredMaterialQty
     val canBuild = hasEnoughCoins && hasEnoughMaterials
 
     Surface(
@@ -218,7 +221,7 @@ fun BuildModeHUD(
                                 maxLines = 1
                             )
                             Text(
-                                text = "${bType.requiredMaterialQty}x ${bType.materialName}",
+                                text = if (bType.requiredMaterialQty == 0) "Size: ${bType.size.toInt()}x${bType.size.toInt()}" else "${bType.requiredMaterialQty}x ${bType.materialName}",
                                 color = Color(0xFFB0BEC5),
                                 fontSize = 10.sp,
                                 maxLines = 1
@@ -247,13 +250,13 @@ fun BuildModeHUD(
                 // Cost summary & Material status
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Cost: ${selectedType.costCoins} 🪙 + ${selectedType.requiredMaterialQty}x ${selectedType.materialName}",
+                        text = if (selectedType.requiredMaterialQty == 0) "Cost: ${selectedType.costCoins} 🪙 (Size: ${selectedType.size.toInt()}x${selectedType.size.toInt()})" else "Cost: ${selectedType.costCoins} 🪙 + ${selectedType.requiredMaterialQty}x ${selectedType.materialName}",
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "You have: $coins 🪙 | $materialQty ${selectedType.materialName}",
+                        text = if (selectedType.requiredMaterialQty == 0) "You have: $coins 🪙" else "You have: $coins 🪙 | $materialQty ${selectedType.materialName}",
                         color = if (canBuild) Color(0xFF81C784) else Color(0xFFFF8A80),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
@@ -279,7 +282,7 @@ fun BuildModeHUD(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (canBuild) "Place Structure" else "Missing Materials",
+                        text = if (canBuild) "Place Structure" else "Not Enough Money",
                         color = if (canBuild) Color(0xFF091215) else Color(0xFF90A4AE),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
@@ -297,5 +300,8 @@ private fun getBuildingIcon(type: BuildableType): ImageVector {
         BuildableType.SOLAR_PANEL -> Icons.Default.Bolt
         BuildableType.WINDMILL -> Icons.Default.Air
         BuildableType.STORAGE -> Icons.Default.Storage
+        BuildableType.WELL -> Icons.Default.WaterDrop
+        BuildableType.FENCE -> Icons.Default.Build
+        BuildableType.COMPOST_BIN -> Icons.Default.Refresh
     }
 }

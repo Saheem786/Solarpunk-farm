@@ -13,15 +13,15 @@ class ThirdPersonCamera(
     // Current interpolated camera parameters
     var yawDeg: Float = 45.0f // Orbit around Y axis
     var pitchDeg: Float = 24.0f // Elevation angle (15-30 degrees)
-    var distance: Float = 7.5f // Default distance (6-9 meters)
+    var distance: Float = 5.0f // Default distance
 
     // Target values for smooth damping
     var desiredYawDeg: Float = 45.0f
     var desiredPitchDeg: Float = 24.0f
-    var desiredDistance: Float = 7.5f
+    var desiredDistance: Float = 5.0f
 
-    val minDistance = 3.0f
-    val maxDistance = 12.0f
+    val minDistance = 2.0f
+    val maxDistance = 6.0f
     val minPitch = 12.0f
     val maxPitch = 60.0f
 
@@ -43,7 +43,6 @@ class ThirdPersonCamera(
         if (yawDeg < 0.0f) yawDeg += 360.0f
 
         pitchDeg += (desiredPitchDeg - pitchDeg) * rotLerpFactor
-        distance += (desiredDistance - distance) * rotLerpFactor
     }
 
     fun rotate(deltaYaw: Float, deltaPitch: Float) {

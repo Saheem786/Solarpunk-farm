@@ -47,6 +47,7 @@ import com.example.ui.theme.SunGold
 fun QuickInventoryModal(
     inventory: List<InventoryEntity>,
     onSellItem: (String, Int) -> Unit,
+    onConsumeItem: (String) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -156,6 +157,26 @@ fun QuickInventoryModal(
                                             color = Color(0xFFB0BEC5),
                                             fontSize = 11.sp
                                         )
+                                    }
+
+                                    val isEgg = item.itemId == "harvest_egg" || item.itemId.contains("egg")
+                                    val isMilk = item.itemId == "harvest_milk" || item.itemId.contains("milk") || item.itemId == "organic_bio-milk"
+                                    val isEdible = isEgg || isMilk || item.itemId.startsWith("harvest_") || item.category == com.example.data.model.ItemCategory.PRODUCE
+
+                                    if (isEdible) {
+                                        Button(
+                                            onClick = { onConsumeItem(item.itemId) },
+                                            colors = ButtonDefaults.buttonColors(containerColor = if (isMilk) CleanCyan else SunGold),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier.padding(end = 6.dp).testTag("consume_${item.itemId}")
+                                        ) {
+                                            Text(
+                                                text = if (isEgg) "Eat (+15)" else if (isMilk) "Drink (+25)" else "Eat",
+                                                color = Color(0xFF091215),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
                                     }
 
                                     Button(

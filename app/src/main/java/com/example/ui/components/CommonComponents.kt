@@ -72,6 +72,7 @@ fun TopGameStatsBar(
     state: GameStateEntity?,
     onAdvanceTimeClick: () -> Unit,
     plots: List<PlotEntity> = emptyList(),
+    ecosystemScore: Int? = null,
     modifier: Modifier = Modifier
 ) {
     if (state == null) return
@@ -197,13 +198,52 @@ fun TopGameStatsBar(
             )
         }
 
-        // Crops Ready Overlay Pill (glows green when > 0)
+        // Crops Ready & Ecosystem Score Row (with leaf icon)
         val readyCropsCount = plots.count { it.stage == CropStage.HARVEST_READY }
         Spacer(modifier = Modifier.height(4.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Ecosystem Health Pill
+            val ecoScore = (ecosystemScore ?: state.ecoPrestige).coerceIn(0, 100)
+            val ecoColor = when {
+                ecoScore < 50 -> Color(0xFFE57373) // red
+                ecoScore <= 75 -> Color(0xFFFFD54F) // yellow/gold
+                else -> Color(0xFF81C784) // green
+            }
+            Surface(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .testTag("hud_ecosystem_score"),
+                color = Color(0xCC112224),
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, ecoColor.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Eco,
+                        contentDescription = "Ecosystem Health",
+                        tint = ecoColor,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Ecosystem: $ecoScore%",
+                        color = ecoColor,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
+            }
+
+            // Crops Ready Pill
             val glowColor = if (readyCropsCount > 0) Color(0xFF00E676) else Color(0xFF90A4AE)
             val borderColor = if (readyCropsCount > 0) Color(0xFF00E676).copy(alpha = 0.8f) else Color.White.copy(alpha = 0.2f)
             val backgroundColor = if (readyCropsCount > 0) Color(0x3300E676) else Color(0xCC112224)

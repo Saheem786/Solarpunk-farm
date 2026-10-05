@@ -213,55 +213,97 @@ enum class BuildableType(
     val previewColor: Long
 ) {
     CABIN(
-        displayName = "Eco Cabin",
-        description = "Cozy regenerative timber sanctuary to rest and restore full stamina and health.",
-        costCoins = 250,
+        displayName = "Wooden Cabin",
+        description = "Small wooden house with slanted roof. Sleep here at night to fully restore stamina.",
+        costCoins = 200,
         requiredMaterialId = "material_bio_timber",
-        requiredMaterialQty = 10,
+        requiredMaterialQty = 0,
         materialName = "Bio-Timber",
-        gameplayEffect = "Rest Shelter (Restore Full HP & Stamina)",
+        gameplayEffect = "Sleeping spot — restores stamina fully at night",
         previewColor = 0xFF8D6E63
     ),
     GREENHOUSE(
-        displayName = "Glass Bio-Dome",
-        description = "Climate-controlled solarpunk greenhouse accelerating nearby crop growth by +50%.",
-        costCoins = 220,
+        displayName = "Greenhouse",
+        description = "Glass panels with wooden frame, green tint. Nearby crops (within 5 units) grow 1.3x faster.",
+        costCoins = 500,
         requiredMaterialId = "material_solar_glass",
-        requiredMaterialQty = 8,
+        requiredMaterialQty = 0,
         materialName = "Solar Glass",
-        gameplayEffect = "+50% Crop Growth Acceleration",
+        gameplayEffect = "Crops within 5 units grow 1.3x faster",
         previewColor = 0xFF80DEEA
     ),
     SOLAR_PANEL(
-        displayName = "Solar Glass Array",
-        description = "High-efficiency photovoltaic glass panel generating clean energy from sunlight.",
-        costCoins = 150,
+        displayName = "Solar Panel",
+        description = "Blue-black rectangular panel on small stand. Generates 10 kWh/day during sunlight.",
+        costCoins = 300,
         requiredMaterialId = "material_solar_glass",
-        requiredMaterialQty = 5,
+        requiredMaterialQty = 0,
         materialName = "Solar Glass",
-        gameplayEffect = "+3.5 kWh/s Solar Energy",
+        gameplayEffect = "Generates 10 kWh/day during sunlight",
         previewColor = 0xFFFFD54F
     ),
     WINDMILL(
-        displayName = "Aero-Spire Windmill",
-        description = "Helical aerodynamic turbine producing clean energy proportional to wind speed.",
-        costCoins = 180,
+        displayName = "Windmill",
+        description = "Tall wooden tower with rotating blades. Generates 15 kWh/day 24/7 (30% less at night).",
+        costCoins = 400,
         requiredMaterialId = "material_eco_alloy",
-        requiredMaterialQty = 6,
+        requiredMaterialQty = 0,
         materialName = "Eco-Alloy",
-        gameplayEffect = "+2.8 kWh/s Wind Energy",
+        gameplayEffect = "Generates 15 kWh/day 24/7 (30% less at night)",
         previewColor = 0xFF80D8FF
     ),
     STORAGE(
-        displayName = "Solid-State Battery Vault",
-        description = "High-density clean battery expansion increasing max battery storage by +60 kWh.",
-        costCoins = 160,
+        displayName = "Storage Shed",
+        description = "Small wooden shed with door. Increases inventory capacity by +50 slots.",
+        costCoins = 250,
         requiredMaterialId = "material_bio_polymer",
-        requiredMaterialQty = 5,
+        requiredMaterialQty = 0,
         materialName = "Bio-Polymer",
-        gameplayEffect = "+60 kWh Max Battery Capacity",
+        gameplayEffect = "+50 inventory space",
         previewColor = 0xFF00E5FF
-    )
+    ),
+    WELL(
+        displayName = "Water Well",
+        description = "Stone circle with wooden roof and bucket. Infinite water source — player can drink here anytime.",
+        costCoins = 150,
+        requiredMaterialId = "material_eco_alloy",
+        requiredMaterialQty = 0,
+        materialName = "Eco-Alloy",
+        gameplayEffect = "Infinite water source — drink anytime",
+        previewColor = 0xFF80CBC4
+    ),
+    FENCE(
+        displayName = "Fence Section",
+        description = "Wooden fence post and rails. Decorative boundary marker to block paths.",
+        costCoins = 20,
+        requiredMaterialId = "material_bio_timber",
+        requiredMaterialQty = 0,
+        materialName = "Bio-Timber",
+        gameplayEffect = "Decorative boundary section",
+        previewColor = 0xFFB0BEC5
+    ),
+    COMPOST_BIN(
+        displayName = "Compost Bin",
+        description = "Wooden box with dark organic material. Converts 3 harvested crops into 1 seed of any type.",
+        costCoins = 100,
+        requiredMaterialId = "material_bio_polymer",
+        requiredMaterialQty = 0,
+        materialName = "Bio-Polymer",
+        gameplayEffect = "Converts 3 harvested crops into 1 random seed",
+        previewColor = 0xFFA1887F
+    );
+
+    val size: Float
+        get() = when (this) {
+            CABIN -> 4.0f
+            GREENHOUSE -> 5.0f
+            SOLAR_PANEL -> 2.0f
+            WINDMILL -> 3.0f
+            STORAGE -> 3.0f
+            WELL -> 2.0f
+            FENCE -> 1.0f
+            COMPOST_BIN -> 2.0f
+        }
 }
 
 /**
@@ -361,6 +403,15 @@ enum class LivestockType(
         productSellPrice = 110,
         purchaseCostCoins = 380,
         tintColor = 0xFFE0E0E0
+    ),
+    CHICKEN(
+        displayName = "Chicken",
+        description = "A friendly low-poly farm chicken laying organic eggs.",
+        productProduced = "Egg",
+        produceIntervalSec = 30f,
+        productSellPrice = 25,
+        purchaseCostCoins = 80,
+        tintColor = 0xFFFFF8E1
     ),
     ROBO_BEE_POLLINATOR(
         displayName = "Bio-Bees Colony",

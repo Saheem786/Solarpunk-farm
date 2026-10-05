@@ -37,9 +37,9 @@ class FarmRepository(private val dao: FarmDao) {
     val contracts: Flow<List<ContractEntity>> = dao.getAllContracts()
     val placedBuildings: Flow<List<PlacedBuildingEntity>> = dao.getAllPlacedBuildings()
 
-    suspend fun initializeDefaultDataIfEmpty() {
+    suspend fun initializeDefaultDataIfEmpty(forceReset: Boolean = false) {
         val currentState = dao.getGameState().firstOrNull()
-        if (currentState == null) {
+        if (currentState == null || forceReset) {
             // Seed initial Game State
             val initialState = GameStateEntity(
                 id = 1,
@@ -150,7 +150,7 @@ class FarmRepository(private val dao: FarmDao) {
             )
             dao.insertEnergyNodes(initialEnergyNodes)
 
-            // Seed Initial Regenerative Livestock
+            // Seed Initial Regenerative Livestock (Including 5 Chickens and 2 Cows)
             val initialLivestock = listOf(
                 LivestockEntity(
                     id = 1,
@@ -176,11 +176,26 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 3,
                     produceProgress = 0.4f,
                     readyToHarvest = false,
-                    posX = -14.0f,
+                    posX = -8.0f,
                     posY = 0.0f,
-                    posZ = 12.0f,
-                    targetX = -13.0f,
-                    targetZ = 10.0f
+                    posZ = -4.0f,
+                    targetX = -8.0f,
+                    targetZ = -4.0f
+                ),
+                LivestockEntity(
+                    id = 16,
+                    type = LivestockType.CYBER_BOVINE,
+                    name = "Daisy (Meadow Cow)",
+                    happiness = 80.0f,
+                    hunger = 20.0f,
+                    age = 2,
+                    produceProgress = 0.1f,
+                    readyToHarvest = false,
+                    posX = -10.0f,
+                    posY = 0.0f,
+                    posZ = -8.0f,
+                    targetX = -10.0f,
+                    targetZ = -8.0f
                 ),
                 LivestockEntity(
                     id = 3,
@@ -211,6 +226,82 @@ class FarmRepository(private val dao: FarmDao) {
                     posZ = 0.0f,
                     targetX = -14.0f,
                     targetZ = 2.0f
+                ),
+                // 5 Chickens spawned near the farmhouse (6.0, 0.0)
+                LivestockEntity(
+                    id = 10,
+                    type = LivestockType.CHICKEN,
+                    name = "Clucky",
+                    happiness = 90.0f,
+                    hunger = 10.0f,
+                    age = 1,
+                    produceProgress = 0.1f,
+                    readyToHarvest = false,
+                    posX = 4.5f,
+                    posY = 0.0f,
+                    posZ = 1.5f,
+                    targetX = 4.5f,
+                    targetZ = 1.5f
+                ),
+                LivestockEntity(
+                    id = 11,
+                    type = LivestockType.CHICKEN,
+                    name = "Henrietta",
+                    happiness = 95.0f,
+                    hunger = 5.0f,
+                    age = 1,
+                    produceProgress = 0.4f,
+                    readyToHarvest = false,
+                    posX = 7.5f,
+                    posY = 0.0f,
+                    posZ = 2.0f,
+                    targetX = 7.5f,
+                    targetZ = 2.0f
+                ),
+                LivestockEntity(
+                    id = 12,
+                    type = LivestockType.CHICKEN,
+                    name = "Eggatha",
+                    happiness = 85.0f,
+                    hunger = 15.0f,
+                    age = 2,
+                    produceProgress = 0.6f,
+                    readyToHarvest = false,
+                    posX = 5.0f,
+                    posY = 0.0f,
+                    posZ = -2.5f,
+                    targetX = 5.0f,
+                    targetZ = -2.5f
+                ),
+                LivestockEntity(
+                    id = 13,
+                    type = LivestockType.CHICKEN,
+                    name = "Peep",
+                    happiness = 90.0f,
+                    hunger = 12.0f,
+                    age = 1,
+                    produceProgress = 0.3f,
+                    readyToHarvest = false,
+                    posX = 8.5f,
+                    posY = 0.0f,
+                    posZ = 1.0f,
+                    targetX = 8.5f,
+                    targetZ = 1.0f
+                ),
+                LivestockEntity(
+                    id = 14,
+                    type = LivestockType.CHICKEN,
+                    name = "Penny",
+                    happiness = 80.0f,
+                    hunger = 18.0f,
+                    age = 1,
+                    produceProgress = 0.2f,
+                    readyToHarvest = false,
+                    posX = 6.0f,
+                    posY = 0.0f,
+                    posZ = 3.5f,
+                    targetX = 6.0f,
+                    targetZ = 3.5f
                 )
             )
             dao.insertLivestockList(initialLivestock)
@@ -398,14 +489,24 @@ class FarmRepository(private val dao: FarmDao) {
         val animal = currentAnimals.find { it.id == animalId } ?: return null
         if (!animal.readyToHarvest) return null
 
-        val produceItemId = animal.type.productProduced.lowercase().replace(" ", "_")
+        val produceItemId = when (animal.type) {
+            LivestockType.CHICKEN -> "harvest_egg"
+            LivestockType.CYBER_BOVINE -> "harvest_milk"
+            else -> animal.type.productProduced.lowercase().replace(" ", "_")
+        }
+        val produceName = when (animal.type) {
+            LivestockType.CHICKEN -> "Egg"
+            LivestockType.CYBER_BOVINE -> "Organic Bio-Milk"
+            else -> animal.type.productProduced
+        }
+
         val existingItem = dao.getInventoryItem(produceItemId)
         val newQty = (existingItem?.quantity ?: 0) + 1
 
         dao.insertInventory(
             InventoryEntity(
                 itemId = produceItemId,
-                name = animal.type.productProduced,
+                name = produceName,
                 category = ItemCategory.PRODUCE,
                 quantity = newQty,
                 sellValue = animal.type.productSellPrice
@@ -419,7 +520,7 @@ class FarmRepository(private val dao: FarmDao) {
                 happiness = min(100.0f, animal.happiness + 5.0f)
             )
         )
-        return animal.type.productProduced
+        return produceName
     }
 
     suspend fun buyEnergyNode(type: EnergyNodeType): Boolean {
@@ -616,24 +717,37 @@ class FarmRepository(private val dao: FarmDao) {
         val state = dao.getGameState().firstOrNull() ?: return Pair(false, "Game state unavailable")
         
         var itemName = "Organic Farm Snack"
+        var hungerBoost = 30.0f
         if (foodItemId != null) {
             val item = dao.getInventoryItem(foodItemId)
             if (item != null && item.quantity > 0) {
                 itemName = item.name
                 dao.insertInventory(item.copy(quantity = item.quantity - 1))
+                if (foodItemId == "harvest_egg" || foodItemId.contains("egg")) {
+                    hungerBoost = 15.0f // eggs restore +15 hunger
+                }
+            } else {
+                return Pair(false, "No $foodItemId available")
             }
         } else {
-            // Find any harvested edible produce in inventory
-            val edibleProduce = dao.getAllInventory().firstOrNull()?.find { 
+            // Find any harvested edible produce in inventory (prefer eggs)
+            val allInv = dao.getAllInventory().firstOrNull() ?: emptyList()
+            val eggProduce = allInv.find { it.quantity > 0 && (it.itemId == "harvest_egg" || it.itemId.contains("egg")) }
+            val edibleProduce = eggProduce ?: allInv.find { 
                 it.quantity > 0 && (it.category == ItemCategory.PRODUCE || it.itemId.startsWith("harvest_")) 
             }
             if (edibleProduce != null) {
                 itemName = edibleProduce.name
                 dao.insertInventory(edibleProduce.copy(quantity = edibleProduce.quantity - 1))
+                if (edibleProduce.itemId == "harvest_egg" || edibleProduce.itemId.contains("egg")) {
+                    hungerBoost = 15.0f
+                }
+            } else {
+                return Pair(false, "No food/eggs in inventory")
             }
         }
 
-        val newHunger = min(state.maxHunger, state.hunger + 30.0f)
+        val newHunger = min(state.maxHunger, state.hunger + hungerBoost)
         val newHealth = min(state.maxHealth, state.health + 10.0f)
         val newStamina = min(state.maxStamina, state.stamina + 15.0f)
 
@@ -644,12 +758,38 @@ class FarmRepository(private val dao: FarmDao) {
                 stamina = newStamina
             )
         )
-        return Pair(true, "Ate $itemName (+30 Hunger, +10 HP)")
+        return Pair(true, "Ate $itemName (+$hungerBoost Hunger, +10 HP)")
     }
 
-    suspend fun drinkWater(source: String = "Canteen"): Pair<Boolean, String> {
+    suspend fun drinkWater(drinkItemId: String? = null, source: String = "Canteen"): Pair<Boolean, String> {
         val state = dao.getGameState().firstOrNull() ?: return Pair(false, "Game state unavailable")
-        val newThirst = min(state.maxThirst, state.thirst + 40.0f)
+        
+        var drinkName = source
+        var thirstBoost = 40.0f
+        
+        if (drinkItemId != null) {
+            val item = dao.getInventoryItem(drinkItemId)
+            if (item != null && item.quantity > 0) {
+                drinkName = item.name
+                dao.insertInventory(item.copy(quantity = item.quantity - 1))
+                if (drinkItemId == "harvest_organic bio-milk" || drinkItemId.contains("milk")) {
+                    thirstBoost = 25.0f // milk restores +25 thirst
+                }
+            } else {
+                return Pair(false, "No $drinkItemId available")
+            }
+        } else {
+            // Check if player has organic milk in inventory to drink first
+            val allInv = dao.getAllInventory().firstOrNull() ?: emptyList()
+            val milkItem = allInv.find { it.quantity > 0 && (it.itemId.contains("milk")) }
+            if (milkItem != null) {
+                drinkName = milkItem.name
+                dao.insertInventory(milkItem.copy(quantity = milkItem.quantity - 1))
+                thirstBoost = 25.0f
+            }
+        }
+
+        val newThirst = min(state.maxThirst, state.thirst + thirstBoost)
         val newStamina = min(state.maxStamina, state.stamina + 15.0f)
 
         dao.saveGameState(
@@ -658,7 +798,7 @@ class FarmRepository(private val dao: FarmDao) {
                 stamina = newStamina
             )
         )
-        return Pair(true, "Drank from $source (+40 Thirst)")
+        return Pair(true, "Drank $drinkName (+$thirstBoost Thirst)")
     }
 
     suspend fun respawnAtHouse(): Boolean {
@@ -682,11 +822,6 @@ class FarmRepository(private val dao: FarmDao) {
         if (state.solCoins < type.costCoins) {
             return Pair(false, "Need ${type.costCoins} 🪙 (Have ${state.solCoins})")
         }
-        val material = dao.getInventoryItem(type.requiredMaterialId)
-        val matQty = material?.quantity ?: 0
-        if (matQty < type.requiredMaterialQty) {
-            return Pair(false, "Need ${type.requiredMaterialQty}x ${type.materialName} (Have $matQty)")
-        }
         return Pair(true, "Ready to place")
     }
 
@@ -701,11 +836,9 @@ class FarmRepository(private val dao: FarmDao) {
         if (!canAfford) return Pair(false, reason)
 
         val state = dao.getGameState().firstOrNull() ?: return Pair(false, "No state")
-        val material = dao.getInventoryItem(type.requiredMaterialId) ?: return Pair(false, "Missing material")
 
-        // Deduct coins & materials
+        // Deduct coins only (no materials required)
         val newCoins = state.solCoins - type.costCoins
-        dao.insertInventory(material.copy(quantity = material.quantity - type.requiredMaterialQty))
 
         // Insert Placed Building
         dao.insertPlacedBuilding(
@@ -719,7 +852,7 @@ class FarmRepository(private val dao: FarmDao) {
         )
 
         // Apply immediate state effects
-        val extraCapacity = if (type == BuildableType.STORAGE) 60.0f else 0.0f
+        val extraCapacity = if (type == BuildableType.STORAGE) 50.0f else 0.0f
         dao.saveGameState(
             state.copy(
                 solCoins = newCoins,
@@ -899,6 +1032,7 @@ class FarmRepository(private val dao: FarmDao) {
         }
 
         if (crossed6AM) {
+            val beeNodes = animalsList.filter { it.type == LivestockType.ROBO_BEE_POLLINATOR }
             updatedPlots = updatedPlots.map { plot ->
                 if (plot.cropType != null && plot.stage != CropStage.HARVEST_READY && plot.stage != CropStage.WITHERED) {
                     val crop = plot.cropType
@@ -912,11 +1046,19 @@ class FarmRepository(private val dao: FarmDao) {
                         val isNearGreenhouse = greenhouses.any { gh ->
                             val dx = plot.posX - gh.posX
                             val dz = plot.posZ - gh.posZ
-                            (dx * dx + dz * dz) < 81.0f
+                            (dx * dx + dz * dz) < 25.0f
                         } || plot.plotType == PlotType.BIO_DOME
                         val greenhouseBonus = if (isNearGreenhouse) 1.3f else 1.0f
+
+                        // Bees effect: crops within 5 units of bee colony grow 20% faster
+                        val isNearBees = beeNodes.any { b ->
+                            val dx = plot.posX - b.posX
+                            val dz = plot.posZ - b.posZ
+                            (dx * dx + dz * dz) <= 25.0f // 5 units radius
+                        }
+                        val beeBonus = if (isNearBees) 1.20f else 1.0f
                         
-                        val increment = 1.0f * rainBonus * greenhouseBonus
+                        val increment = 1.0f * rainBonus * greenhouseBonus * beeBonus
                         val newProgress = min(crop.growthDays.toFloat(), plot.progress + increment)
                         
                         val ratio = newProgress / crop.growthDays.toFloat()
@@ -958,23 +1100,93 @@ class FarmRepository(private val dao: FarmDao) {
         }
         dao.insertPlots(updatedPlots)
 
-        // 5. Update Livestock (wandering + produce creation)
-        val updatedAnimals = animalsList.map { animal ->
-            val produceRate = (1.0f / animal.type.produceIntervalSec) * (animal.happiness / 100.0f)
-            val newProdProgress = min(1.0f, animal.produceProgress + produceRate * deltaSec)
-            val isReady = newProdProgress >= 1.0f
+        // 5. Update Livestock (State machine: wander, flee, produce creation)
+        val playerX = state.playerX
+        val playerZ = state.playerZ
 
-            // Slow wander target update
+        val coopX = 4.5f
+        val coopZ = 4.0f
+
+        val updatedAnimals = animalsList.map { animal ->
+            var newProdProgress = animal.produceProgress
+            var isReady = animal.readyToHarvest
+
+            when (animal.type) {
+                LivestockType.CHICKEN -> {
+                    // Lay 1 egg every game day (at 6:00 AM, max 3 eggs)
+                    if (crossed6AM) {
+                        newProdProgress = min(3.0f, animal.produceProgress + 1.0f)
+                        isReady = newProdProgress >= 1.0f
+                    }
+                }
+                LivestockType.CYBER_BOVINE -> {
+                    // Produce milk every 2 game days (produce rate scaled)
+                    val milkRate = (1.0f / (animal.type.produceIntervalSec * 2.0f)) * (animal.happiness / 100.0f)
+                    newProdProgress = min(1.0f, animal.produceProgress + milkRate * deltaSec)
+                    isReady = newProdProgress >= 1.0f
+                }
+                else -> {
+                    val produceRate = (1.0f / animal.type.produceIntervalSec) * (animal.happiness / 100.0f)
+                    newProdProgress = min(1.0f, animal.produceProgress + produceRate * deltaSec)
+                    isReady = newProdProgress >= 1.0f
+                }
+            }
+
             var posX = animal.posX
             var posZ = animal.posZ
             var targetX = animal.targetX
             var targetZ = animal.targetZ
-            if (Random.nextFloat() < 0.05f * deltaSec) {
-                targetX = animal.posX + (Random.nextFloat() * 4.0f - 2.0f)
-                targetZ = animal.posZ + (Random.nextFloat() * 4.0f - 2.0f)
+
+            val distToPlayer = kotlin.math.sqrt((posX - playerX) * (posX - playerX) + (posZ - playerZ) * (posZ - playerZ))
+
+            // AI Distance Culling (Performance optimization)
+            if (distToPlayer <= 30.0f) {
+                // Full AI Simulation
+                val fleeThreshold = if (animal.type == LivestockType.CHICKEN) 3.0f else if (animal.type == LivestockType.CYBER_BOVINE) 4.0f else 2.5f
+                val isFleeing = distToPlayer < fleeThreshold
+
+                if (isFleeing && distToPlayer > 0.05f) {
+                    // Run away from player in opposite direction
+                    val fleeDirX = (posX - playerX) / distToPlayer
+                    val fleeDirZ = (posZ - playerZ) / distToPlayer
+                    targetX = (posX + fleeDirX * 3.5f).coerceIn(-22.0f, 22.0f)
+                    targetZ = (posZ + fleeDirZ * 3.5f).coerceIn(-22.0f, 22.0f)
+
+                    // Chickens stay within 8 units of coop
+                    if (animal.type == LivestockType.CHICKEN) {
+                        val dCoop = kotlin.math.sqrt((targetX - coopX) * (targetX - coopX) + (targetZ - coopZ) * (targetZ - coopZ))
+                        if (dCoop > 8.0f) {
+                            targetX = coopX + (targetX - coopX) / dCoop * 7.5f
+                            targetZ = coopZ + (targetZ - coopZ) / dCoop * 7.5f
+                        }
+                    }
+
+                    // Move faster when fleeing
+                    posX += (targetX - posX) * 0.45f * deltaSec
+                    posZ += (targetZ - posZ) * 0.45f * deltaSec
+                } else {
+                    // Normal wandering
+                    if (Random.nextFloat() < 0.25f * deltaSec) {
+                        if (animal.type == LivestockType.CHICKEN) {
+                            // Wander within 8 units of coop
+                            val angle = Random.nextFloat() * 6.283f
+                            val rad = Random.nextFloat() * 7.5f
+                            targetX = coopX + kotlin.math.cos(angle) * rad
+                            targetZ = coopZ + kotlin.math.sin(angle) * rad
+                        } else {
+                            targetX = (animal.posX + (Random.nextFloat() * 6.0f - 3.0f)).coerceIn(-22.0f, 22.0f)
+                            targetZ = (animal.posZ + (Random.nextFloat() * 6.0f - 3.0f)).coerceIn(-22.0f, 22.0f)
+                        }
+                    }
+                    val wanderSpeed = if (animal.type == LivestockType.CYBER_BOVINE) 0.08f else 0.15f
+                    posX += (targetX - posX) * wanderSpeed * deltaSec
+                    posZ += (targetZ - posZ) * wanderSpeed * deltaSec
+                }
+            } else if (distToPlayer <= 80.0f) {
+                // Reduced update rate
+                posX += (targetX - posX) * 0.05f * deltaSec
+                posZ += (targetZ - posZ) * 0.05f * deltaSec
             }
-            posX += (targetX - posX) * 0.1f * deltaSec
-            posZ += (targetZ - posZ) * 0.1f * deltaSec
 
             animal.copy(
                 produceProgress = newProdProgress,

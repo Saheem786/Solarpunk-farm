@@ -8,6 +8,13 @@ import com.example.game3d.opengl.GLShader
 import kotlin.math.cos
 import kotlin.math.sin
 
+enum class PlayerActionAnim {
+    NONE,
+    HARVESTING,
+    WATERING,
+    PLANTING
+}
+
 class Player3DModel {
 
     private val headMesh: GLMesh
@@ -88,15 +95,47 @@ class Player3DModel {
         posZ: Float,
         rotationDeg: Float,
         walkPhase: Float,
-        isMoving: Boolean
+        isMoving: Boolean,
+        isRunning: Boolean = false,
+        animTime: Float = 0f,
+        actionAnim: PlayerActionAnim = PlayerActionAnim.NONE,
+        actionProgress: Float = 0f
     ) {
-        // Kinematic Walking Swing Calculations
-        val swingAmp = if (isMoving) 28.0f else 0.0f
+        // Kinematic Walking / Running Swing Calculations
+        val swingAmp = when {
+            isMoving && isRunning -> 38.0f
+            isMoving -> 24.0f
+            else -> 0.0f
+        }
         val legLeftAngle = sin(walkPhase) * swingAmp
         val legRightAngle = -sin(walkPhase) * swingAmp
-        val armLeftAngle = -sin(walkPhase) * swingAmp * 0.9f
-        val armRightAngle = sin(walkPhase) * swingAmp * 0.9f
-        val bodyBobY = if (isMoving) kotlin.math.abs(sin(walkPhase * 2f)) * 0.06f else 0.0f
+
+        // Arm swing & Action Overrides
+        var armLeftAngle = -sin(walkPhase) * swingAmp * 0.9f
+        var armRightAngle = sin(walkPhase) * swingAmp * 0.9f
+        var torsoPitch = 0.0f
+
+        // Procedural Idle Breathing
+        val idleBreath = if (!isMoving) sin(animTime * 2.8f) * 0.015f else 0.0f
+        val bodyBobY = (if (isMoving) kotlin.math.abs(sin(walkPhase * 2f)) * (if (isRunning) 0.09f else 0.05f) else 0.0f) + idleBreath
+
+        // Action Pose Blending (Harvest bend down, Watering arm tilt)
+        if (actionProgress > 0f) {
+            val blend = sin(actionProgress * Math.PI.toFloat())
+            when (actionAnim) {
+                PlayerActionAnim.HARVESTING, PlayerActionAnim.PLANTING -> {
+                    torsoPitch = 35.0f * blend
+                    armLeftAngle = 45.0f * blend
+                    armRightAngle = 45.0f * blend
+                }
+                PlayerActionAnim.WATERING -> {
+                    armRightAngle = 65.0f * blend
+                    armLeftAngle = -15.0f * blend
+                    torsoPitch = 10.0f * blend
+                }
+                PlayerActionAnim.NONE -> {}
+            }
+        }
 
         // Base Root Transform
         Matrix.setIdentityM(modelMatrix, 0)
@@ -112,12 +151,18 @@ class Player3DModel {
         Matrix.setIdentityM(partMatrix, 0)
         Matrix.multiplyMM(partMatrix, 0, modelMatrix, 0, partMatrix, 0)
         Matrix.translateM(partMatrix, 0, 0f, 0.98f + bodyBobY, 0f)
+        if (torsoPitch != 0f) {
+            Matrix.rotateM(partMatrix, 0, torsoPitch, 1f, 0f, 0f)
+        }
         renderMesh(shader, torsoMesh, partMatrix, viewMatrix, projMatrix)
 
         // 3. Head & Hat (Y base = 1.56m)
         Matrix.setIdentityM(partMatrix, 0)
         Matrix.multiplyMM(partMatrix, 0, modelMatrix, 0, partMatrix, 0)
         Matrix.translateM(partMatrix, 0, 0f, 1.56f + bodyBobY, 0f)
+        if (torsoPitch != 0f) {
+            Matrix.rotateM(partMatrix, 0, torsoPitch * 0.7f, 1f, 0f, 0f)
+        }
         renderMesh(shader, headMesh, partMatrix, viewMatrix, projMatrix)
 
         Matrix.translateM(partMatrix, 0, 0f, 0.22f, 0f)
@@ -168,7 +213,6 @@ class Player3DModel {
         Matrix.multiplyMM(mvMatrix, 0, vMatrix, 0, mMatrix, 0)
         Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
 
-        // Calculate Normal Matrix (3x3 upper left of MV)
         Matrix.invertM(tempMatrix, 0, mvMatrix, 0)
         Matrix.transposeM(normalMatrix, 0, tempMatrix, 0)
 

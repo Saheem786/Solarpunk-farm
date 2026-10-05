@@ -37,73 +37,73 @@ class Crop3DModels {
     init {
         val builder = GLModelBuilder()
 
-        // 1. Raised Permaculture Soil Bed (2.6m x 2.6m x 0.28m high)
+        // 1. Raised Permaculture Soil Bed (Exactly 2.0m x 2.0m x 0.20m low borders)
         builder.reset()
         // Wooden frame borders
-        builder.addBox(0f, 0.14f, -1.35f, 2.90f, 0.28f, 0.18f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(0f, 0.14f, 1.35f, 2.90f, 0.28f, 0.18f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(-1.35f, 0.14f, 0f, 0.18f, 0.28f, 2.70f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(1.35f, 0.14f, 0f, 0.18f, 0.28f, 2.70f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0f, 0.10f, -0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0f, 0.10f, 0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(-0.96f, 0.10f, 0f, 0.08f, 0.20f, 1.84f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0.96f, 0.10f, 0f, 0.08f, 0.20f, 1.84f, 0.52f, 0.36f, 0.20f)
         // Rich Brown Loam Soil
-        builder.addBox(0f, 0.12f, 0f, 2.55f, 0.24f, 2.55f, 0.40f, 0.26f, 0.14f)
+        builder.addBox(0f, 0.08f, 0f, 1.84f, 0.16f, 1.84f, 0.40f, 0.26f, 0.14f)
         soilBedMesh = builder.build()
 
         // Watered Soil Bed (Darker Moist Soil)
         builder.reset()
-        builder.addBox(0f, 0.14f, -1.35f, 2.90f, 0.28f, 0.18f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(0f, 0.14f, 1.35f, 2.90f, 0.28f, 0.18f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(-1.35f, 0.14f, 0f, 0.18f, 0.28f, 2.70f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(1.35f, 0.14f, 0f, 0.18f, 0.28f, 2.70f, 0.52f, 0.36f, 0.20f)
-        builder.addBox(0f, 0.12f, 0f, 2.55f, 0.24f, 2.55f, 0.22f, 0.15f, 0.08f)
+        builder.addBox(0f, 0.10f, -0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0f, 0.10f, 0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(-0.96f, 0.10f, 0f, 0.08f, 0.20f, 1.84f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0.96f, 0.10f, 0f, 0.08f, 0.20f, 1.84f, 0.52f, 0.36f, 0.20f)
+        builder.addBox(0f, 0.08f, 0f, 1.84f, 0.16f, 1.84f, 0.22f, 0.15f, 0.08f)
         soilWateredMesh = builder.build()
 
         // 2. Early Sprout / Seedling (Tiny Green Shoots)
         builder.reset()
-        builder.addCone(-0.4f, 0f, -0.4f, 0.12f, 0.35f, 5, 0.35f, 0.85f, 0.20f)
-        builder.addCone(0.4f, 0f, -0.4f, 0.12f, 0.35f, 5, 0.35f, 0.85f, 0.20f)
-        builder.addCone(-0.4f, 0f, 0.4f, 0.12f, 0.35f, 5, 0.35f, 0.85f, 0.20f)
-        builder.addCone(0.4f, 0f, 0.4f, 0.12f, 0.35f, 5, 0.35f, 0.85f, 0.20f)
+        builder.addCone(-0.3f, 0f, -0.3f, 0.08f, 0.25f, 5, 0.35f, 0.85f, 0.20f)
+        builder.addCone(0.3f, 0f, -0.3f, 0.08f, 0.25f, 5, 0.35f, 0.85f, 0.20f)
+        builder.addCone(-0.3f, 0f, 0.3f, 0.08f, 0.25f, 5, 0.35f, 0.85f, 0.20f)
+        builder.addCone(0.3f, 0f, 0.3f, 0.08f, 0.25f, 5, 0.35f, 0.85f, 0.20f)
         sproutMesh = builder.build()
 
-        // 3. Wheat (Terraced Wheat) - Multi-stalk golden sheaf (Height = 1.3m)
+        // 3. Wheat (Terraced Wheat) - Multi-stalk golden sheaf (Height = 1.2m)
         builder.reset()
-        for (gx in listOf(-0.5f, 0f, 0.5f)) {
-            for (gz in listOf(-0.5f, 0f, 0.5f)) {
+        for (gx in listOf(-0.35f, 0f, 0.35f)) {
+            for (gz in listOf(-0.35f, 0f, 0.35f)) {
                 // Stem
-                builder.addCylinder(gx, 0f, gz, 0.04f, 1.05f, 4, 0.85f, 0.72f, 0.24f)
+                builder.addCylinder(gx, 0f, gz, 0.03f, 0.95f, 4, 0.85f, 0.72f, 0.24f)
                 // Golden Grain Head
-                builder.addBox(gx, 1.15f, gz, 0.14f, 0.35f, 0.14f, 0.96f, 0.84f, 0.28f)
+                builder.addBox(gx, 1.05f, gz, 0.10f, 0.25f, 0.10f, 0.96f, 0.84f, 0.28f)
             }
         }
         wheatMesh = builder.build()
 
-        // 4. Sunflower (Solar Sunflower) - Radiant Yellow Discs (Height = 1.6m)
+        // 4. Sunflower (Solar Sunflower) - Radiant Yellow Discs (Height = 1.35m)
         builder.reset()
-        for (gx in listOf(-0.45f, 0.45f)) {
-            for (gz in listOf(-0.45f, 0.45f)) {
+        for (gx in listOf(-0.35f, 0.35f)) {
+            for (gz in listOf(-0.35f, 0.35f)) {
                 // Sturdy Green Stem
-                builder.addCylinder(gx, 0f, gz, 0.06f, 1.40f, 5, 0.20f, 0.65f, 0.15f)
+                builder.addCylinder(gx, 0f, gz, 0.045f, 1.15f, 5, 0.20f, 0.65f, 0.15f)
                 // Leaves
-                builder.addBox(gx + 0.15f, 0.70f, gz, 0.30f, 0.08f, 0.18f, 0.25f, 0.75f, 0.20f)
-                builder.addBox(gx - 0.15f, 0.95f, gz, 0.30f, 0.08f, 0.18f, 0.25f, 0.75f, 0.20f)
+                builder.addBox(gx + 0.12f, 0.55f, gz, 0.22f, 0.06f, 0.14f, 0.25f, 0.75f, 0.20f)
+                builder.addBox(gx - 0.12f, 0.75f, gz, 0.22f, 0.06f, 0.14f, 0.25f, 0.75f, 0.20f)
                 // Golden Flower Disc
-                builder.addCylinder(gx, 1.45f, gz + 0.08f, 0.38f, 0.08f, 10, 0.98f, 0.82f, 0.10f)
+                builder.addCylinder(gx, 1.20f, gz + 0.06f, 0.30f, 0.06f, 10, 0.98f, 0.82f, 0.10f)
                 // Seed Center (Dark Brown)
-                builder.addCylinder(gx, 1.47f, gz + 0.08f, 0.20f, 0.09f, 8, 0.40f, 0.22f, 0.10f)
+                builder.addCylinder(gx, 1.22f, gz + 0.06f, 0.16f, 0.07f, 8, 0.40f, 0.22f, 0.10f)
             }
         }
         sunflowerMesh = builder.build()
 
-        // 5. Corn (Solar Corn) - Tall stalks with leaves & cobs (Height = 1.8m)
+        // 5. Corn (Solar Corn) - Tall stalks with leaves & cobs (Height = 1.4m)
         builder.reset()
-        for (gx in listOf(-0.5f, 0f, 0.5f)) {
-            for (gz in listOf(-0.5f, 0.5f)) {
-                builder.addCylinder(gx, 0f, gz, 0.06f, 1.75f, 5, 0.22f, 0.68f, 0.18f)
+        for (gx in listOf(-0.35f, 0f, 0.35f)) {
+            for (gz in listOf(-0.35f, 0.35f)) {
+                builder.addCylinder(gx, 0f, gz, 0.045f, 1.35f, 5, 0.22f, 0.68f, 0.18f)
                 // Wide leaves
-                builder.addBox(gx, 0.80f, gz, 0.65f, 0.06f, 0.16f, 0.28f, 0.76f, 0.22f)
-                builder.addBox(gx, 1.25f, gz, 0.55f, 0.06f, 0.16f, 0.28f, 0.76f, 0.22f)
+                builder.addBox(gx, 0.65f, gz, 0.45f, 0.05f, 0.12f, 0.28f, 0.76f, 0.22f)
+                builder.addBox(gx, 1.00f, gz, 0.38f, 0.05f, 0.12f, 0.28f, 0.76f, 0.22f)
                 // Yellow Corn Cob
-                builder.addCone(gx + 0.12f, 0.90f, gz, 0.09f, 0.32f, 6, 0.98f, 0.86f, 0.15f)
+                builder.addCone(gx + 0.08f, 0.70f, gz, 0.07f, 0.25f, 6, 0.98f, 0.86f, 0.15f)
             }
         }
         cornMesh = builder.build()

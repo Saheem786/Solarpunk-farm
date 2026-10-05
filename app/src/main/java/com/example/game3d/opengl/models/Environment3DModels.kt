@@ -37,6 +37,7 @@ class Environment3DModels {
     val birdBodyMesh: GLMesh
     val birdWingMesh: GLMesh
     val butterflyMesh: GLMesh
+    val beeMesh: GLMesh
 
     private val modelMatrix = FloatArray(16)
     private val mvMatrix = FloatArray(16)
@@ -173,35 +174,37 @@ class Environment3DModels {
         builder.addBox(0f, 0.12f, 0f, 0.16f, 0.08f, 0.16f, 0.98f, 0.55f, 0.75f) // Pink Lotus
         lilyPadMesh = builder.build()
 
-        // 7. LOW-POLY PINE TREE (Height = 6.2m)
+        // 7. LOW-POLY PINE TREE (Height = 4.8m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.28f, 1.80f, 6, 0.42f, 0.26f, 0.14f)
-        builder.addCone(0f, 1.40f, 0f, 1.90f, 2.00f, 7, 0.12f, 0.44f, 0.18f)
-        builder.addCone(0f, 2.60f, 0f, 1.50f, 1.80f, 7, 0.15f, 0.52f, 0.22f)
-        builder.addCone(0f, 3.80f, 0f, 1.10f, 1.60f, 7, 0.18f, 0.60f, 0.25f)
+        builder.addCylinder(0f, 0f, 0f, 0.18f, 1.50f, 6, 0.42f, 0.26f, 0.14f)
+        builder.addCone(0f, 1.20f, 0f, 1.30f, 1.60f, 7, 0.12f, 0.44f, 0.18f)
+        builder.addCone(0f, 2.30f, 0f, 1.05f, 1.50f, 7, 0.15f, 0.52f, 0.22f)
+        builder.addCone(0f, 3.40f, 0f, 0.75f, 1.40f, 7, 0.18f, 0.60f, 0.25f)
         pineTreeMesh = builder.build()
 
-        // 8. LOW-POLY OAK / BROADLEAF TREE (Height = 5.5m)
+        // 8. LOW-POLY OAK / BROADLEAF TREE (Height = 4.85m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.35f, 2.00f, 6, 0.46f, 0.30f, 0.16f)
-        builder.addSphere(0f, 3.60f, 0f, 1.85f, 6, 8, 0.22f, 0.68f, 0.24f)
-        builder.addSphere(-0.75f, 3.20f, 0.4f, 1.25f, 5, 7, 0.26f, 0.74f, 0.28f)
-        builder.addSphere(0.75f, 3.30f, -0.4f, 1.25f, 5, 7, 0.24f, 0.70f, 0.26f)
+        builder.addCylinder(0f, 0f, 0f, 0.22f, 1.80f, 6, 0.46f, 0.30f, 0.16f)
+        builder.addSphere(0f, 3.20f, 0f, 1.40f, 6, 8, 0.22f, 0.68f, 0.24f)
+        builder.addSphere(-0.60f, 2.80f, 0.35f, 1.00f, 5, 7, 0.26f, 0.74f, 0.28f)
+        builder.addSphere(0.60f, 2.90f, -0.35f, 0.95f, 5, 7, 0.24f, 0.70f, 0.26f)
+        builder.addSphere(0f, 4.00f, 0f, 0.85f, 5, 7, 0.20f, 0.65f, 0.22f)
         oakTreeMesh = builder.build()
 
-        // 9. CHERRY BLOSSOM TREE (Pink & Cream Flower Canopy)
+        // 9. CHERRY BLOSSOM TREE (Height = 4.6m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.32f, 1.90f, 6, 0.48f, 0.32f, 0.20f)
-        builder.addSphere(0f, 3.40f, 0f, 1.75f, 6, 8, 0.98f, 0.68f, 0.78f) // Soft Sakura Pink
-        builder.addSphere(-0.7f, 3.10f, 0.3f, 1.20f, 5, 7, 0.96f, 0.78f, 0.84f)
-        builder.addSphere(0.7f, 3.20f, -0.3f, 1.20f, 5, 7, 0.95f, 0.60f, 0.72f)
+        builder.addCylinder(0f, 0f, 0f, 0.20f, 1.70f, 6, 0.48f, 0.32f, 0.20f)
+        builder.addSphere(0f, 3.10f, 0f, 1.35f, 6, 8, 0.98f, 0.68f, 0.78f) // Soft Sakura Pink
+        builder.addSphere(-0.55f, 2.70f, 0.30f, 0.90f, 5, 7, 0.96f, 0.78f, 0.84f)
+        builder.addSphere(0.55f, 2.75f, -0.30f, 0.90f, 5, 7, 0.95f, 0.60f, 0.72f)
+        builder.addSphere(0f, 3.80f, 0f, 0.80f, 5, 7, 0.98f, 0.72f, 0.80f)
         cherryTreeMesh = builder.build()
 
-        // 10. WEEPING WILLOW TREE (Drooping Graceful Foliage)
+        // 10. WEEPING WILLOW TREE (Height = 4.85m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.38f, 2.20f, 6, 0.44f, 0.28f, 0.18f)
-        builder.addSphere(0f, 3.80f, 0f, 1.90f, 6, 8, 0.35f, 0.75f, 0.30f)
-        builder.addCone(0f, 1.60f, 0f, 2.40f, 2.50f, 8, 0.28f, 0.68f, 0.25f) // Drooping canopy
+        builder.addCylinder(0f, 0f, 0f, 0.24f, 1.90f, 6, 0.44f, 0.28f, 0.18f)
+        builder.addSphere(0f, 3.40f, 0f, 1.45f, 6, 8, 0.35f, 0.75f, 0.30f)
+        builder.addCone(0f, 1.60f, 0f, 1.70f, 2.10f, 8, 0.28f, 0.68f, 0.25f) // Drooping canopy
         willowTreeMesh = builder.build()
 
         // 11. BUSH CLUSTERS
@@ -245,6 +248,16 @@ class Environment3DModels {
         builder.addBox(-0.20f, 0.02f, 0f, 0.35f, 0.02f, 0.26f, 0.98f, 0.55f, 0.12f) // Orange Wing
         builder.addBox(0.20f, 0.02f, 0f, 0.35f, 0.02f, 0.26f, 0.00f, 0.85f, 0.95f)  // Cyan Wing
         butterflyMesh = builder.build()
+
+        // 15b. 3D HONEYBEE (Tiny 0.1 units Yellow/Black dot)
+        builder.reset()
+        // Yellow & Black Striped Body
+        builder.addBox(0f, 0f, 0f, 0.10f, 0.10f, 0.14f, 0.98f, 0.82f, 0.10f)
+        builder.addBox(0f, 0f, 0.02f, 0.105f, 0.105f, 0.04f, 0.15f, 0.12f, 0.10f)
+        // Translucent Glistening Wings
+        builder.addBox(-0.06f, 0.06f, 0f, 0.10f, 0.01f, 0.08f, 0.90f, 0.95f, 1.0f, 0.85f)
+        builder.addBox(0.06f, 0.06f, 0f, 0.10f, 0.01f, 0.08f, 0.90f, 0.95f, 1.0f, 0.85f)
+        beeMesh = builder.build()
 
         // 16. RAIN-WET GROUND OVERLAY (Darkened Muddy Earth)
         builder.reset()
@@ -371,11 +384,18 @@ class Environment3DModels {
             renderMesh(shader, flowerPatchMesh, modelMatrix, viewMatrix, projMatrix)
         }
 
-        // 9. Ambient Wildlife: Soaring Birds overhead
-        drawAmbientBirds(shader, viewMatrix, projMatrix, animTime)
+        // 9. Ambient Wildlife (Daytime active between 7 AM and 7 PM)
+        val isDaytime = hour in 7.0f..19.0f
+        if (isDaytime) {
+            // Soaring Birds overhead (10 in the sky)
+            drawAmbientBirds(shader, viewMatrix, projMatrix, animTime)
 
-        // 10. Ambient Wildlife: Fluttering Butterflies
-        drawAmbientButterflies(shader, viewMatrix, projMatrix, animTime)
+            // Fluttering Butterflies (5 in the scene)
+            drawAmbientButterflies(shader, viewMatrix, projMatrix, animTime)
+
+            // Buzzing Pollinator Bees (Swarm of 10 circling flowers & crops)
+            drawAmbientBees(shader, viewMatrix, projMatrix, animTime)
+        }
 
         // 11. Celestial Sun (Moves across sky based on hour: rises at 6, zenith at 12, sets at 18)
         val sunAngle = ((hour - 6.0f) / 12.0f) * Math.PI.toFloat()
@@ -416,16 +436,16 @@ class Environment3DModels {
         projMatrix: FloatArray,
         animTime: Float
     ) {
-        // 3 Birds flying in sweeping orbital sky paths
-        for (i in 0 until 3) {
-            val angle = animTime * 0.45f + (i * 2.094f) // 120 deg apart
-            val radius = 14.0f + (i * 2.5f)
+        // 10 Birds flying in graceful orbital sky paths above the farm
+        for (i in 0 until 10) {
+            val angle = animTime * 0.35f + (i * 0.628f)
+            val radius = 10.0f + (i * 1.8f)
             val bx = cos(angle) * radius
             val bz = sin(angle) * radius
-            val by = 9.5f + sin(animTime * 1.2f + i) * 1.5f
+            val by = 8.5f + sin(animTime * 1.0f + i) * 1.8f
             val headingDeg = Math.toDegrees(-angle.toDouble() + Math.PI / 2.0).toFloat()
 
-            val wingFlap = sin(animTime * 12.0f + i * 2.0f) * 28.0f
+            val wingFlap = sin(animTime * 14.0f + i * 1.5f) * 28.0f
 
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, bx, by, bz)
@@ -468,13 +488,41 @@ class Environment3DModels {
             val flutterX = spawn.first + sin(t * 1.8f) * 1.2f
             val flutterZ = spawn.second + cos(t * 1.4f) * 1.2f
             val flutterY = 0.65f + sin(t * 3.5f) * 0.35f
-            val wingFlap = sin(t * 18.0f) * 45.0f
 
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, flutterX, flutterY, flutterZ)
             Matrix.rotateM(modelMatrix, 0, sin(t) * 40.0f, 0f, 1f, 0f)
 
             renderMesh(shader, butterflyMesh, modelMatrix, viewMatrix, projMatrix)
+        }
+    }
+
+    private fun drawAmbientBees(
+        shader: GLShader,
+        viewMatrix: FloatArray,
+        projMatrix: FloatArray,
+        animTime: Float
+    ) {
+        // Swarm of 10 small bees circling near flowers and crop fields
+        val swarmCenters = listOf(
+            Pair(-4.0f, -6.0f), // Crops center
+            Pair(4.0f, 3.2f),   // Wildflower patch
+            Pair(7.8f, -2.5f)   // Garden border
+        )
+
+        for (i in 0 until 10) {
+            val center = swarmCenters[i % swarmCenters.size]
+            val phase = animTime * 3.2f + (i * 0.628f)
+            val radius = 0.8f + (i % 3) * 0.4f
+            val bx = center.first + cos(phase) * radius + sin(animTime * 5.0f + i) * 0.15f
+            val bz = center.second + sin(phase) * radius + cos(animTime * 5.0f + i) * 0.15f
+            val by = 0.55f + sin(animTime * 4.0f + i * 1.2f) * 0.25f
+
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, bx, by, bz)
+            Matrix.rotateM(modelMatrix, 0, sin(phase) * 60.0f, 0f, 1f, 0f)
+
+            renderMesh(shader, beeMesh, modelMatrix, viewMatrix, projMatrix)
         }
     }
 

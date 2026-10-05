@@ -116,6 +116,28 @@ object SaveLoadSystem {
             }
             json.put("buildings", bArray)
 
+            // Livestock
+            val livestock = dao.getAllLivestock().firstOrNull() ?: emptyList()
+            val lArray = JSONArray()
+            for (animal in livestock) {
+                val lObj = JSONObject()
+                lObj.put("id", animal.id)
+                lObj.put("type", animal.type.name)
+                lObj.put("name", animal.name)
+                lObj.put("happiness", animal.happiness.toDouble())
+                lObj.put("hunger", animal.hunger.toDouble())
+                lObj.put("age", animal.age)
+                lObj.put("produceProgress", animal.produceProgress.toDouble())
+                lObj.put("readyToHarvest", animal.readyToHarvest)
+                lObj.put("posX", animal.posX.toDouble())
+                lObj.put("posY", animal.posY.toDouble())
+                lObj.put("posZ", animal.posZ.toDouble())
+                lObj.put("targetX", animal.targetX.toDouble())
+                lObj.put("targetZ", animal.targetZ.toDouble())
+                lArray.put(lObj)
+            }
+            json.put("livestock", lArray)
+
             // Write to file
             val file = File(context.filesDir, SAVE_FILE_NAME)
             file.writeText(json.toString(2))
@@ -317,6 +339,49 @@ object SaveLoadSystem {
                 }
             }
             dao.insertPlacedBuildings(bList)
+
+            // Livestock
+            val lArray = json.optJSONArray("livestock")
+            val lList = mutableListOf<LivestockEntity>()
+            if (lArray != null) {
+                dao.deleteAllLivestock()
+                for (i in 0 until lArray.length()) {
+                    val lObj = lArray.getJSONObject(i)
+                    val lId = lObj.optInt("id", i + 1)
+                    val lTypeStr = lObj.optString("type", "CHICKEN").uppercase()
+                    val lType = try { LivestockType.valueOf(lTypeStr) } catch(e: Exception) { LivestockType.CHICKEN }
+                    val lName = lObj.optString("name", "Animal")
+                    val happiness = lObj.optDouble("happiness", 80.0).toFloat()
+                    val hunger = lObj.optDouble("hunger", 20.0).toFloat()
+                    val age = lObj.optInt("age", 1)
+                    val produceProgress = lObj.optDouble("produceProgress", 0.0).toFloat()
+                    val readyToHarvest = lObj.optBoolean("readyToHarvest", false)
+                    val lx = lObj.optDouble("posX", 0.0).toFloat()
+                    val ly = lObj.optDouble("posY", 0.0).toFloat()
+                    val lz = lObj.optDouble("posZ", 0.0).toFloat()
+                    val ltx = lObj.optDouble("targetX", lx.toDouble()).toFloat()
+                    val ltz = lObj.optDouble("targetZ", lz.toDouble()).toFloat()
+
+                    lList.add(
+                        LivestockEntity(
+                            id = lId,
+                            type = lType,
+                            name = lName,
+                            happiness = happiness,
+                            hunger = hunger,
+                            age = age,
+                            produceProgress = produceProgress,
+                            readyToHarvest = readyToHarvest,
+                            posX = lx,
+                            posY = ly,
+                            posZ = lz,
+                            targetX = ltx,
+                            targetZ = ltz
+                        )
+                    )
+                }
+                dao.insertLivestockList(lList)
+            }
 
             Log.d("SaveLoadSystem", "Loaded game state successfully from private storage")
             true

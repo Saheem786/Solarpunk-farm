@@ -26,6 +26,9 @@ class Animal3DModels {
     // Beehive Mesh
     private val beehiveMesh: GLMesh
 
+    // Chicken Mesh
+    private val chickenMesh: GLMesh
+
     // Shared Drop Shadow Mesh
     private val shadowMesh: GLMesh
 
@@ -104,6 +107,19 @@ class Animal3DModels {
         // Base post
         builder.addCylinder(0f, 0f, 0f, 0.10f, 0.45f, 6, 0.45f, 0.30f, 0.15f)
         beehiveMesh = builder.build()
+
+        // 3b. LOW-POLY CHICKEN (Height = 0.4 units)
+        builder.reset()
+        // White Body
+        builder.addBox(0f, 0.20f, 0f, 0.26f, 0.30f, 0.36f, 0.98f, 0.96f, 0.90f)
+        // Red Comb
+        builder.addBox(0f, 0.38f, 0.10f, 0.05f, 0.10f, 0.12f, 0.95f, 0.15f, 0.10f)
+        // Beak
+        builder.addCone(0f, 0.26f, 0.19f, 0.06f, 0.12f, 4, 0.98f, 0.70f, 0.15f)
+        // Yellow legs
+        builder.addCylinder(-0.06f, 0f, 0f, 0.02f, 0.10f, 4, 0.98f, 0.70f, 0.15f)
+        builder.addCylinder(0.06f, 0f, 0f, 0.02f, 0.10f, 4, 0.98f, 0.70f, 0.15f)
+        chickenMesh = builder.build()
 
         // 4. Drop Shadow Disk
         builder.reset()
@@ -201,6 +217,11 @@ class Animal3DModels {
             }
             LivestockType.ROBO_BEE_POLLINATOR -> {
                 renderMesh(shader, beehiveMesh, modelMatrix, viewMatrix, projMatrix)
+            }
+            LivestockType.CHICKEN -> {
+                val bob = if (isWalking) sin(animTime * 10f) * 0.03f else 0.0f
+                Matrix.translateM(modelMatrix, 0, 0f, bob, 0f)
+                renderMesh(shader, chickenMesh, modelMatrix, viewMatrix, projMatrix)
             }
         }
     }
