@@ -2,6 +2,7 @@ package com.example.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.data.model.BuildableType
 import com.example.data.model.CropStage
 import com.example.data.model.CropType
 import com.example.data.model.EnergyNodeType
@@ -27,7 +28,16 @@ data class GameStateEntity(
     val totalHarvests: Int = 0,
     val carbonOffsetKg: Float = 120.0f,
     val autoIrrigationUnlocked: Boolean = false,
-    val droneHarvesterUnlocked: Boolean = false
+    val droneHarvesterUnlocked: Boolean = false,
+    val health: Float = 100.0f,
+    val maxHealth: Float = 100.0f,
+    val hunger: Float = 100.0f,
+    val maxHunger: Float = 100.0f,
+    val thirst: Float = 100.0f,
+    val maxThirst: Float = 100.0f,
+    val stamina: Float = 100.0f,
+    val maxStamina: Float = 100.0f,
+    val weatherChangeCountdownHours: Float = 6.0f
 )
 
 @Entity(tableName = "farm_plots")
@@ -95,4 +105,15 @@ data class ContractEntity(
     val rewardCoins: Int,
     val rewardEco: Int,
     val isClaimed: Boolean = false
+)
+
+@Entity(tableName = "placed_buildings")
+data class PlacedBuildingEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val buildingType: BuildableType,
+    val posX: Float,
+    val posY: Float = 0.0f,
+    val posZ: Float,
+    val rotationDeg: Float = 0.0f,
+    val level: Int = 1
 )

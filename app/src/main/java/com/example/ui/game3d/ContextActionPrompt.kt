@@ -81,6 +81,8 @@ fun ContextActionPrompt(
                         InteractionTargetType.ENERGY_NODE -> Icons.Default.Build
                         InteractionTargetType.WORKSHOP_BUILDING -> Icons.Default.Handyman
                         InteractionTargetType.MARKET_STALL -> Icons.Default.Store
+                        InteractionTargetType.WATER_SOURCE -> Icons.Default.WaterDrop
+                        InteractionTargetType.FARMHOUSE -> Icons.Default.Eco
                         InteractionTargetType.NONE -> Icons.Default.Eco
                     }
 

@@ -86,4 +86,17 @@ interface FarmDao {
 
     @Update
     suspend fun updateContract(contract: ContractEntity)
+
+    // Placed Buildings
+    @Query("SELECT * FROM placed_buildings ORDER BY id ASC")
+    fun getAllPlacedBuildings(): Flow<List<PlacedBuildingEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlacedBuilding(building: PlacedBuildingEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlacedBuildings(buildings: List<PlacedBuildingEntity>)
+
+    @Query("DELETE FROM placed_buildings WHERE id = :id")
+    suspend fun deletePlacedBuilding(id: Int)
 }

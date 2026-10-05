@@ -186,10 +186,18 @@ object DayNightLightingSystem {
 
         when (weather) {
             WeatherType.RAINY_STORM -> {
-                finalSkyTop = lerpColor(finalSkyTop, Color(0xFF2C3E50), 0.65f)
-                finalSkyHorizon = lerpColor(finalSkyHorizon, Color(0xFF546E7A), 0.55f)
-                finalDirInt *= 0.45f
-                finalShadowAlpha *= 0.4f
+                finalSkyTop = lerpColor(finalSkyTop, Color(0xFF2C3E50), 0.70f)
+                finalSkyHorizon = lerpColor(finalSkyHorizon, Color(0xFF455A64), 0.65f)
+                finalDirInt *= 0.25f
+                finalAmbInt *= 0.75f
+                finalShadowAlpha *= 0.25f
+            }
+            WeatherType.CLOUDY_OVERCAST -> {
+                finalSkyTop = lerpColor(finalSkyTop, Color(0xFF546E7A), 0.55f)
+                finalSkyHorizon = lerpColor(finalSkyHorizon, Color(0xFF90A4AE), 0.50f)
+                finalDirInt *= 0.50f
+                finalAmbInt *= 0.85f
+                finalShadowAlpha *= 0.40f
             }
             WeatherType.HEATWAVE -> {
                 finalSkyHorizon = lerpColor(finalSkyHorizon, Color(0xFFFFD54F), 0.35f)
@@ -205,6 +213,13 @@ object DayNightLightingSystem {
             }
             WeatherType.SUNNY_CLEAR -> {
                 // Default crisp Solarpunk
+            }
+            WeatherType.STORM -> {
+                finalSkyTop = lerpColor(finalSkyTop, Color(0xFF1A1A2E), 0.85f)
+                finalSkyHorizon = lerpColor(finalSkyHorizon, Color(0xFF2C3E50), 0.80f)
+                finalDirInt *= 0.10f
+                finalAmbInt *= 0.60f
+                finalShadowAlpha *= 0.10f
             }
         }
 

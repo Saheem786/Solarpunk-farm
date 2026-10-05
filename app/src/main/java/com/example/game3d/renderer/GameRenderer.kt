@@ -4,7 +4,9 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
+import com.example.data.model.BuildableType
 import com.example.game3d.opengl.GLMesh
 import com.example.game3d.opengl.GLModelBuilder
 import com.example.game3d.opengl.GLShader
@@ -204,6 +206,15 @@ class ModelBatch {
     }
 }
 
+data class GhostBuildingState(
+    val type: BuildableType,
+    val posX: Float,
+    val posY: Float = 0.0f,
+    val posZ: Float,
+    val rotationDeg: Float = 0.0f,
+    val canAfford: Boolean = true
+)
+
 /**
  * GameRenderer: Complete 3D Environment Renderer for the Solarpunk Farm World.
  * Implements PerspectiveCamera, ModelBatch, Environment, and procedural 3D model structures.
@@ -271,6 +282,8 @@ class GameRenderer {
         lightingState: LightingState?,
         plots: List<PlotEntity>,
         energyNodes: List<EnergyNodeEntity>,
+        placedBuildings: List<PlacedBuildingEntity> = emptyList(),
+        ghostBuilding: GhostBuildingState? = null,
         livestock: List<LivestockEntity>,
         animTimeSec: Float
     ) {
@@ -322,11 +335,27 @@ class GameRenderer {
         // 4. Begin ModelBatch Pipeline
         modelBatch.begin(camera, environment)
 
-        // A. Draw Environment (Terrain, Roads, Pond, Trees, Flora)
-        environmentModels?.drawEnvironment(sh, camera.viewMatrix, camera.projectionMatrix)
+        // A. Draw Environment (Terrain, Roads, River, Bridge, Pond, Trees, Grass, Wildlife)
+        environmentModels?.drawEnvironment(sh, camera.viewMatrix, camera.projectionMatrix, animTimeSec)
 
-        // B. Draw Buildings (Farmhouse, Barn, Workshop, Market, Solar Arrays, Wind Turbine, Fences)
-        buildingModels?.drawBuildings(sh, camera.viewMatrix, camera.projectionMatrix, energyNodes, animTimeSec)
+        // B. Draw Buildings (Farmhouse, Barn, Workshop, Market, Solar Arrays, Wind Turbine, Placed Buildings, Fences)
+        buildingModels?.drawBuildings(sh, camera.viewMatrix, camera.projectionMatrix, energyNodes, placedBuildings, animTimeSec)
+
+        // B2. Draw Ghost Holographic Preview if in Build Mode
+        if (ghostBuilding != null) {
+            buildingModels?.drawGhostPreview(
+                shader = sh,
+                viewMatrix = camera.viewMatrix,
+                projMatrix = camera.projectionMatrix,
+                buildingType = ghostBuilding.type,
+                posX = ghostBuilding.posX,
+                posY = ghostBuilding.posY,
+                posZ = ghostBuilding.posZ,
+                rotationDeg = ghostBuilding.rotationDeg,
+                animTime = animTimeSec,
+                canAfford = ghostBuilding.canAfford
+            )
+        }
 
         // C. Draw Plots & 3D Crops across Growth Stages
         cropModels?.drawPlots(sh, camera.viewMatrix, camera.projectionMatrix, plots, animTimeSec)

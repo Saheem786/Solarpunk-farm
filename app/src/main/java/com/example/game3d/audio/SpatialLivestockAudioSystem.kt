@@ -15,6 +15,10 @@ class SpatialLivestockAudioSystem(private val scope: CoroutineScope) {
 
     private val sampleRate = 22050
 
+    fun playSelectToolSound() {
+        playTone(durationMs = 100, frequencies = floatArrayOf(587.33f, 783.99f), volume = 0.4f)
+    }
+
     fun playWaterSound() {
         playTone(
             durationMs = 250,
@@ -60,6 +64,24 @@ class SpatialLivestockAudioSystem(private val scope: CoroutineScope) {
                 generateBeep(freq, 80, 0.45f)
             }
         }
+    }
+
+    fun playLowEnergyWarning() {
+        scope.launch(Dispatchers.Default) {
+            generateBeep(330f, 150, 0.5f)
+            generateBeep(220f, 250, 0.5f)
+        }
+    }
+
+    fun playItemCollect() {
+        scope.launch(Dispatchers.Default) {
+            generateBeep(587.33f, 60, 0.4f)
+            generateBeep(880.00f, 80, 0.45f)
+        }
+    }
+
+    fun playWatering() {
+        playWaterSound()
     }
 
     fun playCoinEarned() {

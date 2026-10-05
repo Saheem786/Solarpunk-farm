@@ -6,7 +6,9 @@ import com.example.data.local.FarmDao
 import com.example.data.local.GameStateEntity
 import com.example.data.local.InventoryEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
+import com.example.data.model.BuildableType
 import com.example.data.model.CropStage
 import com.example.data.model.CropType
 import com.example.data.model.EnergyNodeType
@@ -31,6 +33,7 @@ class FarmRepository(private val dao: FarmDao) {
     val livestock: Flow<List<LivestockEntity>> = dao.getAllLivestock()
     val inventory: Flow<List<InventoryEntity>> = dao.getAllInventory()
     val contracts: Flow<List<ContractEntity>> = dao.getAllContracts()
+    val placedBuildings: Flow<List<PlacedBuildingEntity>> = dao.getAllPlacedBuildings()
 
     suspend fun initializeDefaultDataIfEmpty() {
         val currentState = dao.getGameState().firstOrNull()
@@ -52,7 +55,16 @@ class FarmRepository(private val dao: FarmDao) {
                 totalHarvests = 0,
                 carbonOffsetKg = 150.0f,
                 autoIrrigationUnlocked = false,
-                droneHarvesterUnlocked = false
+                droneHarvesterUnlocked = false,
+                health = 100.0f,
+                maxHealth = 100.0f,
+                hunger = 90.0f,
+                maxHunger = 100.0f,
+                thirst = 85.0f,
+                maxThirst = 100.0f,
+                stamina = 100.0f,
+                maxStamina = 100.0f,
+                weatherChangeCountdownHours = 6.0f
             )
             dao.saveGameState(initialState)
 
@@ -209,12 +221,18 @@ class FarmRepository(private val dao: FarmDao) {
 
             // Seed Initial Inventory Items
             val initialInventory = listOf(
+                InventoryEntity("seed_wheat", "Golden Wheat Seeds", ItemCategory.SEEDS, 8, 12),
+                InventoryEntity("seed_corn", "Sweet Corn Seeds", ItemCategory.SEEDS, 6, 18),
+                InventoryEntity("seed_tomato", "Ruby Tomato Seeds", ItemCategory.SEEDS, 6, 15),
+                InventoryEntity("seed_carrot", "Crisp Carrot Seeds", ItemCategory.SEEDS, 6, 14),
+                InventoryEntity("seed_herbs", "Aromatic Herb Seeds", ItemCategory.SEEDS, 8, 10),
                 InventoryEntity("seed_sunflower", "Solar Sunflower Seeds", ItemCategory.SEEDS, 5, 15),
                 InventoryEntity("seed_mushroom", "Biolum Spore Pack", ItemCategory.SEEDS, 4, 25),
-                InventoryEntity("seed_wheat", "Golden Wheat Grains", ItemCategory.SEEDS, 6, 18),
-                InventoryEntity("seed_spirulina", "Sky Spirulina Culture", ItemCategory.SEEDS, 4, 12),
-                InventoryEntity("seed_berries", "Cyber Berry Cuttings", ItemCategory.SEEDS, 3, 30),
-                InventoryEntity("fertilizer_bio", "Bio-Compost Serum", ItemCategory.TOOL, 8, 10),
+                InventoryEntity("material_bio_timber", "Bio-Timber", ItemCategory.CRAFTED, 25, 20),
+                InventoryEntity("material_solar_glass", "Solar Glass", ItemCategory.CRAFTED, 20, 25),
+                InventoryEntity("material_eco_alloy", "Eco-Alloy", ItemCategory.CRAFTED, 18, 30),
+                InventoryEntity("material_bio_polymer", "Bio-Polymer", ItemCategory.CRAFTED, 15, 22),
+                InventoryEntity("fertilizer_bio", "Bio-Compost Serum", ItemCategory.TOOL, 10, 10),
                 InventoryEntity("solar_wool", "Solar Wool", ItemCategory.PRODUCE, 2, 75),
                 InventoryEntity("solar_honey", "Solar Honey", ItemCategory.PRODUCE, 3, 60),
                 InventoryEntity("bio_fuel", "Purified Bio-Fuel", ItemCategory.CRAFTED, 1, 120)
@@ -580,18 +598,178 @@ class FarmRepository(private val dao: FarmDao) {
         return true
     }
 
+    suspend fun saveGameSnapshot(
+        playerX: Float,
+        playerY: Float,
+        playerZ: Float,
+        playerAngle: Float
+    ): Boolean {
+        val state = dao.getGameState().firstOrNull() ?: return false
+        dao.saveGameState(
+            state.copy(
+                playerX = playerX,
+                playerY = playerY,
+                playerZ = playerZ,
+                playerAngle = playerAngle
+            )
+        )
+        return true
+    }
+
+    suspend fun eatFood(foodItemId: String? = null): Pair<Boolean, String> {
+        val state = dao.getGameState().firstOrNull() ?: return Pair(false, "Game state unavailable")
+        
+        var itemName = "Organic Farm Snack"
+        if (foodItemId != null) {
+            val item = dao.getInventoryItem(foodItemId)
+            if (item != null && item.quantity > 0) {
+                itemName = item.name
+                dao.insertInventory(item.copy(quantity = item.quantity - 1))
+            }
+        } else {
+            // Find any harvested edible produce in inventory
+            val edibleProduce = dao.getAllInventory().firstOrNull()?.find { 
+                it.quantity > 0 && (it.category == ItemCategory.PRODUCE || it.itemId.startsWith("harvest_")) 
+            }
+            if (edibleProduce != null) {
+                itemName = edibleProduce.name
+                dao.insertInventory(edibleProduce.copy(quantity = edibleProduce.quantity - 1))
+            }
+        }
+
+        val newHunger = min(state.maxHunger, state.hunger + 30.0f)
+        val newHealth = min(state.maxHealth, state.health + 10.0f)
+        val newStamina = min(state.maxStamina, state.stamina + 15.0f)
+
+        dao.saveGameState(
+            state.copy(
+                hunger = newHunger,
+                health = newHealth,
+                stamina = newStamina
+            )
+        )
+        return Pair(true, "Ate $itemName (+30 Hunger, +10 HP)")
+    }
+
+    suspend fun drinkWater(source: String = "Canteen"): Pair<Boolean, String> {
+        val state = dao.getGameState().firstOrNull() ?: return Pair(false, "Game state unavailable")
+        val newThirst = min(state.maxThirst, state.thirst + 40.0f)
+        val newStamina = min(state.maxStamina, state.stamina + 15.0f)
+
+        dao.saveGameState(
+            state.copy(
+                thirst = newThirst,
+                stamina = newStamina
+            )
+        )
+        return Pair(true, "Drank from $source (+40 Thirst)")
+    }
+
+    suspend fun respawnAtHouse(): Boolean {
+        val state = dao.getGameState().firstOrNull() ?: return false
+        dao.saveGameState(
+            state.copy(
+                health = 100.0f,
+                hunger = 50.0f,
+                thirst = 50.0f,
+                stamina = 100.0f,
+                playerX = 6.0f,
+                playerY = 0.0f,
+                playerZ = 0.0f
+            )
+        )
+        return true
+    }
+
+    suspend fun canAffordBuilding(type: BuildableType): Pair<Boolean, String> {
+        val state = dao.getGameState().firstOrNull() ?: return Pair(false, "No state")
+        if (state.solCoins < type.costCoins) {
+            return Pair(false, "Need ${type.costCoins} 🪙 (Have ${state.solCoins})")
+        }
+        val material = dao.getInventoryItem(type.requiredMaterialId)
+        val matQty = material?.quantity ?: 0
+        if (matQty < type.requiredMaterialQty) {
+            return Pair(false, "Need ${type.requiredMaterialQty}x ${type.materialName} (Have $matQty)")
+        }
+        return Pair(true, "Ready to place")
+    }
+
+    suspend fun placeBuilding(
+        type: BuildableType,
+        posX: Float,
+        posY: Float,
+        posZ: Float,
+        rotationDeg: Float
+    ): Pair<Boolean, String> {
+        val (canAfford, reason) = canAffordBuilding(type)
+        if (!canAfford) return Pair(false, reason)
+
+        val state = dao.getGameState().firstOrNull() ?: return Pair(false, "No state")
+        val material = dao.getInventoryItem(type.requiredMaterialId) ?: return Pair(false, "Missing material")
+
+        // Deduct coins & materials
+        val newCoins = state.solCoins - type.costCoins
+        dao.insertInventory(material.copy(quantity = material.quantity - type.requiredMaterialQty))
+
+        // Insert Placed Building
+        dao.insertPlacedBuilding(
+            PlacedBuildingEntity(
+                buildingType = type,
+                posX = posX,
+                posY = posY,
+                posZ = posZ,
+                rotationDeg = rotationDeg
+            )
+        )
+
+        // Apply immediate state effects
+        val extraCapacity = if (type == BuildableType.STORAGE) 60.0f else 0.0f
+        dao.saveGameState(
+            state.copy(
+                solCoins = newCoins,
+                ecoPrestige = state.ecoPrestige + 30,
+                carbonOffsetKg = state.carbonOffsetKg + 15.0f,
+                batteryMaxCapacityKwh = state.batteryMaxCapacityKwh + extraCapacity
+            )
+        )
+
+        return Pair(true, "Constructed ${type.displayName}!")
+    }
+
+    suspend fun restAtFarmhouse(): Pair<Boolean, String> {
+        val state = dao.getGameState().firstOrNull() ?: return Pair(false, "Game state unavailable")
+        val newStamina = state.maxStamina
+        val newHealth = min(state.maxHealth, state.health + 30.0f)
+        var newHour = state.gameTimeHour + 1.0f
+        var newDay = state.gameTimeDay
+        if (newHour >= 24.0f) {
+            newHour -= 24.0f
+            newDay += 1
+        }
+
+        dao.saveGameState(
+            state.copy(
+                stamina = newStamina,
+                health = newHealth,
+                gameTimeHour = newHour,
+                gameTimeDay = newDay
+            )
+        )
+        return Pair(true, "Rested at Farmhouse (+Full Stamina, +30 HP)")
+    }
+
     /**
      * Simulation tick for game world loop.
-     * Updates time, weather, crop growth, energy generation, animal wander and production.
+     * Updates time, weather, survival stats (hunger, thirst, stamina, health), crop growth, energy generation, animal wander and production.
      */
-    suspend fun gameTick(deltaSec: Float) {
+    suspend fun gameTick(deltaSec: Float, isMoving: Boolean = false, isSprinting: Boolean = false) {
         val state = dao.getGameState().firstOrNull() ?: return
         val plotsList = dao.getAllPlots().firstOrNull() ?: emptyList()
         val energyList = dao.getAllEnergyNodes().firstOrNull() ?: emptyList()
         val animalsList = dao.getAllLivestock().firstOrNull() ?: emptyList()
 
-        // 1. Advance Game Time (1 real sec = 2 game minutes; 24 game hours = 12 real minutes)
-        val timeAdvanceHours = (deltaSec / 60.0f) * 2.0f
+        // 1. Advance Game Time (1 real minute = 1 game hour => 24 real minutes = 24 game hours)
+        val timeAdvanceHours = (deltaSec / 60.0f)
         var newHour = state.gameTimeHour + timeAdvanceHours
         var newDay = state.gameTimeDay
         if (newHour >= 24.0f) {
@@ -599,23 +777,65 @@ class FarmRepository(private val dao: FarmDao) {
             newDay += 1
         }
 
-        // 2. Weather Shifts (Every few minutes randomly modulate weather)
+        // 2. Weather Shifts (Changes randomly every 6 game hours)
+        var weatherCountdown = state.weatherChangeCountdownHours - timeAdvanceHours
         var currentWeather = state.currentWeather
-        if (Random.nextFloat() < 0.005f * deltaSec) {
-            val weatherValues = WeatherType.values()
-            currentWeather = weatherValues[Random.nextInt(weatherValues.size)]
+        if (weatherCountdown <= 0.0f || newHour < state.gameTimeHour) {
+            weatherCountdown = 6.0f
+            val weatherPool = mutableListOf(
+                WeatherType.SUNNY_CLEAR,
+                WeatherType.CLOUDY_OVERCAST,
+                WeatherType.RAINY_STORM,
+                WeatherType.STORM
+            )
+            val isDaytimeNow = newHour >= 7.0f && newHour < 17.0f
+            if (isDaytimeNow && Random.nextFloat() < 0.15f) {
+                currentWeather = WeatherType.HEATWAVE
+            } else {
+                currentWeather = weatherPool[Random.nextInt(weatherPool.size)]
+            }
+        }
+
+        // 3. Survival Stats Simulation
+        // A. Hunger: decreases by 1 every 30 seconds (1/30 per sec)
+        val hungerDrainRate = 1.0f / 30.0f
+        val newHunger = max(0.0f, state.hunger - hungerDrainRate * deltaSec)
+
+        // B. Thirst: decreases by 1 every 20 seconds (1/20 per sec), 2x faster during HEATWAVE
+        val thirstMultiplier = if (currentWeather == WeatherType.HEATWAVE) 2.0f else 1.0f
+        val thirstDrainRate = (1.0f / 20.0f) * thirstMultiplier
+        val newThirst = max(0.0f, state.thirst - thirstDrainRate * deltaSec)
+
+        // C. Stamina: decreases when walking (1/sec) or running (3/sec), regenerates when idle (2/sec)
+        val newStamina = when {
+            isSprinting -> max(0.0f, state.stamina - 3.0f * deltaSec)
+            isMoving -> max(0.0f, state.stamina - 1.0f * deltaSec)
+            else -> min(state.maxStamina, state.stamina + 2.0f * deltaSec)
+        }
+
+        // D. Health: When hunger = 0 decreases by 1 every 10s; when thirst = 0 decreases by 2 every 10s
+        var newHealth = state.health
+        if (newHunger <= 0.0f || newThirst <= 0.0f) {
+            val starvationDmg = if (newHunger <= 0.0f) (1.0f / 10.0f) else 0.0f
+            val dehydrationDmg = if (newThirst <= 0.0f) (2.0f / 10.0f) else 0.0f
+            newHealth = max(0.0f, newHealth - (starvationDmg + dehydrationDmg) * deltaSec)
+        } else if (newHunger >= 70.0f && newThirst >= 70.0f && newHealth < state.maxHealth) {
+            newHealth = min(state.maxHealth, newHealth + 0.5f * deltaSec)
         }
 
         // Determine Solar & Wind Factors
-        val phase = TimeOfDayPhase.values().find {
-            newHour >= it.startHour && newHour < it.endHour
-        } ?: TimeOfDayPhase.ZENITH
-        val solarMultiplier = phase.solarIntensity * currentWeather.solarMultiplier
-        val windMultiplier = currentWeather.windMultiplier
+        // Solar panels generate energy only during day (7:00 to 17:00)
+        val isDay = newHour in 7.0f..17.0f
+        val solarMultiplier = if (isDay) currentWeather.solarMultiplier else 0.0f
+        // Windmill works 24/7 but slower at night (30% less, so 0.70x multiplier)
+        val isNightTime = newHour >= 19.0f || newHour < 5.0f
+        val windMultiplier = if (isNightTime) (currentWeather.windMultiplier * 0.70f) else currentWeather.windMultiplier
 
-        // 3. Clean Energy Generation Calculation
+        // 4. Clean Energy Generation Calculation (Energy Nodes & Placed Buildings)
         var totalGeneratedKwh = 0.0f
         var totalCapacity = 0.0f
+        val placedList = dao.getAllPlacedBuildings().firstOrNull() ?: emptyList()
+
         energyList.forEach { node ->
             if (node.isActive) {
                 when (node.nodeType) {
@@ -634,6 +854,23 @@ class FarmRepository(private val dao: FarmDao) {
                 }
             }
         }
+
+        // Placed Buildings Gameplay Effects
+        placedList.forEach { building ->
+            when (building.buildingType) {
+                BuildableType.SOLAR_PANEL -> {
+                    totalGeneratedKwh += 3.5f * solarMultiplier * deltaSec
+                }
+                BuildableType.WINDMILL -> {
+                    totalGeneratedKwh += 2.8f * windMultiplier * deltaSec
+                }
+                BuildableType.STORAGE -> {
+                    totalCapacity += 60.0f
+                }
+                else -> {}
+            }
+        }
+
         val maxCap = max(100.0f, totalCapacity + 50.0f)
         val newCharge = min(maxCap, state.batteryChargeKwh + totalGeneratedKwh)
 
@@ -642,24 +879,49 @@ class FarmRepository(private val dao: FarmDao) {
                 gameTimeHour = newHour,
                 gameTimeDay = newDay,
                 currentWeather = currentWeather,
+                weatherChangeCountdownHours = weatherCountdown,
                 batteryChargeKwh = newCharge,
-                batteryMaxCapacityKwh = maxCap
+                batteryMaxCapacityKwh = maxCap,
+                hunger = newHunger,
+                thirst = newThirst,
+                stamina = newStamina,
+                health = newHealth
             )
         )
 
-        // 4. Update Crop Plots
+        // 5. Update Crop Plots with Rain Hydration, Greenhouse Boost and Sunlight
+        val greenhouses = placedList.filter { it.buildingType == BuildableType.GREENHOUSE }
         val updatedPlots = plotsList.map { plot ->
             if (plot.cropType != null && plot.stage != CropStage.HARVEST_READY && plot.stage != CropStage.WITHERED) {
                 val crop = plot.cropType
-                // Auto rain or soil moisture
-                val hasWater = plot.moisture > 0.1f || currentWeather.autoWaterRain
-                val hasSun = solarMultiplier >= (crop.sunNeed * 0.3f) || plot.plotType == PlotType.BIO_DOME
+                val isRaining = currentWeather.autoWaterRain
 
-                val moistureDrain = if (currentWeather == WeatherType.HEATWAVE) 0.015f else 0.006f
-                val newMoisture = if (currentWeather.autoWaterRain) 1.0f else max(0.0f, plot.moisture - moistureDrain * deltaSec)
+                // Check Greenhouse proximity (within 9 meters)
+                val isNearGreenhouse = greenhouses.any { gh ->
+                    val dx = plot.posX - gh.posX
+                    val dz = plot.posZ - gh.posZ
+                    (dx * dx + dz * dz) < 81.0f
+                } || plot.plotType == PlotType.BIO_DOME
+
+                // Crops grow only during daylight hours (5 AM to 7 PM)
+                val isCropsDay = newHour in 5.0f..19.0f
+                val hasSun = isCropsDay || isNearGreenhouse
+                val hasWater = plot.moisture > 0.1f || isRaining || isNearGreenhouse
+
+                // Moisture drains 2x faster during Heatwave
+                val moistureMultiplier = if (currentWeather == WeatherType.HEATWAVE) 2.0f else 1.0f
+                val moistureDrain = 0.006f * moistureMultiplier
+                val newMoisture = if (isRaining) {
+                    min(1.0f, plot.moisture + 0.25f * deltaSec)
+                } else {
+                    max(0.0f, plot.moisture - moistureDrain * deltaSec)
+                }
 
                 if (hasWater && hasSun) {
-                    val growthRate = (1.0f / crop.growthDurationSec) * (1.0f + plot.compostLevel * 0.5f)
+                    val weatherGrowthBoost = currentWeather.cropGrowthMultiplier
+                    val greenhouseBoost = if (isNearGreenhouse) 1.50f else 1.0f
+                    val soilQualityBoost = 1.0f + plot.compostLevel * 0.6f
+                    val growthRate = (1.0f / crop.growthDurationSec) * soilQualityBoost * weatherGrowthBoost * greenhouseBoost
                     val newProgress = min(1.0f, plot.progress + growthRate * deltaSec)
                     val newStage = when {
                         newProgress >= 1.0f -> CropStage.HARVEST_READY

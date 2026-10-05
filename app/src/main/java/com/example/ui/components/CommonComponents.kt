@@ -21,17 +21,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -73,70 +78,117 @@ fun TopGameStatsBar(
     val m = totalMinutes % 60
     val ampm = if (h < 12) "AM" else "PM"
     val displayH = if (h == 0) 12 else if (h > 12) h - 12 else h
-    val timeFormatted = String.format("%02d:%02d %s", displayH, m, ampm)
+    val timeFormatted = String.format("Day %d • %02d:%02d %s", state.gameTimeDay, displayH, m, ampm)
     val isNight = h < 6 || h >= 20
 
-    Row(
+    val weather = state.currentWeather
+    val weatherIcon = when (weather) {
+        WeatherType.RAINY_STORM -> Icons.Default.WaterDrop
+        WeatherType.CLOUDY_OVERCAST -> Icons.Default.Cloud
+        WeatherType.WIND_GALE -> Icons.Default.Air
+        WeatherType.HEATWAVE -> Icons.Default.Whatshot
+        WeatherType.MISTY_NEBULA -> Icons.Default.Cloud
+        WeatherType.SUNNY_CLEAR -> Icons.Default.WbSunny
+        WeatherType.STORM -> Icons.Default.Bolt
+    }
+    val weatherTint = when (weather) {
+        WeatherType.RAINY_STORM -> Color(0xFF00E5FF)
+        WeatherType.CLOUDY_OVERCAST -> Color(0xFFB0BEC5)
+        WeatherType.WIND_GALE -> Color(0xFF80DEEA)
+        WeatherType.HEATWAVE -> Color(0xFFFFB300)
+        WeatherType.MISTY_NEBULA -> Color(0xFF80CBC4)
+        WeatherType.SUNNY_CLEAR -> SunGold
+        WeatherType.STORM -> Color(0xFFFFEB3B)
+    }
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
-        // Sol Coins Pill
-        StatPill(
-            icon = Icons.Default.MonetizationOn,
-            iconTint = SunGold,
-            label = "${state.solCoins}",
-            testTag = "stat_coins"
-        )
-
-        // Battery Power Gauge Pill
-        val chargePercent = ((state.batteryChargeKwh / state.batteryMaxCapacityKwh) * 100).roundToInt()
-        StatPill(
-            icon = Icons.Default.Bolt,
-            iconTint = CleanCyan,
-            label = "${state.batteryChargeKwh.toInt()}/${state.batteryMaxCapacityKwh.toInt()} kWh",
-            secondaryLabel = "$chargePercent%",
-            testTag = "stat_energy"
-        )
-
-        // Eco Prestige Pill
-        StatPill(
-            icon = Icons.Default.Eco,
-            iconTint = SolarEmerald,
-            label = "${state.ecoPrestige}",
-            testTag = "stat_eco"
-        )
-
-        // Time / Weather Dial (Clickable to Fast-Forward)
-        Surface(
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .clickable { onAdvanceTimeClick() }
-                .testTag("stat_time_button"),
-            color = Color(0xCC112224),
-            shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald.copy(alpha = 0.4f))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically
+            // 1. Day / Time Dial (Clickable to Fast-Forward +2h)
+            Surface(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable { onAdvanceTimeClick() }
+                    .testTag("stat_time_button"),
+                color = Color(0xDD112224),
+                shape = RoundedCornerShape(20.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald.copy(alpha = 0.5f))
             ) {
-                Icon(
-                    imageVector = if (isNight) Icons.Default.Nightlight else Icons.Default.WbSunny,
-                    contentDescription = "Day/Night Dial",
-                    tint = if (isNight) CleanCyan else SunGold,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    text = timeFormatted,
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (isNight) Icons.Default.Nightlight else Icons.Default.WbSunny,
+                        contentDescription = "Day/Night Dial",
+                        tint = if (isNight) CleanCyan else SunGold,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = timeFormatted,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
+
+            // 2. Weather Status Pill (Icon + Solar % + Wind Speed)
+            val isSolarGenerating = h in 7..16
+            val solarPercent = if (!isSolarGenerating) 0 else ((weather.solarMultiplier * 100).roundToInt())
+            Surface(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .testTag("stat_weather_pill"),
+                color = Color(0xDD112224),
+                shape = RoundedCornerShape(20.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, weatherTint.copy(alpha = 0.4f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = weatherIcon,
+                        contentDescription = weather.displayName,
+                        tint = weatherTint,
+                        modifier = Modifier.size(15.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "${weather.displayName.split(" ")[0]} • Solar $solarPercent%",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            // 3. Sol Coins Pill
+            StatPill(
+                icon = Icons.Default.MonetizationOn,
+                iconTint = SunGold,
+                label = "${state.solCoins}",
+                testTag = "stat_coins"
+            )
+
+            // 4. Battery Power Gauge Pill
+            val chargePercent = ((state.batteryChargeKwh / state.batteryMaxCapacityKwh) * 100).roundToInt()
+            StatPill(
+                icon = Icons.Default.Bolt,
+                iconTint = CleanCyan,
+                label = "${state.batteryChargeKwh.toInt()} kWh",
+                secondaryLabel = "$chargePercent%",
+                testTag = "stat_energy"
+            )
         }
     }
 }
@@ -330,5 +382,154 @@ fun SolarpunkProgressBar(
                     )
                 )
         )
+    }
+}
+
+@Composable
+fun SurvivalStatsHUD(
+    state: GameStateEntity?,
+    onEatClick: () -> Unit,
+    onDrinkClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (state == null) return
+
+    val health = state.health.coerceIn(0f, state.maxHealth)
+    val hunger = state.hunger.coerceIn(0f, state.maxHunger)
+    val thirst = state.thirst.coerceIn(0f, state.maxThirst)
+    val stamina = state.stamina.coerceIn(0f, state.maxStamina)
+
+    val healthFrac = (health / state.maxHealth).coerceIn(0f, 1f)
+    val hungerFrac = (hunger / state.maxHunger).coerceIn(0f, 1f)
+    val thirstFrac = (thirst / state.maxThirst).coerceIn(0f, 1f)
+    val staminaFrac = (stamina / state.maxStamina).coerceIn(0f, 1f)
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .testTag("survival_stats_hud"),
+        color = Color(0xDD0D1B1E),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 4 Mini Stat Bars Grid
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 1. Health Bar
+                SurvivalStatItem(
+                    icon = Icons.Default.Favorite,
+                    iconTint = Color(0xFFFF5252),
+                    label = "HP",
+                    valueText = "${health.toInt()}",
+                    fraction = healthFrac,
+                    barColor = Color(0xFFFF5252),
+                    modifier = Modifier.weight(1f),
+                    testTag = "stat_bar_health"
+                )
+
+                // 2. Hunger Bar
+                SurvivalStatItem(
+                    icon = Icons.Default.Restaurant,
+                    iconTint = Color(0xFFFF9800),
+                    label = "Food",
+                    valueText = "${hunger.toInt()}%",
+                    fraction = hungerFrac,
+                    barColor = Color(0xFFFF9800),
+                    modifier = Modifier.weight(1f),
+                    testTag = "stat_bar_hunger"
+                )
+
+                // 3. Thirst Bar
+                SurvivalStatItem(
+                    icon = Icons.Default.WaterDrop,
+                    iconTint = Color(0xFF00E5FF),
+                    label = "Water",
+                    valueText = "${thirst.toInt()}%",
+                    fraction = thirstFrac,
+                    barColor = Color(0xFF00E5FF),
+                    modifier = Modifier.weight(1f),
+                    testTag = "stat_bar_thirst"
+                )
+
+                // 4. Stamina Bar
+                SurvivalStatItem(
+                    icon = Icons.Default.DirectionsRun,
+                    iconTint = Color(0xFF00E676),
+                    label = "Stamina",
+                    valueText = "${stamina.toInt()}%",
+                    fraction = staminaFrac,
+                    barColor = Color(0xFF00E676),
+                    modifier = Modifier.weight(1f),
+                    testTag = "stat_bar_stamina"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SurvivalStatItem(
+    icon: ImageVector,
+    iconTint: Color,
+    label: String,
+    valueText: String,
+    fraction: Float,
+    barColor: Color,
+    modifier: Modifier = Modifier,
+    testTag: String
+) {
+    Column(
+        modifier = modifier.testTag(testTag),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 2.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = iconTint,
+                modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = valueText,
+                color = if (fraction < 0.25f) Color(0xFFFF5252) else Color.White,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        // Micro Progress Bar
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color(0xFF1E282D))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction)
+                    .height(5.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(barColor.copy(alpha = 0.75f), barColor)
+                        )
+                    )
+            )
+        }
     }
 }

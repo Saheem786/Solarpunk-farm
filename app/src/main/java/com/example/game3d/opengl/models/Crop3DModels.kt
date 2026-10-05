@@ -18,8 +18,11 @@ class Crop3DModels {
     // Crop Type Meshes
     val sproutMesh: GLMesh
     val wheatMesh: GLMesh
-    val sunflowerMesh: GLMesh
     val cornMesh: GLMesh
+    val tomatoMesh: GLMesh
+    val carrotMesh: GLMesh
+    val herbsMesh: GLMesh
+    val sunflowerMesh: GLMesh
     val berryMesh: GLMesh
     val mushroomMesh: GLMesh
     val harvestRingMesh: GLMesh
@@ -105,31 +108,56 @@ class Crop3DModels {
         }
         cornMesh = builder.build()
 
-        // 6. Berry / Tomato Vine Lattice
+        // 6. Tomato Trellis Bush (Vibrant Red Spheres on Foliage)
         builder.reset()
-        // Wooden stake
         builder.addCylinder(0f, 0f, 0f, 0.05f, 1.50f, 5, 0.50f, 0.35f, 0.20f)
-        // Green Foliage Bush
         builder.addSphere(0f, 0.85f, 0f, 0.55f, 6, 8, 0.18f, 0.65f, 0.20f)
-        // Red Berries / Tomatoes
-        builder.addSphere(-0.35f, 0.85f, 0.25f, 0.12f, 4, 6, 0.95f, 0.18f, 0.12f)
-        builder.addSphere(0.35f, 0.75f, -0.25f, 0.12f, 4, 6, 0.95f, 0.18f, 0.12f)
-        builder.addSphere(0.15f, 1.15f, 0.30f, 0.12f, 4, 6, 0.95f, 0.18f, 0.12f)
-        berryMesh = builder.build()
+        builder.addSphere(-0.32f, 0.85f, 0.25f, 0.15f, 5, 6, 0.95f, 0.15f, 0.10f)
+        builder.addSphere(0.32f, 0.75f, -0.25f, 0.15f, 5, 6, 0.95f, 0.15f, 0.10f)
+        builder.addSphere(0.12f, 1.15f, 0.28f, 0.14f, 5, 6, 0.95f, 0.15f, 0.10f)
+        tomatoMesh = builder.build()
 
-        // 7. Bioluminescent Mushroom / Herb (Glowing Cyan & Violet)
+        // 7. Carrot Bed (Orange crowns poking above soil with feathery green foliage)
         builder.reset()
         for (gx in listOf(-0.35f, 0.35f)) {
             for (gz in listOf(-0.35f, 0.35f)) {
-                // Stalk (Pale Cyan)
+                // Orange Carrot top
+                builder.addCylinder(gx, 0f, gz, 0.09f, 0.15f, 6, 0.98f, 0.55f, 0.08f)
+                // Feathery Carrot Foliage
+                builder.addCone(gx, 0.15f, gz, 0.22f, 0.65f, 5, 0.22f, 0.75f, 0.20f)
+            }
+        }
+        carrotMesh = builder.build()
+
+        // 8. Herbs Bush (Aromatic Multi-Stem Herbal Cluster)
+        builder.reset()
+        for (gx in listOf(-0.30f, 0f, 0.30f)) {
+            for (gz in listOf(-0.30f, 0.30f)) {
+                builder.addCylinder(gx, 0f, gz, 0.03f, 0.45f, 4, 0.30f, 0.70f, 0.25f)
+                builder.addSphere(gx, 0.45f, gz, 0.22f, 5, 6, 0.25f, 0.85f, 0.35f)
+            }
+        }
+        herbsMesh = builder.build()
+
+        // 9. Berry Vine Lattice
+        builder.reset()
+        builder.addCylinder(0f, 0f, 0f, 0.05f, 1.50f, 5, 0.50f, 0.35f, 0.20f)
+        builder.addSphere(0f, 0.85f, 0f, 0.55f, 6, 8, 0.18f, 0.65f, 0.20f)
+        builder.addSphere(-0.35f, 0.85f, 0.25f, 0.12f, 4, 6, 0.85f, 0.15f, 0.85f)
+        builder.addSphere(0.35f, 0.75f, -0.25f, 0.12f, 4, 6, 0.85f, 0.15f, 0.85f)
+        berryMesh = builder.build()
+
+        // 10. Bioluminescent Mushroom (Glowing Cyan & Violet)
+        builder.reset()
+        for (gx in listOf(-0.35f, 0.35f)) {
+            for (gz in listOf(-0.35f, 0.35f)) {
                 builder.addCylinder(gx, 0f, gz, 0.08f, 0.60f, 6, 0.45f, 0.90f, 0.95f)
-                // Mushroom Cap (Glowing Vibrant Cyan)
                 builder.addSphere(gx, 0.68f, gz, 0.28f, 6, 8, 0.00f, 0.95f, 0.85f)
             }
         }
         mushroomMesh = builder.build()
 
-        // 8. Harvest-Ready Floating Glow Ring
+        // 11. Harvest-Ready Floating Glow Ring
         builder.reset()
         builder.addCylinder(0f, 1.65f, 0f, 0.85f, 0.06f, 10, 1.00f, 0.88f, 0.20f, 0.75f)
         harvestRingMesh = builder.build()
@@ -146,14 +174,14 @@ class Crop3DModels {
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, plot.posX, plot.posY, plot.posZ)
 
-            // 1. Draw Raised Soil Bed
+            // 1. Draw Raised Soil Bed (Moist or Dry)
             val bed = if (plot.moisture > 0.4f) soilWateredMesh else soilBedMesh
             renderMesh(shader, bed, modelMatrix, viewMatrix, projMatrix)
 
             // 2. Draw Crop Plant if seeded
             if (plot.cropType != null && plot.stage != CropStage.EMPTY) {
                 val scale = when (plot.stage) {
-                    CropStage.SEEDLING -> 0.45f
+                    CropStage.SEEDLING -> 0.40f
                     CropStage.SPROUT -> 0.65f
                     CropStage.VEGETATIVE -> 0.85f
                     CropStage.FLOWERING -> 1.0f
@@ -171,9 +199,12 @@ class Crop3DModels {
                 Matrix.rotateM(plantMatrix, 0, sway, 1f, 0f, 0f)
 
                 val cropMesh = when (plot.cropType) {
-                    CropType.TERRACED_WHEAT -> wheatMesh
+                    CropType.WHEAT, CropType.TERRACED_WHEAT -> wheatMesh
+                    CropType.CORN, CropType.SOLAR_CORN -> cornMesh
+                    CropType.TOMATO -> tomatoMesh
+                    CropType.CARROT -> carrotMesh
+                    CropType.HERBS -> herbsMesh
                     CropType.SOLAR_SUNFLOWER -> sunflowerMesh
-                    CropType.SOLAR_CORN -> cornMesh
                     CropType.CYBER_BERRIES -> berryMesh
                     CropType.BIOLUMINESCENT_MUSHROOM -> mushroomMesh
                     else -> wheatMesh

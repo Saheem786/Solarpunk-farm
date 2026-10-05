@@ -9,7 +9,9 @@ import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.GameStateEntity
 import com.example.data.local.InventoryEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
+import com.example.data.model.BuildableType
 import com.example.data.model.CropType
 import com.example.data.model.EnergyNodeType
 import com.example.data.model.ItemCategory
@@ -26,13 +28,17 @@ import com.example.game3d.player.PlayerInputState
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
 import com.example.game3d.renderer.DayNightLightingSystem
+import com.example.game3d.renderer.GhostBuildingState
 import com.example.game3d.renderer.LightingState
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -67,6 +73,21 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     val contracts: StateFlow<List<ContractEntity>> = repository.contracts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val placedBuildings: StateFlow<List<PlacedBuildingEntity>> = repository.placedBuildings
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Build Mode State
+    private val _isBuildMode = MutableStateFlow(false)
+    val isBuildMode: StateFlow<Boolean> = _isBuildMode.asStateFlow()
+
+    private val _selectedBuildType = MutableStateFlow(BuildableType.CABIN)
+    val selectedBuildType: StateFlow<BuildableType> = _selectedBuildType.asStateFlow()
+
+    private val _buildRotationDeg = MutableStateFlow(0.0f)
+    val buildRotationDeg: StateFlow<Float> = _buildRotationDeg.asStateFlow()
+
+    val ghostBuildingState = MutableStateFlow<GhostBuildingState?>(null)
+
     // 3D Player & Camera Objects
     val player = ThirdPersonPlayer(0.0f, 0.0f, 0.0f)
     val camera = ThirdPersonCamera(0.0f, 0.0f, 0.0f)
@@ -98,14 +119,63 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     private val _bannerNotification = MutableStateFlow<NotificationMessage?>(null)
     val bannerNotification: StateFlow<NotificationMessage?> = _bannerNotification.asStateFlow()
 
+    private val _isFainted = MutableStateFlow(false)
+    val isFainted: StateFlow<Boolean> = _isFainted.asStateFlow()
+
+    private val _faintCountdown = MutableStateFlow(5)
+    val faintCountdown: StateFlow<Int> = _faintCountdown.asStateFlow()
+
     private val _animTime = MutableStateFlow(0.0f)
     val animTime: StateFlow<Float> = _animTime.asStateFlow()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
             repository.initializeDefaultDataIfEmpty()
+            val savedState = repository.gameState.firstOrNull()
+            if (savedState != null) {
+                player.posX = savedState.playerX
+                player.posY = savedState.playerY
+                player.posZ = savedState.playerZ
+                player.orientationAngleDeg = savedState.playerAngle
+                camera.updateTarget(savedState.playerX, savedState.playerY, savedState.playerZ, 1.0f)
+            }
         }
         startGameLoop()
+        startAutoSaveLoop()
+    }
+
+    private fun startAutoSaveLoop() {
+        viewModelScope.launch(Dispatchers.IO) {
+            while (isActive) {
+                delay(120_000) // Auto-save every 2 minutes
+                val success = repository.saveGameSnapshot(
+                    playerX = player.posX,
+                    playerY = player.posY,
+                    playerZ = player.posZ,
+                    playerAngle = player.orientationAngleDeg
+                )
+                if (success) {
+                    showNotification("Auto-Saved", "Game progress, crops & structures saved", "save")
+                }
+            }
+        }
+    }
+
+    fun manualSave() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = repository.saveGameSnapshot(
+                playerX = player.posX,
+                playerY = player.posY,
+                playerZ = player.posZ,
+                playerAngle = player.orientationAngleDeg
+            )
+            if (success) {
+                audioSystem.playCraftSuccess()
+                showNotification("Game Saved", "Player position, coins, crops & energy stored", "save")
+            } else {
+                showNotification("Save Failed", "Could not persist game state", "error")
+            }
+        }
     }
 
     private fun startGameLoop() {
@@ -119,7 +189,16 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 _animTime.value += deltaSec
 
                 // 1. Update Player Movement
-                player.update(_inputState.value, camera.yawDeg, deltaSec)
+                val currentStamina = gameState.value?.stamina ?: 100.0f
+                val effectiveSprinting = _inputState.value.isSprinting && currentStamina > 2.0f
+                val weather = gameState.value?.currentWeather ?: WeatherType.SUNNY_CLEAR
+                val speedMultiplier = if (weather == WeatherType.STORM) 0.85f else 1.0f
+                player.update(
+                    _inputState.value.copy(isSprinting = effectiveSprinting),
+                    camera.yawDeg,
+                    deltaSec,
+                    speedMultiplier
+                )
 
                 // 2. Update Camera Target
                 camera.updateTarget(player.posX, player.posY, player.posZ, deltaSec)
@@ -138,13 +217,95 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
 
                 // 4. Update Day/Night Lighting
                 val hour = gameState.value?.gameTimeHour ?: 8.5f
-                val weather = gameState.value?.currentWeather ?: WeatherType.SUNNY_CLEAR
                 _lightingState.value = DayNightLightingSystem.calculateLighting(hour, weather)
 
-                // 5. Game Simulation Tick (Run every ~500ms for db performance)
-                repository.gameTick(deltaSec)
+                // 5. Update Ghost Building Preview in Build Mode
+                if (_isBuildMode.value) {
+                    val angleRad = Math.toRadians(player.orientationAngleDeg.toDouble())
+                    val gx = player.posX + (sin(angleRad) * 4.8f).toFloat()
+                    val gz = player.posZ + (cos(angleRad) * 4.8f).toFloat()
+                    val coins = gameState.value?.solCoins ?: 0
+                    val matQty = inventory.value.find { it.itemId == _selectedBuildType.value.requiredMaterialId }?.quantity ?: 0
+                    val canAfford = coins >= _selectedBuildType.value.costCoins && matQty >= _selectedBuildType.value.requiredMaterialQty
+
+                    ghostBuildingState.value = GhostBuildingState(
+                        type = _selectedBuildType.value,
+                        posX = gx,
+                        posY = 0.0f,
+                        posZ = gz,
+                        rotationDeg = _buildRotationDeg.value,
+                        canAfford = canAfford
+                    )
+                } else {
+                    ghostBuildingState.value = null
+                }
+
+                // 6. Game Simulation Tick (Run every frame with survival stats)
+                repository.gameTick(deltaSec, player.isMoving, effectiveSprinting)
+
+                // 7. Check if player fainted due to 0 health
+                val currentHp = gameState.value?.health ?: 100.0f
+                if (currentHp <= 0.0f && !_isFainted.value) {
+                    triggerFaintedSequence()
+                }
 
                 delay(16) // ~60fps loop
+            }
+        }
+    }
+
+    private fun triggerFaintedSequence() {
+        _isFainted.value = true
+        _faintCountdown.value = 5
+        audioSystem.playLowEnergyWarning()
+        viewModelScope.launch {
+            for (sec in 5 downTo 1) {
+                _faintCountdown.value = sec
+                delay(1000)
+            }
+            // Respawn at house
+            repository.respawnAtHouse()
+            player.posX = 6.0f
+            player.posY = 0.0f
+            player.posZ = 0.0f
+            camera.updateTarget(6.0f, 0.0f, 0.0f, 1.0f)
+            _isFainted.value = false
+            showNotification("Restored at Sanctuary", "You woke up safely at the farmhouse", "health")
+        }
+    }
+
+    fun toggleBuildMode() {
+        _isBuildMode.value = !_isBuildMode.value
+        if (_isBuildMode.value) {
+            showNotification("Build Mode Active", "Select structure, rotate & place in the sanctuary", "build")
+        }
+    }
+
+    fun selectBuildType(type: BuildableType) {
+        _selectedBuildType.value = type
+        audioSystem.playSelectToolSound()
+    }
+
+    fun rotateBuilding() {
+        _buildRotationDeg.value = (_buildRotationDeg.value + 90.0f) % 360.0f
+        audioSystem.playSelectToolSound()
+    }
+
+    fun confirmPlaceBuilding() {
+        val ghost = ghostBuildingState.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.placeBuilding(
+                type = ghost.type,
+                posX = ghost.posX,
+                posY = ghost.posY,
+                posZ = ghost.posZ,
+                rotationDeg = ghost.rotationDeg
+            )
+            if (success) {
+                audioSystem.playPlantSeedSound()
+                showNotification("Constructed!", message, "check_circle")
+            } else {
+                showNotification("Cannot Build", message, "warning")
             }
         }
     }
@@ -220,7 +381,46 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             InteractionTargetType.MARKET_STALL -> {
                 openModal("market_screen")
             }
+            InteractionTargetType.WATER_SOURCE -> {
+                drink("Fresh Spring Pond")
+            }
+            InteractionTargetType.FARMHOUSE -> {
+                restInFarmhouse()
+            }
             InteractionTargetType.NONE -> {}
+        }
+    }
+
+    fun eat(foodItemId: String? = null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.eatFood(foodItemId)
+            if (success) {
+                showNotification("Ate Food", message, "restaurant")
+            } else {
+                showNotification("Cannot Eat", message, "warning")
+            }
+        }
+    }
+
+    fun drink(source: String = "Canteen") {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.drinkWater(source)
+            if (success) {
+                showNotification("Hydrated", message, "water_drop")
+            } else {
+                showNotification("Cannot Drink", message, "warning")
+            }
+        }
+    }
+
+    fun restInFarmhouse() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.restAtFarmhouse()
+            if (success) {
+                showNotification("Rested", message, "hotel")
+            } else {
+                showNotification("Cannot Rest", message, "warning")
+            }
         }
     }
 
@@ -395,15 +595,9 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
 
     fun advanceTimeOfDay(hours: Float) {
         viewModelScope.launch(Dispatchers.IO) {
+            repository.gameTick(hours * 60.0f)
             val state = gameState.value ?: return@launch
-            var newHour = (state.gameTimeHour + hours)
-            var newDay = state.gameTimeDay
-            if (newHour >= 24.0f) {
-                newHour -= 24.0f
-                newDay += 1
-            }
-            repository.saveGameState(state.copy(gameTimeHour = newHour, gameTimeDay = newDay))
-            showNotification("Time Shift", "Advanced time to ${formatGameTime(newHour)}", "schedule")
+            showNotification("Time Shift", "Advanced time to ${formatGameTime(state.gameTimeHour)}", "schedule")
         }
     }
 

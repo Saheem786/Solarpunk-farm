@@ -3,10 +3,12 @@ package com.example.game3d.opengl
 import android.opengl.GLSurfaceView
 import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
 import com.example.game3d.renderer.GameRenderer
+import com.example.game3d.renderer.GhostBuildingState
 import com.example.game3d.renderer.LightingState
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -21,6 +23,8 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
     @Volatile var lightingRef: LightingState? = null
     @Volatile var plotsRef: List<PlotEntity> = emptyList()
     @Volatile var energyNodesRef: List<EnergyNodeEntity> = emptyList()
+    @Volatile var placedBuildingsRef: List<PlacedBuildingEntity> = emptyList()
+    @Volatile var ghostBuildingRef: GhostBuildingState? = null
     @Volatile var livestockRef: List<LivestockEntity> = emptyList()
     @Volatile var animTimeSec: Float = 0.0f
 
@@ -39,6 +43,8 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
             lightingState = lightingRef,
             plots = plotsRef,
             energyNodes = energyNodesRef,
+            placedBuildings = placedBuildingsRef,
+            ghostBuilding = ghostBuildingRef,
             livestock = livestockRef,
             animTimeSec = animTimeSec
         )

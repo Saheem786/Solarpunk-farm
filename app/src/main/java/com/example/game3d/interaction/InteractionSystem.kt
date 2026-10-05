@@ -13,7 +13,9 @@ enum class InteractionTargetType {
     ENERGY_NODE,
     LIVESTOCK,
     WORKSHOP_BUILDING,
-    MARKET_STALL
+    MARKET_STALL,
+    WATER_SOURCE,
+    FARMHOUSE
 }
 
 data class InteractionPrompt(
@@ -171,6 +173,62 @@ object InteractionSystem {
                 subtitle = "Sell produce & claim wholesale contracts",
                 recommendedTool = PlayerTool.HAND,
                 distance = marketDist
+            )
+        }
+
+        // Check Drinking Water Well (Near House at X=8, Z=-3.5)
+        val wellDist = distance(playerX, playerZ, 8.0f, -3.5f)
+        if (wellDist < closestDist) {
+            closestDist = wellDist
+            closestPrompt = InteractionPrompt(
+                targetType = InteractionTargetType.WATER_SOURCE,
+                targetId = 997,
+                title = "Drink from Well",
+                subtitle = "Pure Ground Water (+40 Thirst)",
+                recommendedTool = PlayerTool.HAND,
+                distance = wellDist
+            )
+        }
+
+        // Check Fresh Water Pond (Located at X=10, Z=-10)
+        val pondDist = distance(playerX, playerZ, 10.0f, -10.0f)
+        if (pondDist < closestDist) {
+            closestDist = pondDist
+            closestPrompt = InteractionPrompt(
+                targetType = InteractionTargetType.WATER_SOURCE,
+                targetId = 997,
+                title = "Drink Spring Water",
+                subtitle = "Replenish Thirst (+40 Thirst)",
+                recommendedTool = PlayerTool.HAND,
+                distance = pondDist
+            )
+        }
+
+        // Check Scenic River (Located at X=16, Z=0)
+        val riverDist = distance(playerX, playerZ, 16.0f, 0.0f)
+        if (riverDist < closestDist) {
+            closestDist = riverDist
+            closestPrompt = InteractionPrompt(
+                targetType = InteractionTargetType.WATER_SOURCE,
+                targetId = 997,
+                title = "Drink River Water",
+                subtitle = "Fresh Mountain Stream (+40 Thirst)",
+                recommendedTool = PlayerTool.HAND,
+                distance = riverDist
+            )
+        }
+
+        // Check Farmhouse (Located at X=6, Z=0)
+        val houseDist = distance(playerX, playerZ, 6.0f, 0.0f)
+        if (houseDist < closestDist) {
+            closestDist = houseDist
+            closestPrompt = InteractionPrompt(
+                targetType = InteractionTargetType.FARMHOUSE,
+                targetId = 996,
+                title = "Rest in Farmhouse",
+                subtitle = "Restore full stamina & recover health (+1 hr)",
+                recommendedTool = PlayerTool.HAND,
+                distance = houseDist
             )
         }
 

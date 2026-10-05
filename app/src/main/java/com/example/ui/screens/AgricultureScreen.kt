@@ -245,8 +245,16 @@ private fun PlotCard(
                     fontWeight = FontWeight.Bold
                 )
                 if (plot.cropType != null) {
+                    val stageLabel = when (plot.stage) {
+                        CropStage.SEEDLING -> "Seed"
+                        CropStage.SPROUT -> "Sprout"
+                        CropStage.VEGETATIVE, CropStage.FLOWERING -> "Growing"
+                        CropStage.HARVEST_READY -> "Ready"
+                        CropStage.WITHERED -> "Withered"
+                        CropStage.EMPTY -> "Empty"
+                    }
                     Text(
-                        text = plot.stage.name,
+                        text = stageLabel,
                         color = if (plot.stage == CropStage.HARVEST_READY) SunGold else SolarEmerald,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold

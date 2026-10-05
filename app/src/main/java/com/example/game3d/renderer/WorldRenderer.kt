@@ -181,6 +181,37 @@ class WorldRenderer {
             }
         }
 
+        // Draw Glowing House Windows at Night
+        if (lighting.isNight) {
+            val winY = 1.70f
+            val winZ = 2.42f
+            val windows = listOf(
+                Triple(4.2f, winY, winZ),
+                Triple(7.8f, winY, winZ)
+            )
+            for (win in windows) {
+                val p = project3D(win.first, win.second, win.third, camera, width, height)
+                if (p != null) {
+                    val wx = p.first
+                    val wy = p.second
+                    val depth = p.third
+                    val size = (140.0f / depth).coerceIn(4.0f, 30.0f)
+                    // Draw soft ambient window glow
+                    drawScope.drawRect(
+                        color = Color(0xFFFFD54F).copy(alpha = 0.45f),
+                        topLeft = Offset(wx - size * 0.4f, wy - size * 0.4f),
+                        size = Size(size * 0.8f, size * 0.8f)
+                    )
+                    // Draw bright window center
+                    drawScope.drawRect(
+                        color = Color(0xFFFFF59D),
+                        topLeft = Offset(wx - size * 0.25f, wy - size * 0.25f),
+                        size = Size(size * 0.5f, size * 0.5f)
+                    )
+                }
+            }
+        }
+
         // 4. Draw Weather FX & Atmospheric Particles
         drawWeatherParticles(drawScope, width, height, weather, animTimeSec, lighting)
     }
@@ -439,6 +470,27 @@ class WorldRenderer {
                     radius = scale * 1.1f * pulse,
                     center = Offset(sx, sy - plantHeight),
                     style = Stroke(width = 3.0f)
+                )
+            }
+        }
+
+        // Fireflies near crops at night
+        if (lighting.isNight) {
+            val fireflyCount = 4
+            for (i in 0 until fireflyCount) {
+                val angle = (animTime * 1.5f + i * 1.57f)
+                val fx = sx + cos(angle) * (scale * 0.9f) + sin(animTime * 3.0f + i) * 8f
+                val fy = sy - (scale * 0.4f) + sin(angle * 2.0f) * (scale * 0.5f) + cos(animTime * 4.0f + i) * 6f
+                val size = ((sin(animTime * 5.0f + i) * 0.5f + 0.5f) * 2.5f + 1.2f)
+                drawScope.drawCircle(
+                    color = Color(0xFFEEFF41), // glowing yellow-green
+                    radius = size,
+                    center = Offset(fx, fy)
+                )
+                drawScope.drawCircle(
+                    color = Color(0x33EEFF41),
+                    radius = size * 3f,
+                    center = Offset(fx, fy)
                 )
             }
         }
@@ -810,6 +862,18 @@ class WorldRenderer {
                     size = Size(w, h)
                 )
             }
+            WeatherType.CLOUDY_OVERCAST -> {
+                // Soft drifting cloud shade
+                for (i in 0 until 4) {
+                    val cx = ((i * 300.0f + animTime * 30.0f) % (w + 400.0f)) - 200.0f
+                    val cy = (h * 0.15f + (i * 120.0f) % (h * 0.7f))
+                    drawScope.drawCircle(
+                        color = Color(0x1837474F),
+                        radius = 160.0f,
+                        center = Offset(cx, cy)
+                    )
+                }
+            }
             WeatherType.SUNNY_CLEAR -> {
                 // Subtle floating pollen sparkles
                 for (i in 0 until 12) {
@@ -819,6 +883,27 @@ class WorldRenderer {
                         color = Color(0x88FFE082),
                         radius = 2.0f,
                         center = Offset(px.toFloat(), py.toFloat())
+                    )
+                }
+            }
+            WeatherType.STORM -> {
+                // Slanted Heavy Rain Droplets + Lightning Flash
+                for (i in 0 until 80) {
+                    val rx = ((i * 37.3f + animTime * 550.0f) % w)
+                    val ry = ((i * 93.1f + animTime * 950.0f) % h)
+                    drawScope.drawLine(
+                        color = Color(0xAA80D8FF),
+                        start = Offset(rx, ry),
+                        end = Offset(rx - 12f, ry + 32f),
+                        strokeWidth = 2.5f
+                    )
+                }
+                // Ambient Lightning Screen Flash every 4 seconds for 120ms
+                val flashSec = animTime % 4.0f
+                if (flashSec < 0.12f) {
+                    drawScope.drawRect(
+                        color = Color(0xCCFFFFFF),
+                        size = Size(w, h)
                     )
                 }
             }

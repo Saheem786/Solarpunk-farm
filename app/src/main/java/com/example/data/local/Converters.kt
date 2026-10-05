@@ -1,6 +1,7 @@
 package com.example.data.local
 
 import androidx.room.TypeConverter
+import com.example.data.model.BuildableType
 import com.example.data.model.CropStage
 import com.example.data.model.CropType
 import com.example.data.model.EnergyNodeType
@@ -51,4 +52,10 @@ class Converters {
 
     @TypeConverter
     fun toItemCategory(value: String): ItemCategory = enumValueOf(value)
+
+    @TypeConverter
+    fun fromBuildableType(value: BuildableType): String = value.name
+
+    @TypeConverter
+    fun toBuildableType(value: String): BuildableType = enumValueOf(value)
 }

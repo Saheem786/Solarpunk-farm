@@ -249,10 +249,12 @@ fun BusinessDashboardScreen(
                             val isSelected = weather == currentWeather
                             val icon = when (weather) {
                                 WeatherType.SUNNY_CLEAR -> Icons.Default.WbSunny
+                                WeatherType.CLOUDY_OVERCAST -> Icons.Default.Cloud
                                 WeatherType.HEATWAVE -> Icons.Default.Whatshot
                                 WeatherType.RAINY_STORM -> Icons.Default.Cloud
                                 WeatherType.WIND_GALE -> Icons.Default.Air
                                 WeatherType.MISTY_NEBULA -> Icons.Default.AutoAwesome
+                                WeatherType.STORM -> Icons.Default.Bolt
                             }
 
                             Box(

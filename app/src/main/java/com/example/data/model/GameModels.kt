@@ -18,6 +18,71 @@ enum class CropType(
     val primaryColor: Long,
     val secondaryColor: Long
 ) {
+    WHEAT(
+        displayName = "Golden Wheat",
+        description = "Deep-rooted heritage grain enriching soil and yielding fresh flour.",
+        growthDurationSec = 16f,
+        waterNeed = 0.3f,
+        sunNeed = 0.7f,
+        harvestYield = 3,
+        baseSellPrice = 35,
+        seedCost = 12,
+        energyBonusKwh = 1.0f,
+        primaryColor = 0xFFFFE082,
+        secondaryColor = 0xFF8D6E63
+    ),
+    CORN(
+        displayName = "Sweet Corn",
+        description = "Tall architectural stalks with golden sun-ripened corn cobs.",
+        growthDurationSec = 22f,
+        waterNeed = 0.5f,
+        sunNeed = 0.85f,
+        harvestYield = 2,
+        baseSellPrice = 55,
+        seedCost = 18,
+        energyBonusKwh = 2.0f,
+        primaryColor = 0xFFFFCA28,
+        secondaryColor = 0xFF388E3C
+    ),
+    TOMATO(
+        displayName = "Ruby Tomato",
+        description = "Juicy sun-ripened red tomatoes on supportive vertical trellis vines.",
+        growthDurationSec = 18f,
+        waterNeed = 0.6f,
+        sunNeed = 0.75f,
+        harvestYield = 4,
+        baseSellPrice = 48,
+        seedCost = 15,
+        energyBonusKwh = 1.5f,
+        primaryColor = 0xFFFF5252,
+        secondaryColor = 0xFF2E7D32
+    ),
+    CARROT(
+        displayName = "Crisp Carrot",
+        description = "Nutritious sweet orange root vegetable thriving in compost-rich soil.",
+        growthDurationSec = 14f,
+        waterNeed = 0.4f,
+        sunNeed = 0.6f,
+        harvestYield = 3,
+        baseSellPrice = 38,
+        seedCost = 14,
+        energyBonusKwh = 1.2f,
+        primaryColor = 0xFFFF9800,
+        secondaryColor = 0xFF4CAF50
+    ),
+    HERBS(
+        displayName = "Aromatic Herbs",
+        description = "Fragrant medicinal and culinary rosemary, basil, and herbal tea leaves.",
+        growthDurationSec = 10f,
+        waterNeed = 0.35f,
+        sunNeed = 0.5f,
+        harvestYield = 5,
+        baseSellPrice = 28,
+        seedCost = 10,
+        energyBonusKwh = 0.8f,
+        primaryColor = 0xFF81C784,
+        secondaryColor = 0xFF00E676
+    ),
     SOLAR_SUNFLOWER(
         displayName = "Solar Sunflower",
         description = "Photovoltaic flora that generates clean energy while blooming.",
@@ -44,6 +109,45 @@ enum class CropType(
         primaryColor = 0xFF00E5FF,
         secondaryColor = 0xFF7C4DFF
     ),
+    TERRACED_WHEAT(
+        displayName = "Golden Grain",
+        description = "Heritage wheat enriching regenerative soil.",
+        growthDurationSec = 16f,
+        waterNeed = 0.3f,
+        sunNeed = 0.7f,
+        harvestYield = 3,
+        baseSellPrice = 35,
+        seedCost = 12,
+        energyBonusKwh = 1.0f,
+        primaryColor = 0xFFFFE082,
+        secondaryColor = 0xFF8D6E63
+    ),
+    SOLAR_CORN(
+        displayName = "Prismatic Corn",
+        description = "Tall architectural stalks with iridescent holographic kernels.",
+        growthDurationSec = 22f,
+        waterNeed = 0.5f,
+        sunNeed = 0.85f,
+        harvestYield = 2,
+        baseSellPrice = 55,
+        seedCost = 18,
+        energyBonusKwh = 2.0f,
+        primaryColor = 0xFFFFCA28,
+        secondaryColor = 0xFF388E3C
+    ),
+    CYBER_BERRIES(
+        displayName = "Cyber Berries",
+        description = "Antioxidant-dense berries with bio-electric pulsing stems.",
+        growthDurationSec = 25f,
+        waterNeed = 0.5f,
+        sunNeed = 0.6f,
+        harvestYield = 5,
+        baseSellPrice = 85,
+        seedCost = 30,
+        energyBonusKwh = 1.2f,
+        primaryColor = 0xFFE040FB,
+        secondaryColor = 0xFF536DFE
+    ),
     SKY_SPIRULINA(
         displayName = "Sky Spirulina",
         description = "Algae suspension harvested in vertical hydroponic columns.",
@@ -59,7 +163,7 @@ enum class CropType(
     ),
     HYDROPONIC_MELON(
         displayName = "Hydro Melon",
-        description = "Sweet, crystalline melons grown in mineral-rich nutrient film.",
+        description = "Sweet crystalline melons grown in mineral nutrient film.",
         growthDurationSec = 30f,
         waterNeed = 0.7f,
         sunNeed = 0.6f,
@@ -69,32 +173,6 @@ enum class CropType(
         energyBonusKwh = 2.0f,
         primaryColor = 0xFFFF8A80,
         secondaryColor = 0xFF69F0AE
-    ),
-    TERRACED_WHEAT(
-        displayName = "Golden Grain",
-        description = "Deep-rooted heritage wheat that enriches regenerative soil.",
-        growthDurationSec = 18f,
-        waterNeed = 0.3f,
-        sunNeed = 0.7f,
-        harvestYield = 3,
-        baseSellPrice = 50,
-        seedCost = 18,
-        energyBonusKwh = 1.0f,
-        primaryColor = 0xFFFFE082,
-        secondaryColor = 0xFF8D6E63
-    ),
-    CYBER_BERRIES(
-        displayName = "Cyber Berries",
-        description = "Antioxidant-dense berries with bio-electric pulsing stems.",
-        growthDurationSec = 25f,
-        waterNeed = 0.5f,
-        sunNeed = 0.6f,
-        harvestYield = 5,
-        baseSellPrice = 85,
-        seedCost = 30,
-        energyBonusKwh = 1.2f,
-        primaryColor = 0xFFE040FB,
-        secondaryColor = 0xFF536DFE
     ),
     NITRO_BEANS(
         displayName = "Bio-Nitro Beans",
@@ -108,19 +186,71 @@ enum class CropType(
         energyBonusKwh = 0.6f,
         primaryColor = 0xFF81C784,
         secondaryColor = 0xFF388E3C
+    )
+}
+
+/**
+ * Buildings constructible by player in Build Mode.
+ */
+enum class BuildableType(
+    val displayName: String,
+    val description: String,
+    val costCoins: Int,
+    val requiredMaterialId: String,
+    val requiredMaterialQty: Int,
+    val materialName: String,
+    val gameplayEffect: String,
+    val previewColor: Long
+) {
+    CABIN(
+        displayName = "Eco Cabin",
+        description = "Cozy regenerative timber sanctuary to rest and restore full stamina and health.",
+        costCoins = 250,
+        requiredMaterialId = "material_bio_timber",
+        requiredMaterialQty = 10,
+        materialName = "Bio-Timber",
+        gameplayEffect = "Rest Shelter (Restore Full HP & Stamina)",
+        previewColor = 0xFF8D6E63
     ),
-    SOLAR_CORN(
-        displayName = "Prismatic Corn",
-        description = "Tall architectural stalks with iridescent holographic kernels.",
-        growthDurationSec = 28f,
-        waterNeed = 0.6f,
-        sunNeed = 0.9f,
-        harvestYield = 2,
-        baseSellPrice = 95,
-        seedCost = 35,
-        energyBonusKwh = 2.5f,
-        primaryColor = 0xFFFFCA28,
-        secondaryColor = 0xFF00BCD4
+    GREENHOUSE(
+        displayName = "Glass Bio-Dome",
+        description = "Climate-controlled solarpunk greenhouse accelerating nearby crop growth by +50%.",
+        costCoins = 220,
+        requiredMaterialId = "material_solar_glass",
+        requiredMaterialQty = 8,
+        materialName = "Solar Glass",
+        gameplayEffect = "+50% Crop Growth Acceleration",
+        previewColor = 0xFF80DEEA
+    ),
+    SOLAR_PANEL(
+        displayName = "Solar Glass Array",
+        description = "High-efficiency photovoltaic glass panel generating clean energy from sunlight.",
+        costCoins = 150,
+        requiredMaterialId = "material_solar_glass",
+        requiredMaterialQty = 5,
+        materialName = "Solar Glass",
+        gameplayEffect = "+3.5 kWh/s Solar Energy",
+        previewColor = 0xFFFFD54F
+    ),
+    WINDMILL(
+        displayName = "Aero-Spire Windmill",
+        description = "Helical aerodynamic turbine producing clean energy proportional to wind speed.",
+        costCoins = 180,
+        requiredMaterialId = "material_eco_alloy",
+        requiredMaterialQty = 6,
+        materialName = "Eco-Alloy",
+        gameplayEffect = "+2.8 kWh/s Wind Energy",
+        previewColor = 0xFF80D8FF
+    ),
+    STORAGE(
+        displayName = "Solid-State Battery Vault",
+        description = "High-density clean battery expansion increasing max battery storage by +60 kWh.",
+        costCoins = 160,
+        requiredMaterialId = "material_bio_polymer",
+        requiredMaterialQty = 5,
+        materialName = "Bio-Polymer",
+        gameplayEffect = "+60 kWh Max Battery Capacity",
+        previewColor = 0xFF00E5FF
     )
 }
 
@@ -273,14 +403,18 @@ enum class WeatherType(
     val description: String,
     val solarMultiplier: Float,
     val windMultiplier: Float,
+    val cropGrowthMultiplier: Float,
+    val windSpeedKmh: Float,
     val autoWaterRain: Boolean,
     val colorOverlay: Long
 ) {
-    SUNNY_CLEAR("Sunny & Clear", "Optimal solar radiation with crisp blue skies.", 1.4f, 0.8f, false, 0x00FFFFFF),
-    HEATWAVE("Solar Heatwave", "Blazing solar intensity; soil dries quickly.", 1.8f, 0.5f, false, 0x1AFFB300),
-    RAINY_STORM("Eco Rain Shower", "Natural permaculture watering for all outdoor plots.", 0.5f, 1.3f, true, 0x3337474F),
-    WIND_GALE("Zephyr Breeze", "High-velocity atmospheric currents for wind spires.", 0.9f, 2.0f, false, 0x1A80DEEA),
-    MISTY_NEBULA("Morning Mist", "Moist morning fog; optimal for fungi & spirulina.", 0.7f, 0.7f, false, 0x26B2EBF2)
+    SUNNY_CLEAR("Clear", "☀️ Optimal solar radiation with crisp blue skies.", 1.0f, 1.0f, 1.0f, 12.0f, false, 0x00FFFFFF),
+    CLOUDY_OVERCAST("Cloudy", "☁️ Overcast skies; solar output -30%.", 0.70f, 1.0f, 1.0f, 20.0f, false, 0x1A607D8B),
+    RAINY_STORM("Rain", "🌧️ Permaculture rain; crops grow 2x faster, solar output -60%.", 0.40f, 1.10f, 2.0f, 28.0f, true, 0x3337474F),
+    STORM("Storm", "⛈️ Fierce thunderstorm! Windmill +50%, solar -90%, lightning flashes.", 0.10f, 1.50f, 1.5f, 48.0f, true, 0x551A232E),
+    HEATWAVE("Heatwave", "🔥 Pale yellow skies. Solar +30%, wind -50%, thirst 2x faster.", 1.30f, 0.50f, 1.0f, 6.0f, false, 0x26FFD54F),
+    WIND_GALE("Gale", "💨 Strong gale winds.", 0.50f, 1.60f, 1.0f, 55.0f, false, 0x1A00E5FF),
+    MISTY_NEBULA("Misty", "🌫️ Low-lying fog over the fields.", 0.60f, 0.80f, 1.0f, 8.0f, false, 0x1A80CBC4)
 }
 
 /**

@@ -21,11 +21,11 @@ class ThirdPersonPlayer(
     private val minBoundZ = -24.0f
     private val maxBoundZ = 24.0f
 
-    fun update(input: PlayerInputState, cameraYawDeg: Float, deltaSec: Float) {
+    fun update(input: PlayerInputState, cameraYawDeg: Float, deltaSec: Float, speedMultiplier: Float = 1.0f) {
         val inputMagnitude = sqrt(input.moveX * input.moveX + input.moveZ * input.moveZ)
         if (inputMagnitude > 0.05f) {
             isMoving = true
-            val speedFactor = if (input.isSprinting) 11.0f else 6.5f
+            val speedFactor = (if (input.isSprinting) 11.0f else 6.5f) * speedMultiplier
             currentSpeed = speedFactor * min(1.0f, inputMagnitude)
 
             // Calculate movement relative to camera angle

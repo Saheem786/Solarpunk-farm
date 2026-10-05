@@ -10,9 +10,15 @@ class ThirdPersonCamera(
     var targetY: Float = 0.0f,
     var targetZ: Float = 0.0f
 ) {
+    // Current interpolated camera parameters
     var yawDeg: Float = 45.0f // Orbit around Y axis
     var pitchDeg: Float = 24.0f // Elevation angle (15-30 degrees)
     var distance: Float = 7.5f // Default distance (6-9 meters)
+
+    // Target values for smooth damping
+    var desiredYawDeg: Float = 45.0f
+    var desiredPitchDeg: Float = 24.0f
+    var desiredDistance: Float = 7.5f
 
     val minDistance = 3.0f
     val maxDistance = 12.0f
@@ -20,21 +26,34 @@ class ThirdPersonCamera(
     val maxPitch = 60.0f
 
     fun updateTarget(targetPlayerX: Float, targetPlayerY: Float, targetPlayerZ: Float, deltaSec: Float) {
-        // Smooth target follow interpolation
-        val lerpFactor = min(1.0f, 12.0f * deltaSec)
-        targetX += (targetPlayerX - targetX) * lerpFactor
-        targetY += (targetPlayerY + 1.25f - targetY) * lerpFactor
-        targetZ += (targetPlayerZ - targetZ) * lerpFactor
+        // Smooth target follow interpolation (exponential easing)
+        val posLerpFactor = min(1.0f, 10.0f * deltaSec)
+        targetX += (targetPlayerX - targetX) * posLerpFactor
+        targetY += (targetPlayerY + 1.25f - targetY) * posLerpFactor
+        targetZ += (targetPlayerZ - targetZ) * posLerpFactor
+
+        // Smooth rotation & zoom damping
+        val rotLerpFactor = min(1.0f, 14.0f * deltaSec)
+
+        // Handle yaw wrap-around interpolation
+        var yawDiff = (desiredYawDeg - yawDeg) % 360.0f
+        if (yawDiff > 180.0f) yawDiff -= 360.0f
+        if (yawDiff < -180.0f) yawDiff += 360.0f
+        yawDeg = (yawDeg + yawDiff * rotLerpFactor) % 360.0f
+        if (yawDeg < 0.0f) yawDeg += 360.0f
+
+        pitchDeg += (desiredPitchDeg - pitchDeg) * rotLerpFactor
+        distance += (desiredDistance - distance) * rotLerpFactor
     }
 
     fun rotate(deltaYaw: Float, deltaPitch: Float) {
-        yawDeg = (yawDeg + deltaYaw) % 360.0f
-        if (yawDeg < 0.0f) yawDeg += 360.0f
-        pitchDeg = max(minPitch, min(maxPitch, pitchDeg + deltaPitch))
+        desiredYawDeg = (desiredYawDeg + deltaYaw) % 360.0f
+        if (desiredYawDeg < 0.0f) desiredYawDeg += 360.0f
+        desiredPitchDeg = max(minPitch, min(maxPitch, desiredPitchDeg + deltaPitch))
     }
 
     fun zoom(zoomDelta: Float) {
-        distance = max(minDistance, min(maxDistance, distance + zoomDelta))
+        desiredDistance = max(minDistance, min(maxDistance, desiredDistance + zoomDelta))
     }
 
     fun getCameraPosition(): Triple<Float, Float, Float> {

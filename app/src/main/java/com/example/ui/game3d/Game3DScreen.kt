@@ -11,15 +11,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Construction
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.game3d.opengl.GLWorldRenderer
 import com.example.ui.FarmViewModel
 import com.example.ui.components.SolarpunkNotificationBanner
+import com.example.ui.components.SurvivalStatsHUD
 import com.example.ui.components.ToolSelectorDock
 import com.example.ui.components.TopGameStatsBar
 import com.example.ui.theme.CleanCyan
@@ -49,6 +57,11 @@ fun Game3DScreen(
     val energyNodes by viewModel.energyNodes.collectAsStateWithLifecycle()
     val livestock by viewModel.livestock.collectAsStateWithLifecycle()
     val inventory by viewModel.inventory.collectAsStateWithLifecycle()
+    val placedBuildings by viewModel.placedBuildings.collectAsStateWithLifecycle(emptyList())
+    val isBuildMode by viewModel.isBuildMode.collectAsStateWithLifecycle()
+    val selectedBuildType by viewModel.selectedBuildType.collectAsStateWithLifecycle()
+    val buildRotationDeg by viewModel.buildRotationDeg.collectAsStateWithLifecycle()
+    val ghostBuilding by viewModel.ghostBuildingState.collectAsStateWithLifecycle()
     val inputState by viewModel.inputState.collectAsStateWithLifecycle()
     val selectedTool by viewModel.selectedTool.collectAsStateWithLifecycle()
     val currentPrompt by viewModel.currentPrompt.collectAsStateWithLifecycle()
@@ -56,9 +69,19 @@ fun Game3DScreen(
     val activeModal by viewModel.activeModal.collectAsStateWithLifecycle()
     val selectedPlotForModal by viewModel.selectedPlotForModal.collectAsStateWithLifecycle()
     val bannerNotification by viewModel.bannerNotification.collectAsStateWithLifecycle()
+    val isFainted by viewModel.isFainted.collectAsStateWithLifecycle()
+    val faintCountdown by viewModel.faintCountdown.collectAsStateWithLifecycle()
     val animTime by viewModel.animTime.collectAsStateWithLifecycle()
 
     val glRenderer = remember { GLWorldRenderer() }
+    var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
+
+    DisposableEffect(glView) {
+        glView?.onResume()
+        onDispose {
+            glView?.onPause()
+        }
+    }
 
     // Synchronize latest state with GLWorldRenderer
     glRenderer.playerRef = viewModel.player
@@ -66,6 +89,8 @@ fun Game3DScreen(
     glRenderer.lightingRef = lightingState
     glRenderer.plotsRef = plots
     glRenderer.energyNodesRef = energyNodes
+    glRenderer.placedBuildingsRef = placedBuildings
+    glRenderer.ghostBuildingRef = ghostBuilding
     glRenderer.livestockRef = livestock
     glRenderer.animTimeSec = animTime
 
@@ -81,6 +106,7 @@ fun Game3DScreen(
                     setEGLContextClientVersion(2)
                     setRenderer(glRenderer)
                     renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+                    glView = this
                 }
             },
             modifier = Modifier.fillMaxSize()
@@ -103,6 +129,11 @@ fun Game3DScreen(
                 state = gameState,
                 onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) }
             )
+            SurvivalStatsHUD(
+                state = gameState,
+                onEatClick = { viewModel.eat() },
+                onDrinkClick = { viewModel.drink() }
+            )
             SolarpunkNotificationBanner(
                 notification = bannerNotification
             )
@@ -112,10 +143,38 @@ fun Game3DScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 70.dp, end = 12.dp),
+                .padding(top = 110.dp, end = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.End
         ) {
+            // Build Mode Toggle Button
+            QuickActionCircleButton(
+                icon = Icons.Default.Construction,
+                label = if (isBuildMode) "Cancel" else "Build",
+                color = if (isBuildMode) SunGold else SolarEmerald,
+                active = isBuildMode,
+                testTag = "btn_build_mode",
+                onClick = { viewModel.toggleBuildMode() }
+            )
+
+            // Eat Button
+            QuickActionCircleButton(
+                icon = Icons.Default.Restaurant,
+                label = "Eat",
+                color = Color(0xFFFF9800),
+                testTag = "btn_eat",
+                onClick = { viewModel.eat() }
+            )
+
+            // Drink Button
+            QuickActionCircleButton(
+                icon = Icons.Default.WaterDrop,
+                label = "Drink",
+                color = Color(0xFF00E5FF),
+                testTag = "btn_drink",
+                onClick = { viewModel.drink() }
+            )
+
             // Inventory Bag Button
             QuickActionCircleButton(
                 icon = Icons.Default.Inventory2,
@@ -123,6 +182,15 @@ fun Game3DScreen(
                 color = CleanCyan,
                 testTag = "btn_inventory",
                 onClick = { viewModel.openModal("inventory") }
+            )
+
+            // Manual Save Button
+            QuickActionCircleButton(
+                icon = Icons.Default.Save,
+                label = "Save",
+                color = SolarEmerald,
+                testTag = "btn_manual_save",
+                onClick = { viewModel.manualSave() }
             )
 
             // Sprint Toggle Button
@@ -145,36 +213,68 @@ fun Game3DScreen(
             )
         }
 
-        // 5. Context Action Prompt (Bottom Right, above dock)
-        ContextActionPrompt(
-            prompt = currentPrompt,
-            onActionClick = { viewModel.onContextActionButton() },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 90.dp, end = 16.dp)
-        )
-
-        // 6. Bottom Controls: Virtual Joystick & Tool Selector Dock
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = 16.dp, vertical = 14.dp)
-        ) {
-            // Left: Analog Joystick
-            VirtualJoystick(
-                onMove = { x, z -> viewModel.setJoystickMove(x, z) },
-                modifier = Modifier.align(Alignment.BottomStart)
-            )
-
-            // Center/Right: Tool Selector Dock
-            ToolSelectorDock(
-                selectedTool = selectedTool,
-                onSelectTool = { viewModel.selectTool(it) },
+        // 5. Context Action Prompt (Bottom Right, above dock when not in Build Mode)
+        if (!isBuildMode) {
+            ContextActionPrompt(
+                prompt = currentPrompt,
+                onActionClick = { viewModel.onContextActionButton() },
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 6.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 90.dp, end = 16.dp)
             )
+        }
+
+        // 6. Bottom Controls: Build Mode HUD OR Virtual Joystick & Tool Selector Dock
+        if (isBuildMode) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+            ) {
+                // Joystick floating on bottom left so player can position during build mode
+                VirtualJoystick(
+                    onMove = { x, z -> viewModel.setJoystickMove(x, z) },
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 16.dp, bottom = 180.dp)
+                )
+
+                // Build Mode Control Dock
+                BuildModeHUD(
+                    selectedType = selectedBuildType,
+                    rotationDeg = buildRotationDeg,
+                    ghostState = ghostBuilding,
+                    gameState = gameState,
+                    inventory = inventory,
+                    onSelectType = { viewModel.selectBuildType(it) },
+                    onRotate = { viewModel.rotateBuilding() },
+                    onConfirmPlace = { viewModel.confirmPlaceBuilding() },
+                    onExitBuildMode = { viewModel.toggleBuildMode() },
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                // Left: Analog Joystick
+                VirtualJoystick(
+                    onMove = { x, z -> viewModel.setJoystickMove(x, z) },
+                    modifier = Modifier.align(Alignment.BottomStart)
+                )
+
+                // Center/Right: Tool Selector Dock
+                ToolSelectorDock(
+                    selectedTool = selectedTool,
+                    onSelectTool = { viewModel.selectTool(it) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 6.dp)
+                )
+            }
         }
 
         // 7. Modals
@@ -194,6 +294,11 @@ fun Game3DScreen(
                 onSellItem = { id, qty -> viewModel.sellItem(id, qty) },
                 onDismiss = { viewModel.openModal(null) }
             )
+        }
+
+        // 8. Fainted Screen Overlay
+        if (isFainted) {
+            FaintedOverlay(countdownSec = faintCountdown)
         }
     }
 }

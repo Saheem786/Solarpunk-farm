@@ -55,6 +55,10 @@ fun MarketScreen(
 ) {
     val contracts by viewModel.contracts.collectAsStateWithLifecycle()
     val inventory by viewModel.inventory.collectAsStateWithLifecycle()
+    val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+
+    val hour = gameState?.gameTimeHour ?: 8.0f
+    val isOpen = hour >= 8.0f && hour < 18.0f
 
     LazyColumn(
         modifier = modifier
@@ -82,6 +86,39 @@ fun MarketScreen(
             }
         }
 
+        // Closed Banner
+        if (!isOpen) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("market_closed_card"),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF3E1F1F)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF5252))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🚨 MARKET CLOSED",
+                            color = Color(0xFFFF5252),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Solar City market hours: 8:00 AM — 6:00 PM.\nPlease return during business hours to fulfill contracts and trade crops.",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+
         // Wholesale City Contracts Section
         item {
             Text(
@@ -97,6 +134,7 @@ fun MarketScreen(
             ContractCard(
                 contract = contract,
                 availableCount = inventoryCount,
+                isOpen = isOpen,
                 onClaim = { viewModel.claimContract(contract.id) }
             )
         }
@@ -139,6 +177,7 @@ fun MarketScreen(
             items(sellableItems) { item ->
                 SellItemCard(
                     item = item,
+                    isOpen = isOpen,
                     onSellOne = { viewModel.sellItem(item.itemId, 1) },
                     onSellAll = { viewModel.sellItem(item.itemId, item.quantity) }
                 )
@@ -151,6 +190,7 @@ fun MarketScreen(
 private fun ContractCard(
     contract: ContractEntity,
     availableCount: Int,
+    isOpen: Boolean,
     onClaim: () -> Unit
 ) {
     val isComplete = availableCount >= contract.requiredQty
@@ -268,7 +308,7 @@ private fun ContractCard(
                 if (!contract.isClaimed) {
                     Button(
                         onClick = onClaim,
-                        enabled = isComplete,
+                        enabled = isComplete && isOpen,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = SunGold,
                             disabledContainerColor = Color(0xFF263238)
@@ -277,8 +317,8 @@ private fun ContractCard(
                         modifier = Modifier.testTag("claim_contract_${contract.id}")
                     ) {
                         Text(
-                            text = if (isComplete) "Dispatch Zeppelin" else "Pending Supply",
-                            color = if (isComplete) Color(0xFF091215) else Color(0xFF90A4AE),
+                            text = if (!isOpen) "Closed" else if (isComplete) "Dispatch Zeppelin" else "Pending Supply",
+                            color = if (isComplete && isOpen) Color(0xFF091215) else Color(0xFF90A4AE),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -292,6 +332,7 @@ private fun ContractCard(
 @Composable
 private fun SellItemCard(
     item: InventoryEntity,
+    isOpen: Boolean,
     onSellOne: () -> Unit,
     onSellAll: () -> Unit
 ) {
@@ -341,19 +382,27 @@ private fun SellItemCard(
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Button(
                     onClick = onSellOne,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E463E)),
+                    enabled = isOpen,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1E463E),
+                        disabledContainerColor = Color(0xFF1B2E2A)
+                    ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("sell_one_${item.itemId}")
                 ) {
-                    Text(text = "1x", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "1x", color = if (isOpen) Color.White else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onSellAll,
-                    colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
+                    enabled = isOpen,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SolarEmerald,
+                        disabledContainerColor = Color(0xFF1B2E2A)
+                    ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("sell_all_${item.itemId}")
                 ) {
-                    Text(text = "All", color = Color(0xFF091215), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "All", color = if (isOpen) Color(0xFF091215) else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
