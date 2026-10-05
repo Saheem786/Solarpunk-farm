@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Handyman
 import androidx.compose.material.icons.filled.LocalFlorist
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.filled.WaterDrop
@@ -49,6 +51,7 @@ import com.example.ui.theme.SunGoldLight
 fun ContextActionPrompt(
     prompt: InteractionPrompt?,
     onActionClick: () -> Unit,
+    onSecondaryActionClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -60,11 +63,12 @@ fun ContextActionPrompt(
         if (prompt != null) {
             Surface(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(28.dp))
+                    .widthIn(min = 260.dp, max = 440.dp)
+                    .clip(RoundedCornerShape(26.dp))
                     .clickable { onActionClick() }
                     .testTag("action_prompt_button"),
-                color = Color(0xF00A2320),
-                shape = RoundedCornerShape(28.dp),
+                color = Color(0xF20A2320),
+                shape = RoundedCornerShape(26.dp),
                 border = androidx.compose.foundation.BorderStroke(
                     width = 2.dp,
                     brush = Brush.horizontalGradient(listOf(SolarEmerald, SunGold))
@@ -72,7 +76,7 @@ fun ContextActionPrompt(
                 shadowElevation = 8.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val icon = when (prompt.targetType) {
@@ -82,13 +86,16 @@ fun ContextActionPrompt(
                         InteractionTargetType.WORKSHOP_BUILDING -> Icons.Default.Handyman
                         InteractionTargetType.MARKET_STALL -> Icons.Default.Store
                         InteractionTargetType.WATER_SOURCE -> Icons.Default.WaterDrop
+                        InteractionTargetType.WATER_BUILDING -> Icons.Default.WaterDrop
+                        InteractionTargetType.CAMPFIRE -> Icons.Default.Eco
                         InteractionTargetType.FARMHOUSE -> Icons.Default.Eco
+                        InteractionTargetType.NPC -> Icons.Default.Person
                         InteractionTargetType.NONE -> Icons.Default.Eco
                     }
 
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
+                            .size(42.dp)
                             .clip(CircleShape)
                             .background(Brush.radialGradient(listOf(SunGold, SolarEmerald))),
                         contentAlignment = Alignment.Center
@@ -101,21 +108,44 @@ fun ContextActionPrompt(
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                    Column {
+                    Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
                             text = prompt.title,
                             color = Color.White,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                         Text(
                             text = prompt.subtitle,
                             color = SunGoldLight,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
                         )
+                    }
+
+                    if (prompt.secondaryActionTitle != null && onSecondaryActionClick != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(14.dp))
+                                .clickable { onSecondaryActionClick() }
+                                .testTag("btn_secondary_action"),
+                            color = Color(0x4400E5FF),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(
+                                text = prompt.secondaryActionTitle,
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            )
+                        }
                     }
                 }
             }

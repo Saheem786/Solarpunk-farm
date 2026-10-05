@@ -4,6 +4,7 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.NpcEntity
 import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.data.model.BuildableType
@@ -16,6 +17,7 @@ import com.example.game3d.opengl.models.Animal3DModels
 import com.example.game3d.opengl.models.Building3DModels
 import com.example.game3d.opengl.models.Crop3DModels
 import com.example.game3d.opengl.models.Environment3DModels
+import com.example.game3d.opengl.models.Npc3DModels
 import com.example.game3d.opengl.models.Player3DModel
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
@@ -240,6 +242,10 @@ class GameRenderer {
         private set
     var environmentModels: Environment3DModels? = null
         private set
+    var npcModels: Npc3DModels? = null
+        private set
+    private var skybox: Skybox3D? = null
+    private var lensFlare: GLLensFlareRenderer? = null
 
     private var isInitialized: Boolean = false
     private var lastAnimTimeSec: Float = 0.0f
@@ -270,6 +276,10 @@ class GameRenderer {
         buildingModels = Building3DModels()
         cropModels = Crop3DModels()
         environmentModels = Environment3DModels()
+        npcModels = Npc3DModels()
+        skybox = Skybox3D()
+        lensFlare = GLLensFlareRenderer()
+        lensFlare?.init()
 
         isInitialized = true
     }
@@ -290,6 +300,7 @@ class GameRenderer {
         placedBuildings: List<PlacedBuildingEntity> = emptyList(),
         ghostBuilding: GhostBuildingState? = null,
         livestock: List<LivestockEntity>,
+        npcs: List<NpcEntity> = emptyList(),
         animTimeSec: Float,
         hour: Float = 12.0f,
         weather: WeatherType = WeatherType.SUNNY_CLEAR,
@@ -368,7 +379,16 @@ class GameRenderer {
         camera.lookAt(targetX, targetY, targetZ)
         camera.update()
 
-        // 4. Begin ModelBatch Pipeline
+        // 4. Render Dynamic 24-Hour Skybox
+        skybox?.render(
+            viewMatrix = camera.viewMatrix,
+            projectionMatrix = camera.projectionMatrix,
+            lightingState = lightingState,
+            hour = hour,
+            animTimeSec = animTimeSec
+        )
+
+        // 5. Begin ModelBatch Pipeline
         modelBatch.begin(camera, environment)
 
         // A. Draw Environment (Terrain, Roads, River, Bridge, Pond, Trees, Grass, Wildlife)
@@ -399,6 +419,9 @@ class GameRenderer {
         // D. Draw 3D Livestock (Cows, Sheep, Chickens, Pigs, Goats, Beehive)
         animalModels?.drawLivestock(sh, camera.viewMatrix, camera.projectionMatrix, livestock, animTimeSec)
 
+        // D2. Draw 3D Settlement NPC Survivors
+        npcModels?.drawNpcs(sh, camera.viewMatrix, camera.projectionMatrix, npcs, camX, camZ, animTimeSec)
+
         // E. Draw 3D Player Humanoid Character with Procedural Animation
         if (player != null) {
             playerModel?.draw(
@@ -423,6 +446,21 @@ class GameRenderer {
         particleSystem?.render(sh, camera.viewMatrix, camera.projectionMatrix)
 
         modelBatch.end()
+
+        // 6. Render Screen-Space Optical Lens Flare
+        lensFlare?.render(
+            viewMatrix = camera.viewMatrix,
+            projectionMatrix = camera.projectionMatrix,
+            camX = camX,
+            camY = camY,
+            camZ = camZ,
+            viewportWidth = camera.viewportWidth,
+            viewportHeight = camera.viewportHeight,
+            hour = hour,
+            weather = weather,
+            lightingState = lightingState,
+            animTimeSec = animTimeSec
+        )
     }
 
     private fun checkCameraCollision(
@@ -503,6 +541,26 @@ class GameRenderer {
                 BuildableType.WELL -> 2.0f
                 BuildableType.FENCE -> 1.0f
                 BuildableType.COMPOST_BIN -> 2.0f
+                BuildableType.RAIN_BARREL -> 1.5f
+                BuildableType.WATER_FILTER -> 1.8f
+                BuildableType.WATER_PURIFIER -> 2.2f
+                BuildableType.IRRIGATION_PIPE -> 1.0f
+                BuildableType.IRRIGATION_NODE -> 1.0f
+                BuildableType.WATER_STORAGE_SHED -> 3.5f
+                BuildableType.HYDRO_GENERATOR -> 3.2f
+                BuildableType.ADVANCED_SOLAR -> 4.2f
+                BuildableType.BIOGAS_GENERATOR -> 3.2f
+                BuildableType.GEOTHERMAL_VENT -> 4.2f
+                BuildableType.BASIC_BATTERY -> 2.2f
+                BuildableType.ADVANCED_BATTERY -> 3.2f
+                BuildableType.BATTERY_BANK -> 5.0f
+                BuildableType.POWER_POLE -> 1.0f
+                BuildableType.NPC_CABIN -> 3.2f
+                BuildableType.BUNKHOUSE -> 5.2f
+                BuildableType.KITCHEN -> 4.2f
+                BuildableType.MEDIC_STATION -> 3.2f
+                BuildableType.WORKSHOP -> 3.2f
+                BuildableType.RESEARCH_LAB -> 4.2f
             }
             val halfSize = size / 2.0f
             val height = when (building.buildingType) {
@@ -514,8 +572,28 @@ class GameRenderer {
                 BuildableType.WELL -> 2.2f
                 BuildableType.FENCE -> 1.15f
                 BuildableType.COMPOST_BIN -> 1.5f
+                BuildableType.RAIN_BARREL -> 1.4f
+                BuildableType.WATER_FILTER -> 1.6f
+                BuildableType.WATER_PURIFIER -> 2.2f
+                BuildableType.IRRIGATION_PIPE -> 0.3f
+                BuildableType.IRRIGATION_NODE -> 0.8f
+                BuildableType.WATER_STORAGE_SHED -> 2.8f
+                BuildableType.HYDRO_GENERATOR -> 2.5f
+                BuildableType.ADVANCED_SOLAR -> 2.2f
+                BuildableType.BIOGAS_GENERATOR -> 2.6f
+                BuildableType.GEOTHERMAL_VENT -> 4.0f
+                BuildableType.BASIC_BATTERY -> 2.0f
+                BuildableType.ADVANCED_BATTERY -> 2.5f
+                BuildableType.BATTERY_BANK -> 3.2f
+                BuildableType.POWER_POLE -> 4.2f
+                BuildableType.NPC_CABIN -> 3.2f
+                BuildableType.BUNKHOUSE -> 4.0f
+                BuildableType.KITCHEN -> 3.2f
+                BuildableType.MEDIC_STATION -> 3.0f
+                BuildableType.WORKSHOP -> 3.0f
+                BuildableType.RESEARCH_LAB -> 3.8f
             }
-            if (building.buildingType == BuildableType.FENCE) {
+            if (building.buildingType == BuildableType.FENCE || building.buildingType == BuildableType.IRRIGATION_PIPE || building.buildingType == BuildableType.POWER_POLE) {
                 continue
             }
             
@@ -557,6 +635,8 @@ class GameRenderer {
     }
 
     fun dispose() {
+        lensFlare?.dispose()
+        lensFlare = null
         isInitialized = false
     }
 }

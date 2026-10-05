@@ -12,7 +12,9 @@ enum class PlayerActionAnim {
     NONE,
     HARVESTING,
     WATERING,
-    PLANTING
+    PLANTING,
+    FISHING,
+    DRINKING
 }
 
 class Player3DModel {
@@ -24,6 +26,7 @@ class Player3DModel {
     private val legMesh: GLMesh
     private val bootMesh: GLMesh
     private val shadowMesh: GLMesh
+    private val fishingRodMesh: GLMesh
 
     private val modelMatrix = FloatArray(16)
     private val mvMatrix = FloatArray(16)
@@ -84,6 +87,12 @@ class Player3DModel {
         builder.reset()
         builder.addCylinder(0f, 0.02f, 0f, 0.55f, 0.01f, 10, 0.04f, 0.08f, 0.06f, 0.55f)
         shadowMesh = builder.build()
+
+        // 8. Handheld Fishing Rod
+        builder.reset()
+        builder.addCylinder(0f, 0.95f, 0f, 0.022f, 2.1f, 6, 0.45f, 0.30f, 0.16f)
+        builder.addCylinder(0f, 0.12f, 0.06f, 0.055f, 0.08f, 6, 0.85f, 0.72f, 0.25f) // reel
+        fishingRodMesh = builder.build()
     }
 
     fun draw(
@@ -133,8 +142,21 @@ class Player3DModel {
                     armLeftAngle = -15.0f * blend
                     torsoPitch = 10.0f * blend
                 }
+                PlayerActionAnim.FISHING -> {
+                    armRightAngle = 65.0f
+                    armLeftAngle = 35.0f
+                    torsoPitch = 5.0f
+                }
+                PlayerActionAnim.DRINKING -> {
+                    armRightAngle = 85.0f * blend
+                    torsoPitch = -8.0f * blend
+                }
                 PlayerActionAnim.NONE -> {}
             }
+        } else if (actionAnim == PlayerActionAnim.FISHING) {
+            armRightAngle = 65.0f
+            armLeftAngle = 35.0f
+            torsoPitch = 5.0f
         }
 
         // Base Root Transform

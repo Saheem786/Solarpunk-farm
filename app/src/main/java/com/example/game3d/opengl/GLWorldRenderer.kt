@@ -3,6 +3,7 @@ package com.example.game3d.opengl
 import android.opengl.GLSurfaceView
 import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.NpcEntity
 import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
 import com.example.data.model.BuildableType
@@ -30,6 +31,7 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
     @Volatile var placedBuildingsRef: List<PlacedBuildingEntity> = emptyList()
     @Volatile var ghostBuildingRef: GhostBuildingState? = null
     @Volatile var livestockRef: List<LivestockEntity> = emptyList()
+    @Volatile var npcsRef: List<NpcEntity> = emptyList()
     @Volatile var animTimeSec: Float = 0.0f
     @Volatile var weatherRef: WeatherType = WeatherType.SUNNY_CLEAR
     @Volatile var hourRef: Float = 12.0f
@@ -57,6 +59,7 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
             placedBuildings = placedBuildingsRef,
             ghostBuilding = ghostBuildingRef,
             livestock = livestockRef,
+            npcs = npcsRef,
             animTimeSec = animTimeSec,
             hour = hourRef,
             weather = weatherRef,

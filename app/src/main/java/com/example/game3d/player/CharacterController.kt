@@ -36,10 +36,10 @@ class CharacterController(
         motionX: Float,
         motionZ: Float,
         colliders: List<Collider>,
-        minBoundX: Float = -23.5f,
-        maxBoundX: Float = 23.5f,
-        minBoundZ: Float = -23.5f,
-        maxBoundZ: Float = 23.5f
+        minBoundX: Float = -198.0f,
+        maxBoundX: Float = 198.0f,
+        minBoundZ: Float = -198.0f,
+        maxBoundZ: Float = 198.0f
     ): CharacterMovementResult {
         val effRadius = radius + skinWidth
         var newX = currentX

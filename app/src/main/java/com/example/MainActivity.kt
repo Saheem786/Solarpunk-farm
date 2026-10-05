@@ -2,12 +2,14 @@ package com.example
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -32,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -89,14 +92,22 @@ class MainActivity : ComponentActivity() {
 fun MainAppContent(viewModel: FarmViewModel) {
     var currentScreen by remember { mutableStateOf(FarmScreen.WORLD_3D) }
 
+    if (currentScreen != FarmScreen.WORLD_3D) {
+        BackHandler {
+            currentScreen = FarmScreen.WORLD_3D
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
                 containerColor = Color(0xFF0A181B),
                 contentColor = Color.White,
-                tonalElevation = 8.dp,
-                modifier = Modifier.testTag("main_navigation_bar")
+                tonalElevation = 6.dp,
+                modifier = Modifier
+                    .height(54.dp)
+                    .testTag("main_navigation_bar")
             ) {
                 FarmScreen.values().forEach { screen ->
                     val isSelected = currentScreen == screen
@@ -107,14 +118,15 @@ fun MainAppContent(viewModel: FarmViewModel) {
                             Icon(
                                 imageVector = screen.icon,
                                 contentDescription = screen.title,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         },
                         label = {
                             Text(
                                 text = screen.title,
-                                fontSize = 10.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                fontSize = 9.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
@@ -136,14 +148,34 @@ fun MainAppContent(viewModel: FarmViewModel) {
                 .padding(innerPadding)
                 .background(Color(0xFF091215))
         ) {
-            when (currentScreen) {
-                FarmScreen.WORLD_3D -> Game3DScreen(viewModel = viewModel)
-                FarmScreen.CROPS -> AgricultureScreen(viewModel = viewModel)
-                FarmScreen.ENERGY -> SolarEnergyScreen(viewModel = viewModel)
-                FarmScreen.LIVESTOCK -> LivestockScreen(viewModel = viewModel)
-                FarmScreen.WORKSHOP -> WorkshopScreen(viewModel = viewModel)
-                FarmScreen.MARKET -> MarketScreen(viewModel = viewModel)
-                FarmScreen.LEDGER -> BusinessDashboardScreen(viewModel = viewModel)
+            // Persistent 3D World layer (prevents SurfaceSyncGroup teardowns during tab navigation)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        alpha = if (currentScreen == FarmScreen.WORLD_3D) 1f else 0f
+                    }
+            ) {
+                Game3DScreen(viewModel = viewModel)
+            }
+
+            // High-performance overlay sub-screens
+            if (currentScreen != FarmScreen.WORLD_3D) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF091215))
+                ) {
+                    when (currentScreen) {
+                        FarmScreen.CROPS -> AgricultureScreen(viewModel = viewModel)
+                        FarmScreen.ENERGY -> SolarEnergyScreen(viewModel = viewModel)
+                        FarmScreen.LIVESTOCK -> LivestockScreen(viewModel = viewModel)
+                        FarmScreen.WORKSHOP -> WorkshopScreen(viewModel = viewModel)
+                        FarmScreen.MARKET -> MarketScreen(viewModel = viewModel)
+                        FarmScreen.LEDGER -> BusinessDashboardScreen(viewModel = viewModel)
+                        FarmScreen.WORLD_3D -> Unit
+                    }
+                }
             }
         }
     }

@@ -30,11 +30,11 @@ class ThirdPersonPlayer(
         stepOffset = 0.30f
     )
 
-    // Farm boundaries
-    private val minBoundX = -23.5f
-    private val maxBoundX = 23.5f
-    private val minBoundZ = -23.5f
-    private val maxBoundZ = 23.5f
+    // 400m x 400m World boundaries (-198m to +198m)
+    private val minBoundX = -198.0f
+    private val maxBoundX = 198.0f
+    private val minBoundZ = -198.0f
+    private val maxBoundZ = 198.0f
 
     fun update(
         input: PlayerInputState,

@@ -58,12 +58,40 @@ object SaveLoadSystem {
             statsObj.put("stamina", state.stamina.toDouble())
             json.put("stats", statsObj)
 
+            // Discovery & Exploration
+            val explorationObj = JSONObject()
+            explorationObj.put("discoveredPois", state.discoveredPois)
+            explorationObj.put("discoveredChunks", state.discoveredChunks)
+            explorationObj.put("discoveredBiomes", state.discoveredBiomes)
+            explorationObj.put("currentBiomeId", state.currentBiomeId)
+            json.put("exploration", explorationObj)
+
             // Economy
             val ecoObj = JSONObject()
             ecoObj.put("money", state.solCoins)
             ecoObj.put("energy", state.batteryChargeKwh.toDouble())
             ecoObj.put("greenPoints", state.ecoPrestige.toDouble())
+            ecoObj.put("researchPoints", state.researchPoints)
+            ecoObj.put("activeMissionId", state.activeMissionId)
+            ecoObj.put("storyEndingUnlocked", state.storyEndingUnlocked)
             json.put("economy", ecoObj)
+
+            // Water & Sickness System
+            val waterObj = JSONObject()
+            waterObj.put("cleanWaterCarried", state.cleanWaterCarried)
+            waterObj.put("rawWaterCarried", state.rawWaterCarried)
+            waterObj.put("maxWaterCarried", state.maxWaterCarried)
+            waterObj.put("isSick", state.isSick)
+            waterObj.put("sicknessRemainingHours", state.sicknessRemainingHours.toDouble())
+            json.put("water", waterObj)
+
+            // Fishing System
+            val fishingObj = JSONObject()
+            fishingObj.put("fishingRodTier", state.fishingRodTier)
+            fishingObj.put("fishPopStream", state.fishPopStream)
+            fishingObj.put("fishPopRiver", state.fishPopRiver)
+            fishingObj.put("fishPopPond", state.fishPopPond)
+            json.put("fishing", fishingObj)
 
             // Crops (6 plots)
             val cropsArray = JSONArray()
@@ -112,6 +140,8 @@ object SaveLoadSystem {
                 bObj.put("y", b.posY.toDouble())
                 bObj.put("z", b.posZ.toDouble())
                 bObj.put("rotY", b.rotationDeg.toDouble())
+                bObj.put("waterStored", b.waterStored.toDouble())
+                bObj.put("customData", b.customData)
                 bArray.put(bObj)
             }
             json.put("buildings", bArray)
@@ -170,6 +200,9 @@ object SaveLoadSystem {
             val money = ecoObj?.optInt("money", 450) ?: 450
             val energy = ecoObj?.optDouble("energy", 100.0)?.toFloat() ?: 100.0f
             val greenPoints = ecoObj?.optDouble("greenPoints", 0.0)?.toFloat() ?: 0.0f
+            val researchPoints = ecoObj?.optInt("researchPoints", 20) ?: 20
+            val activeMissionId = ecoObj?.optString("activeMissionId", "mission_1") ?: "mission_1"
+            val storyEndingUnlocked = ecoObj?.optBoolean("storyEndingUnlocked", false) ?: false
 
             val statsObj = json.optJSONObject("stats")
             val health = statsObj?.optDouble("health", 100.0)?.toFloat() ?: 100.0f
@@ -196,6 +229,25 @@ object SaveLoadSystem {
             val minute = json.optInt("minute", 0)
             val computedHour = hour.toFloat() + (minute.toFloat() / 60.0f)
 
+            val explorationObj = json.optJSONObject("exploration")
+            val discoveredPois = explorationObj?.optString("discoveredPois", "poi_old_farm") ?: "poi_old_farm"
+            val discoveredChunks = explorationObj?.optString("discoveredChunks", "9_9,9_10,10_9,10_10") ?: "9_9,9_10,10_9,10_10"
+            val discoveredBiomes = explorationObj?.optString("discoveredBiomes", "green_valley") ?: "green_valley"
+            val currentBiomeId = explorationObj?.optString("currentBiomeId", "green_valley") ?: "green_valley"
+
+            val waterObj = json.optJSONObject("water")
+            val cleanWaterCarried = waterObj?.optInt("cleanWaterCarried", 4) ?: 4
+            val rawWaterCarried = waterObj?.optInt("rawWaterCarried", 0) ?: 0
+            val maxWaterCarried = waterObj?.optInt("maxWaterCarried", 10) ?: 10
+            val isSick = waterObj?.optBoolean("isSick", false) ?: false
+            val sicknessRemainingHours = waterObj?.optDouble("sicknessRemainingHours", 0.0)?.toFloat() ?: 0.0f
+
+            val fishingObj = json.optJSONObject("fishing")
+            val fishingRodTier = fishingObj?.optInt("fishingRodTier", 1) ?: 1
+            val fishPopStream = fishingObj?.optInt("fishPopStream", 10) ?: 10
+            val fishPopRiver = fishingObj?.optInt("fishPopRiver", 10) ?: 10
+            val fishPopPond = fishingObj?.optInt("fishPopPond", 10) ?: 10
+
             // Restore GameStateEntity
             val state = GameStateEntity(
                 id = 1,
@@ -213,7 +265,23 @@ object SaveLoadSystem {
                 playerX = px,
                 playerY = py,
                 playerZ = pz,
-                playerAngle = rotY
+                playerAngle = rotY,
+                discoveredPois = discoveredPois,
+                discoveredChunks = discoveredChunks,
+                discoveredBiomes = discoveredBiomes,
+                currentBiomeId = currentBiomeId,
+                cleanWaterCarried = cleanWaterCarried,
+                rawWaterCarried = rawWaterCarried,
+                maxWaterCarried = maxWaterCarried,
+                isSick = isSick,
+                sicknessRemainingHours = sicknessRemainingHours,
+                fishingRodTier = fishingRodTier,
+                fishPopStream = fishPopStream,
+                fishPopRiver = fishPopRiver,
+                fishPopPond = fishPopPond,
+                researchPoints = researchPoints,
+                activeMissionId = activeMissionId,
+                storyEndingUnlocked = storyEndingUnlocked
             )
             dao.saveGameState(state)
 
@@ -324,6 +392,8 @@ object SaveLoadSystem {
                     val by = bObj.optDouble("y", 0.0).toFloat()
                     val bz = bObj.optDouble("z", 0.0).toFloat()
                     val brotY = bObj.optDouble("rotY", 0.0).toFloat()
+                    val bWater = bObj.optDouble("waterStored", 0.0).toFloat()
+                    val bCustom = bObj.optString("customData", "")
 
                     bList.add(
                         PlacedBuildingEntity(
@@ -333,7 +403,9 @@ object SaveLoadSystem {
                             posY = by,
                             posZ = bz,
                             rotationDeg = brotY,
-                            level = 1
+                            level = 1,
+                            waterStored = bWater,
+                            customData = bCustom
                         )
                     )
                 }

@@ -174,6 +174,81 @@ class FarmAudioManager(
     }
 
     /**
+     * Fishing line cast swoosh and water landing plop.
+     */
+    fun playFishingCast() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.45f * sfxVolume * masterVolume
+            synthesizeShortPulse(durationMs = 90, frequencies = floatArrayOf(800f, 400f, 250f), volume = vol, noiseMod = true)
+            delay(120)
+            generateTone(320f, 50, vol * 0.8f) // water plop
+        }
+    }
+
+    /**
+     * Urgent tension alert when fish bites bobber ("!").
+     */
+    fun playFishBiteAlert() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.65f * sfxVolume * masterVolume
+            generateTone(1046.50f, 70, vol) // High C6
+            delay(30)
+            generateTone(1318.51f, 100, vol) // E6
+        }
+    }
+
+    /**
+     * Triumphant water splash and cheer jingle upon catching fish.
+     */
+    fun playFishCatch() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.60f * sfxVolume * masterVolume
+            // Splash
+            synthesizeShortPulse(durationMs = 120, frequencies = floatArrayOf(600f, 450f, 300f), volume = vol * 0.7f, noiseMod = true)
+            delay(60)
+            // Fanfare
+            val notes = floatArrayOf(523.25f, 659.25f, 783.99f, 1046.50f, 1318.51f)
+            for (n in notes) {
+                generateTone(n, 65, vol)
+                delay(35)
+            }
+        }
+    }
+
+    /**
+     * Fish escapes reel-in window.
+     */
+    fun playFishEscape() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.45f * sfxVolume * masterVolume
+            generateTone(420f, 70, vol)
+            delay(40)
+            generateTone(280f, 120, vol * 0.8f)
+        }
+    }
+
+    /**
+     * Water boiling and bubbling sound at campfire.
+     */
+    fun playBoilWater() {
+        scope.launch(Dispatchers.Default) {
+            val vol = 0.48f * sfxVolume * masterVolume
+            for (i in 0..4) {
+                generateTone(380f + (i % 2) * 80f, 40, vol)
+                delay(45)
+            }
+        }
+    }
+
+    /**
+     * Irrigation sprinkler spray pulse.
+     */
+    fun playIrrigationSpray() {
+        val vol = 0.42f * sfxVolume * masterVolume
+        synthesizeShortPulse(durationMs = 280, frequencies = floatArrayOf(900f, 720f, 600f, 450f), volume = vol, noiseMod = true)
+    }
+
+    /**
      * Soft "ding" chime on saving game progress.
      */
     fun playSaveGame() {

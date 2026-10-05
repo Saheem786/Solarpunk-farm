@@ -8,6 +8,9 @@ import com.example.data.model.CropType
 import com.example.data.model.EnergyNodeType
 import com.example.data.model.ItemCategory
 import com.example.data.model.LivestockType
+import com.example.data.model.NpcActivity
+import com.example.data.model.NpcPersonalityTrait
+import com.example.data.model.NpcRole
 import com.example.data.model.PlotType
 import com.example.data.model.WeatherType
 
@@ -37,7 +40,23 @@ data class GameStateEntity(
     val maxThirst: Float = 100.0f,
     val stamina: Float = 100.0f,
     val maxStamina: Float = 100.0f,
-    val weatherChangeCountdownHours: Float = 6.0f
+    val weatherChangeCountdownHours: Float = 6.0f,
+    val discoveredPois: String = "poi_old_farm",
+    val discoveredChunks: String = "9_9,9_10,10_9,10_10",
+    val discoveredBiomes: String = "green_valley",
+    val currentBiomeId: String = "green_valley",
+    val cleanWaterCarried: Int = 4,
+    val rawWaterCarried: Int = 0,
+    val maxWaterCarried: Int = 10,
+    val isSick: Boolean = false,
+    val sicknessRemainingHours: Float = 0.0f,
+    val fishingRodTier: Int = 1,
+    val fishPopStream: Int = 10,
+    val fishPopRiver: Int = 10,
+    val fishPopPond: Int = 10,
+    val researchPoints: Int = 20,
+    val activeMissionId: String = "mission_1",
+    val storyEndingUnlocked: Boolean = false
 )
 
 @Entity(tableName = "farm_plots")
@@ -115,5 +134,95 @@ data class PlacedBuildingEntity(
     val posY: Float = 0.0f,
     val posZ: Float,
     val rotationDeg: Float = 0.0f,
-    val level: Int = 1
+    val level: Int = 1,
+    val waterStored: Float = 0.0f,
+    val customData: String = ""
+)
+
+@Entity(tableName = "npcs")
+data class NpcEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val role: NpcRole,
+    val age: Int = 26,
+    val skillLevel: Int = 1,
+    val trait: NpcPersonalityTrait = NpcPersonalityTrait.CHEERFUL,
+    val appearanceColor: Long = 0xFF81C784,
+    val hairColor: Long = 0xFF4E342E,
+    val morale: Float = 75.0f, // 0 to 100
+    val hunger: Float = 20.0f, // 0 to 100 (0 = full, 100 = starving)
+    val thirst: Float = 20.0f, // 0 to 100 (0 = hydrated, 100 = dehydrated)
+    val assignedBedId: Int? = null,
+    val assignedBuildingId: Int? = null,
+    val currentActivity: NpcActivity = NpcActivity.WORKING,
+    val posX: Float = 6.0f,
+    val posY: Float = 0.0f,
+    val posZ: Float = 2.0f,
+    val targetX: Float = 6.0f,
+    val targetZ: Float = 2.0f,
+    val rotationDeg: Float = 0.0f,
+    val isWalking: Boolean = false,
+    val speechBubble: String? = null,
+    val speechBubbleTimer: Float = 0.0f,
+    val relationshipToPlayer: Int = 25, // -100 to +100
+    val partnerNpcId: Int? = null,
+    val tasksCompleted: Int = 0
+)
+
+@Entity(tableName = "npc_arrivals")
+data class NpcArrivalEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val role: NpcRole,
+    val name: String,
+    val dayTrigger: Int,
+    val status: String = "PENDING", // PENDING, ACCEPTED, REJECTED_COOLDOWN
+    val cooldownDaysRemaining: Int = 0
+)
+
+@Entity(tableName = "research_techs")
+data class ResearchTechEntity(
+    @PrimaryKey val id: String,
+    val tier: Int,
+    val title: String,
+    val rpCost: Int,
+    val isUnlocked: Boolean = false
+)
+
+@Entity(tableName = "story_missions")
+data class StoryMissionEntity(
+    @PrimaryKey val id: String,
+    val missionNumber: Int,
+    val title: String,
+    val currentProgress: Int = 0,
+    val targetProgress: Int = 1,
+    val isCompleted: Boolean = false,
+    val isUnlocked: Boolean = false
+)
+
+@Entity(tableName = "points_of_interest")
+data class PoiEntity(
+    @PrimaryKey val id: String,
+    val name: String,
+    val biomeId: String,
+    val posX: Float,
+    val posZ: Float,
+    val isDiscovered: Boolean = false
+)
+
+@Entity(tableName = "lore_entries")
+data class LoreEntryEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    val author: String,
+    val category: String,
+    val textContent: String,
+    val isUnlocked: Boolean = false
+)
+
+@Entity(tableName = "terminal_logs")
+data class TerminalLogEntity(
+    @PrimaryKey val id: String,
+    val terminalName: String,
+    val locationName: String,
+    val isHacked: Boolean = false
 )

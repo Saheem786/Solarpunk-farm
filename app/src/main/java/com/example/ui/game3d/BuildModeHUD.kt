@@ -38,6 +38,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -163,7 +167,77 @@ fun BuildModeHUD(
                 }
             }
 
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Category Tabs
+            var selectedCategory by remember { mutableStateOf("All") }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf("All", "⚡ Power & Batteries", "💧 Water & Irrigation", "🏡 Homestead").forEach { cat ->
+                    val isCatActive = selectedCategory == cat
+                    Surface(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { selectedCategory = cat }
+                            .testTag("build_cat_${cat.take(3).lowercase()}"),
+                        color = if (isCatActive) SolarEmerald.copy(alpha = 0.25f) else Color(0xFF142428),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isCatActive) SolarEmerald else Color(0x3300E676)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = cat,
+                            color = if (isCatActive) Color(0xFFB9F6CA) else Color(0xFFB0BEC5),
+                            fontSize = 11.sp,
+                            fontWeight = if (isCatActive) FontWeight.Bold else FontWeight.Medium,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Filtered buildings list
+            val filteredBuildings = BuildableType.values().filter { bType ->
+                when (selectedCategory) {
+                    "⚡ Power & Batteries" -> bType in listOf(
+                        BuildableType.SOLAR_PANEL,
+                        BuildableType.WINDMILL,
+                        BuildableType.HYDRO_GENERATOR,
+                        BuildableType.ADVANCED_SOLAR,
+                        BuildableType.BIOGAS_GENERATOR,
+                        BuildableType.GEOTHERMAL_VENT,
+                        BuildableType.BASIC_BATTERY,
+                        BuildableType.ADVANCED_BATTERY,
+                        BuildableType.BATTERY_BANK,
+                        BuildableType.POWER_POLE
+                    )
+                    "💧 Water & Irrigation" -> bType in listOf(
+                        BuildableType.WELL,
+                        BuildableType.RAIN_BARREL,
+                        BuildableType.WATER_FILTER,
+                        BuildableType.WATER_PURIFIER,
+                        BuildableType.IRRIGATION_PIPE,
+                        BuildableType.IRRIGATION_NODE,
+                        BuildableType.WATER_STORAGE_SHED
+                    )
+                    "🏡 Homestead" -> bType in listOf(
+                        BuildableType.CABIN,
+                        BuildableType.GREENHOUSE,
+                        BuildableType.STORAGE,
+                        BuildableType.FENCE,
+                        BuildableType.COMPOST_BIN
+                    )
+                    else -> true
+                }
+            }
 
             // Building Selection Scrollable Carousel
             Row(
@@ -172,7 +246,7 @@ fun BuildModeHUD(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                BuildableType.values().forEach { bType ->
+                filteredBuildings.forEach { bType ->
                     val isSelected = bType == selectedType
                     val icon = getBuildingIcon(bType)
 
@@ -303,5 +377,25 @@ private fun getBuildingIcon(type: BuildableType): ImageVector {
         BuildableType.WELL -> Icons.Default.WaterDrop
         BuildableType.FENCE -> Icons.Default.Build
         BuildableType.COMPOST_BIN -> Icons.Default.Refresh
+        BuildableType.RAIN_BARREL -> Icons.Default.WaterDrop
+        BuildableType.WATER_FILTER -> Icons.Default.Refresh
+        BuildableType.WATER_PURIFIER -> Icons.Default.Bolt
+        BuildableType.IRRIGATION_PIPE -> Icons.Default.Build
+        BuildableType.IRRIGATION_NODE -> Icons.Default.Eco
+        BuildableType.WATER_STORAGE_SHED -> Icons.Default.Storage
+        BuildableType.HYDRO_GENERATOR -> Icons.Default.WaterDrop
+        BuildableType.ADVANCED_SOLAR -> Icons.Default.Bolt
+        BuildableType.BIOGAS_GENERATOR -> Icons.Default.Eco
+        BuildableType.GEOTHERMAL_VENT -> Icons.Default.Bolt
+        BuildableType.BASIC_BATTERY -> Icons.Default.Storage
+        BuildableType.ADVANCED_BATTERY -> Icons.Default.Storage
+        BuildableType.BATTERY_BANK -> Icons.Default.Storage
+        BuildableType.POWER_POLE -> Icons.Default.Build
+        BuildableType.NPC_CABIN -> Icons.Default.Home
+        BuildableType.BUNKHOUSE -> Icons.Default.Home
+        BuildableType.KITCHEN -> Icons.Default.Refresh
+        BuildableType.MEDIC_STATION -> Icons.Default.Build
+        BuildableType.WORKSHOP -> Icons.Default.Build
+        BuildableType.RESEARCH_LAB -> Icons.Default.Eco
     }
 }

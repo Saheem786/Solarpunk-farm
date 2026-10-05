@@ -480,6 +480,66 @@ object WorldColliderBuilder {
                     val bz = b.posZ + 1.45f * cosRot
                     list.add(SegmentCollider(ax, az, bx, bz, 0.14f, "Placed_Fence_${b.id}"))
                 }
+                BuildableType.RAIN_BARREL -> {
+                    list.add(CylinderCollider(b.posX, b.posZ, 0.75f, "Placed_RainBarrel_${b.id}"))
+                }
+                BuildableType.WATER_FILTER -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 1.2f, 1.2f, b.rotationDeg, "Placed_WaterFilter_${b.id}"))
+                }
+                BuildableType.WATER_PURIFIER -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 1.8f, 1.8f, b.rotationDeg, "Placed_WaterPurifier_${b.id}"))
+                }
+                BuildableType.IRRIGATION_PIPE -> {
+                    // Pipe is flat on the ground, walkable
+                }
+                BuildableType.IRRIGATION_NODE -> {
+                    list.add(CylinderCollider(b.posX, b.posZ, 0.45f, "Placed_IrrigationNode_${b.id}"))
+                }
+                BuildableType.WATER_STORAGE_SHED -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.2f, 2.6f, b.rotationDeg, "Placed_WaterStorageShed_${b.id}"))
+                }
+                BuildableType.HYDRO_GENERATOR -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 2.8f, 2.0f, b.rotationDeg, "Placed_Hydro_${b.id}"))
+                }
+                BuildableType.ADVANCED_SOLAR -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.8f, 3.8f, b.rotationDeg, "Placed_AdvSolar_${b.id}"))
+                }
+                BuildableType.BIOGAS_GENERATOR -> {
+                    list.add(CylinderCollider(b.posX, b.posZ, 1.45f, "Placed_Biogas_${b.id}"))
+                }
+                BuildableType.GEOTHERMAL_VENT -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.8f, 3.8f, b.rotationDeg, "Placed_Geothermal_${b.id}"))
+                }
+                BuildableType.BASIC_BATTERY -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 1.8f, 1.4f, b.rotationDeg, "Placed_BasicBattery_${b.id}"))
+                }
+                BuildableType.ADVANCED_BATTERY -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 2.6f, 1.8f, b.rotationDeg, "Placed_AdvBattery_${b.id}"))
+                }
+                BuildableType.BATTERY_BANK -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 4.4f, 3.4f, b.rotationDeg, "Placed_BatteryBank_${b.id}"))
+                }
+                BuildableType.POWER_POLE -> {
+                    list.add(CylinderCollider(b.posX, b.posZ, 0.35f, "Placed_PowerPole_${b.id}"))
+                }
+                BuildableType.NPC_CABIN -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.2f, 3.2f, b.rotationDeg, "Placed_NpcCabin_${b.id}"))
+                }
+                BuildableType.BUNKHOUSE -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 5.2f, 5.2f, b.rotationDeg, "Placed_Bunkhouse_${b.id}"))
+                }
+                BuildableType.KITCHEN -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 4.2f, 4.2f, b.rotationDeg, "Placed_Kitchen_${b.id}"))
+                }
+                BuildableType.MEDIC_STATION -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.2f, 3.2f, b.rotationDeg, "Placed_MedicStation_${b.id}"))
+                }
+                BuildableType.WORKSHOP -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 3.2f, 3.2f, b.rotationDeg, "Placed_Workshop_${b.id}"))
+                }
+                BuildableType.RESEARCH_LAB -> {
+                    list.add(BoxCollider(b.posX, b.posZ, 4.2f, 4.2f, b.rotationDeg, "Placed_ResearchLab_${b.id}"))
+                }
             }
         }
 

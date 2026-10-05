@@ -1,6 +1,9 @@
 package com.example.ui
 
 import android.app.Application
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,19 +13,40 @@ import com.example.data.local.EnergyNodeEntity
 import com.example.data.local.GameStateEntity
 import com.example.data.local.InventoryEntity
 import com.example.data.local.LivestockEntity
+import com.example.data.local.NpcEntity
 import com.example.data.local.PlacedBuildingEntity
 import com.example.data.local.PlotEntity
+import com.example.data.model.BiomeType
 import com.example.data.model.BuildableType
 import com.example.data.model.CropStage
 import com.example.data.model.CropType
+import com.example.data.model.DeviceType
+import com.example.data.model.EnergyGridSummary
 import com.example.data.model.EnergyNodeType
+import com.example.data.model.FishType
+import com.example.data.model.FishingRodTier
+import com.example.data.model.FishingSpotType
 import com.example.data.model.ItemCategory
 import com.example.data.model.LivestockType
+import com.example.data.model.NpcArrivalCandidate
+import com.example.data.model.NpcRole
 import com.example.data.model.PlayerTool
+import com.example.data.model.PointOfInterestType
+import com.example.data.model.PowerPriority
+import com.example.data.model.SettlementStats
 import com.example.data.model.TimeOfDayPhase
 import com.example.data.model.WeatherType
+import com.example.data.model.*
 import com.example.data.repository.FarmRepository
 import com.example.data.repository.SaveLoadSystem
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlin.random.Random
 import com.example.game3d.audio.HapticFeedbackHelper
 import com.example.game3d.audio.SpatialLivestockAudioSystem
 import com.example.game3d.interaction.InteractionPrompt
@@ -33,9 +57,11 @@ import com.example.game3d.particles.ParticleSystem3D
 import com.example.game3d.player.PlayerInputState
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
+import com.example.game3d.renderer.BiomeSystem
 import com.example.game3d.renderer.DayNightLightingSystem
 import com.example.game3d.renderer.GhostBuildingState
 import com.example.game3d.renderer.LightingState
+import com.example.ui.components.DiscoveryAlertData
 import com.example.ui.components.FloatingTextData
 import com.example.ui.theme.CleanCyan
 import com.example.ui.theme.SolarEmerald
@@ -44,13 +70,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -58,6 +78,25 @@ data class NotificationMessage(
     val title: String,
     val description: String,
     val icon: String = "info"
+)
+
+enum class FishingStage {
+    CASTING,
+    WAITING,
+    BITE,
+    REELING,
+    SUCCESS,
+    ESCAPED
+}
+
+data class ActiveFishingSession(
+    val spot: FishingSpotType,
+    val stage: FishingStage,
+    val progress: Float = 0f,
+    val tension: Float = 0.5f,
+    val sweetSpotCenter: Float = 0.5f,
+    val caughtFish: FishType? = null,
+    val message: String = ""
 )
 
 class FarmViewModel(application: Application) : AndroidViewModel(application) {
@@ -180,7 +219,170 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    // Biome Exploration & Discovery State
+    val discoveredChunks = MutableStateFlow<Set<String>>(setOf("9_9", "9_10", "10_9", "10_10"))
+    val discoveredPois = MutableStateFlow<Set<String>>(setOf("poi_old_farm"))
+    val discoveredBiomes = MutableStateFlow<Set<String>>(setOf("green_valley"))
+    val currentBiome = MutableStateFlow(BiomeType.GREEN_VALLEY)
+    val discoveryAlert = MutableStateFlow<DiscoveryAlertData?>(null)
+    private var lastBoundaryWarningTime = 0L
+
+    // Phase 3: Fishing Mechanics & Mini-Game State
+    val activeFishingSession = MutableStateFlow<ActiveFishingSession?>(null)
+
+    // Phase 4: Energy Grid & Power Management StateFlows
+    val energySummary: StateFlow<EnergyGridSummary> = repository.energySummary
+    val devicePriorities: StateFlow<Map<DeviceType, PowerPriority>> = repository.devicePriorities
+    val unlockedTechs: StateFlow<Set<String>> = repository.unlockedTechs
+
+    // Phase 5: Settlement & Survivor StateFlows
+    val npcs: StateFlow<List<NpcEntity>> = repository.npcs.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+    val pendingArrival: StateFlow<NpcArrivalCandidate?> = repository.pendingArrival
+    val settlementStats: StateFlow<SettlementStats> = repository.settlementStats
+    val selectedNpcForDialogue = MutableStateFlow<NpcEntity?>(null)
+
+    // Phase 6: Research Tree, Story Missions, Discovery & Terminals StateFlows
+    val researchPoints: StateFlow<Int> = gameState.map { it?.researchPoints ?: 20 }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), 20
+    )
+    val storyMissions: StateFlow<List<StoryMission>> = repository.storyMissions.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+    val activeMission: StateFlow<StoryMission?> = storyMissions.map { list ->
+        list.find { it.isUnlocked && !it.isCompleted } ?: list.firstOrNull { !it.isCompleted }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val pointsOfInterest: StateFlow<List<PointOfInterestData>> = repository.pointsOfInterest.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+    val loreEntries: StateFlow<List<LoreEntryData>> = repository.loreEntries.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+    val terminalLogs: StateFlow<List<TerminalLogData>> = repository.terminalLogs.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList()
+    )
+    val storyEndingUnlocked: StateFlow<Boolean> = gameState.map { it?.storyEndingUnlocked ?: false }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5000), false
+    )
+    val activeTerminalForModal = MutableStateFlow<TerminalLogData?>(null)
+
+    fun hackTerminal(terminalId: String, password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = repository.hackTerminal(terminalId, password)
+            viewModelScope.launch(Dispatchers.Main) {
+                if (success) {
+                    audioSystem.playCraftSuccess()
+                    haptics.vibrateSuccess()
+                    addFloatingText("Terminal Decrypted! +25 RP", CleanCyan)
+                    showNotification("Decrypted Log!", "Gained +25 RP and lore entry.", "terminal")
+                    openModal(null)
+                } else {
+                    audioSystem.playErrorSound()
+                    haptics.vibrateError()
+                    showNotification("Access Denied", "Incorrect password. Hint: SOLARIS", "warning")
+                }
+            }
+        }
+    }
+
+    fun openTerminalModal(terminal: TerminalLogData) {
+        activeTerminalForModal.value = terminal
+        openModal("terminal_hack")
+    }
+
+    fun acceptNpcArrival() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = repository.acceptPendingArrival()
+            viewModelScope.launch(Dispatchers.Main) {
+                if (success) {
+                    audioSystem.playCraftSuccess()
+                    haptics.vibrateSuccess()
+                    addFloatingText("Survivor Welcomed!", SolarEmerald)
+                    showNotification("Welcome to Sanctuary!", "A new survivor joined your settlement.", "check_circle")
+                }
+            }
+        }
+    }
+
+    fun rejectNpcArrival() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.rejectPendingArrival()
+            viewModelScope.launch(Dispatchers.Main) {
+                haptics.vibrateButtonTap()
+                showNotification("Arrival Postponed", "The traveler will return in 3 days.", "info")
+            }
+        }
+    }
+
+    fun interactWithNpc(npcId: Int, optionKey: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.interactWithNpc(npcId, optionKey)
+            viewModelScope.launch(Dispatchers.Main) {
+                haptics.vibrateButtonTap()
+                if (success) {
+                    audioSystem.playButtonTap()
+                    showNotification("Dialogue", message, "chat")
+                } else {
+                    audioSystem.playErrorSound()
+                }
+            }
+        }
+    }
+
+    fun assignNpcRole(npcId: Int, newRole: NpcRole) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = repository.assignNpcRole(npcId, newRole)
+            viewModelScope.launch(Dispatchers.Main) {
+                if (success) {
+                    audioSystem.playButtonTap()
+                    haptics.vibrateButtonTap()
+                    showNotification("Role Assigned", "NPC role updated to ${newRole.displayName}", "work")
+                }
+            }
+        }
+    }
+
+    fun openNpcDialogue(npc: NpcEntity) {
+        selectedNpcForDialogue.value = npc
+        openModal("npc_dialogue")
+    }
+
+    fun setDevicePriority(device: DeviceType, priority: PowerPriority) {
+        repository.setDevicePriority(device, priority)
+        haptics.vibrateButtonTap()
+        audioSystem.playButtonTap()
+        showNotification("Priority Updated", "${device.displayName} set to ${priority.displayName}", "bolt")
+    }
+
+    fun unlockEnergyTech(techId: String, requiredRp: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val success = repository.unlockEnergyTech(techId, requiredRp)
+            viewModelScope.launch(Dispatchers.Main) {
+                if (success) {
+                    audioSystem.playCraftSuccess()
+                    haptics.vibrateSuccess()
+                    addFloatingText("Tech Unlocked!", SolarEmerald)
+                    showNotification("Research Unlocked!", "Energy grid capability upgraded", "bolt")
+                } else {
+                    audioSystem.playErrorSound()
+                    haptics.vibrateError()
+                    showNotification("Not Enough RP", "Earn more Eco Prestige through harvesting & clean energy", "warning")
+                }
+            }
+        }
+    }
+
     init {
+        repository.onPowerLowAlert = { message ->
+            viewModelScope.launch(Dispatchers.Main) {
+                audioSystem.playLowEnergyWarning()
+                haptics.vibrateError()
+                showNotification("Power Grid Alert", message, "warning")
+            }
+        }
+
         // Apply saved volume settings
         audioSystem.masterVolume = masterVolume.value
         audioSystem.musicVolume = musicVolume.value
@@ -200,6 +402,14 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 player.posZ = savedState.playerZ
                 player.orientationAngleDeg = savedState.playerAngle
                 camera.updateTarget(savedState.playerX, savedState.playerY, savedState.playerZ, 1.0f)
+
+                val chunks = savedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
+                if (chunks.isNotEmpty()) discoveredChunks.value = chunks
+                val pois = savedState.discoveredPois.split(",").filter { it.isNotBlank() }.toSet()
+                if (pois.isNotEmpty()) discoveredPois.value = pois
+                val biomes = savedState.discoveredBiomes.split(",").filter { it.isNotBlank() }.toSet()
+                if (biomes.isNotEmpty()) discoveredBiomes.value = biomes
+                currentBiome.value = BiomeType.fromPosition(savedState.playerZ)
             }
             // Dismiss initial loading after game state is ready
             delay(900)
@@ -207,6 +417,20 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
         }
         startGameLoop()
         startAutoSaveLoop()
+    }
+
+    fun dismissDiscoveryAlert() {
+        discoveryAlert.value = null
+    }
+
+    fun triggerDiscoveryAlert(alert: DiscoveryAlertData) {
+        viewModelScope.launch {
+            discoveryAlert.value = alert
+            delay(4800)
+            if (discoveryAlert.value?.id == alert.id) {
+                discoveryAlert.value = null
+            }
+        }
     }
 
     fun setMasterVolume(vol: Float) {
@@ -277,7 +501,10 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                     playerX = player.posX,
                     playerY = player.posY,
                     playerZ = player.posZ,
-                    playerAngle = player.orientationAngleDeg
+                    playerAngle = player.orientationAngleDeg,
+                    discoveredPois = discoveredPois.value.joinToString(","),
+                    discoveredChunks = discoveredChunks.value.joinToString(","),
+                    currentBiomeId = currentBiome.value.id
                 )
                 val success = SaveLoadSystem.saveGame(getApplication(), repository.farmDao)
                 if (success) {
@@ -293,7 +520,10 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 playerX = player.posX,
                 playerY = player.posY,
                 playerZ = player.posZ,
-                playerAngle = player.orientationAngleDeg
+                playerAngle = player.orientationAngleDeg,
+                discoveredPois = discoveredPois.value.joinToString(","),
+                discoveredChunks = discoveredChunks.value.joinToString(","),
+                currentBiomeId = currentBiome.value.id
             )
             val success = SaveLoadSystem.saveGame(getApplication(), repository.farmDao)
             viewModelScope.launch(Dispatchers.Main) {
@@ -323,6 +553,12 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 player.posZ = loadedState.playerZ
                 player.orientationAngleDeg = loadedState.playerAngle
                 camera.updateTarget(loadedState.playerX, loadedState.playerY, loadedState.playerZ, 1.0f)
+
+                val chunks = loadedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
+                if (chunks.isNotEmpty()) discoveredChunks.value = chunks
+                val pois = loadedState.discoveredPois.split(",").filter { it.isNotBlank() }.toSet()
+                if (pois.isNotEmpty()) discoveredPois.value = pois
+                currentBiome.value = BiomeType.fromPosition(loadedState.playerZ)
             }
             _isLoading.value = false
             viewModelScope.launch(Dispatchers.Main) {
@@ -372,17 +608,106 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 val currentStamina = gameState.value?.stamina ?: 100.0f
                 val effectiveSprinting = _inputState.value.isSprinting && currentStamina > 2.0f
                 val weather = gameState.value?.currentWeather ?: WeatherType.SUNNY_CLEAR
-                val speedMultiplier = if (weather == WeatherType.STORM) 0.85f else 1.0f
+                val weatherSpeedMultiplier = if (weather == WeatherType.STORM) 0.85f else 1.0f
+
+                // Biome calculation & terrain drag modifier
+                val activeBiome = BiomeType.fromPosition(player.posZ)
+                if (currentBiome.value != activeBiome) {
+                    currentBiome.value = activeBiome
+                }
+
+                // Check if player entered a new Biome zone for the first time
+                if (!discoveredBiomes.value.contains(activeBiome.id)) {
+                    discoveredBiomes.value = discoveredBiomes.value + activeBiome.id
+                    viewModelScope.launch(Dispatchers.IO) {
+                        repository.discoverBiome(activeBiome)
+                    }
+                    audioSystem.playBuildingComplete()
+                    haptics.vibrateBuildPlacement()
+                    particleSystem.spawnCoinSparkles(player.posX, 1.0f, player.posZ)
+                    addFloatingText("+50🪙 Eco Bonus", SunGold)
+
+                    val biomeColor = when (activeBiome) {
+                        BiomeType.DEEP_FOREST -> Color(0xFF81C784)
+                        BiomeType.WETLAND -> CleanCyan
+                        BiomeType.GREEN_VALLEY -> SolarEmerald
+                    }
+
+                    triggerDiscoveryAlert(
+                        DiscoveryAlertData(
+                            title = "Discovered: ${activeBiome.displayName}",
+                            subtitle = "${activeBiome.description} (+50 Sol Coins, +10 Eco)",
+                            categoryLabel = "NEW BIOME DISCOVERED",
+                            icon = androidx.compose.material.icons.Icons.Default.Info,
+                            accentColor = biomeColor,
+                            rewardCoins = 50
+                        )
+                    )
+                }
+
+                val biomeSpeedMultiplier = BiomeSystem.getMovementSpeedMultiplier(player.posX, player.posZ)
+                val effectiveSpeedMultiplier = weatherSpeedMultiplier * biomeSpeedMultiplier
 
                 player.update(
                     input = if (_isBuildMode.value) PlayerInputState() else _inputState.value.copy(isSprinting = effectiveSprinting),
                     cameraYawDeg = camera.yawDeg,
                     deltaSec = deltaSec,
-                    speedMultiplier = speedMultiplier,
+                    speedMultiplier = effectiveSpeedMultiplier,
                     placedBuildings = placedBuildings.value,
                     energyNodes = energyNodes.value,
                     plots = plots.value
                 )
+
+                // Fog of War chunk uncovering around player (35m radius)
+                val updatedChunks = BiomeSystem.uncoverChunksAround(player.posX, player.posZ, discoveredChunks.value, 35.0f)
+                if (updatedChunks.size > discoveredChunks.value.size) {
+                    discoveredChunks.value = updatedChunks
+                }
+
+                // Point of Interest Proximity Discovery Check
+                val undiscoveredPoi = BiomeSystem.checkPoiDiscovery(player.posX, player.posZ, discoveredPois.value, 14.0f)
+                if (undiscoveredPoi != null) {
+                    discoveredPois.value = discoveredPois.value + undiscoveredPoi.id
+                    viewModelScope.launch(Dispatchers.IO) {
+                        repository.discoverPoi(undiscoveredPoi)
+                    }
+                    audioSystem.playBuildingComplete()
+                    haptics.vibrateBuildPlacement()
+                    particleSystem.spawnCoinSparkles(player.posX, 1.2f, player.posZ)
+                    addFloatingText("+${undiscoveredPoi.rewardCoins}🪙 ${undiscoveredPoi.displayName}", SunGold)
+
+                    val poiColor = when (undiscoveredPoi.biome) {
+                        BiomeType.DEEP_FOREST -> Color(0xFFFFD54F)
+                        BiomeType.WETLAND -> CleanCyan
+                        BiomeType.GREEN_VALLEY -> SolarEmerald
+                    }
+
+                    triggerDiscoveryAlert(
+                        DiscoveryAlertData(
+                            title = "Discovered: ${undiscoveredPoi.displayName}",
+                            subtitle = "${undiscoveredPoi.discoveryRewardDesc} (+${undiscoveredPoi.rewardCoins} Sol Coins)",
+                            categoryLabel = "NEW POINT OF INTEREST",
+                            icon = androidx.compose.material.icons.Icons.Default.Star,
+                            accentColor = poiColor,
+                            rewardCoins = undiscoveredPoi.rewardCoins,
+                            rewardItemName = undiscoveredPoi.rewardItemName
+                        )
+                    )
+                }
+
+                // World Boundary Warning when approaching world perimeter (±192m)
+                val isNearBoundary = kotlin.math.abs(player.posX) >= 192.0f || kotlin.math.abs(player.posZ) >= 192.0f
+                if (isNearBoundary) {
+                    val nowMs = System.currentTimeMillis()
+                    if (nowMs - lastBoundaryWarningTime > 8000L) {
+                        lastBoundaryWarningTime = nowMs
+                        showNotification(
+                            title = "World Edge",
+                            desc = "The world ends here. More areas coming soon.",
+                            icon = "warning"
+                        )
+                    }
+                }
 
                 // Footstep sound & dust particle emission
                 if (player.isMoving && !_isBuildMode.value) {
@@ -408,7 +733,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
 
                 // 4. Update Day/Night Lighting & Music Loop
                 val hour = gameState.value?.gameTimeHour ?: 8.5f
-                _lightingState.value = DayNightLightingSystem.calculateLighting(hour, weather)
+                _lightingState.value = DayNightLightingSystem.calculateLighting(hour, weather, animTime.value)
                 val isDaytime = hour in 7.0f..19.0f
                 audioSystem.updateDayNightMusic(isDaytime)
                 audioSystem.updateWeatherAmbience(weather)
@@ -548,6 +873,37 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 return Pair(false, "Too close to permanent landmark")
             }
         }
+
+        // 1. Hydro Generator: Must be near flowing river or stream (not pond)
+        if (type == BuildableType.HYDRO_GENERATOR) {
+            val nearStream = kotlin.math.abs(gx - 16.5f) <= 6.0f && gz in -25.0f..25.0f
+            val nearRiver = kotlin.math.abs(gz - (-100.0f)) <= 12.0f
+            if (!nearStream && !nearRiver) {
+                return Pair(false, "Must be near flowing river or stream (river, not pond)")
+            }
+        }
+
+        // 2. Biogas Generator: Must be near compost bin or animal pen
+        if (type == BuildableType.BIOGAS_GENERATOR) {
+            val nearCompost = existingBuildings.any {
+                it.buildingType == BuildableType.COMPOST_BIN &&
+                kotlin.math.sqrt(((gx - it.posX) * (gx - it.posX) + (gz - it.posZ) * (gz - it.posZ)).toDouble()) <= 8.5
+            }
+            val nearPen = (gx in -22.0f..-4.0f && gz in -4.0f..18.0f)
+            if (!nearCompost && !nearPen) {
+                return Pair(false, "Must be near compost bin or animal pen")
+            }
+        }
+
+        // 3. Geothermal Vent: Near mountain region or thermal hotspot
+        if (type == BuildableType.GEOTHERMAL_VENT) {
+            val nearMountain = gz >= 30.0f
+            val nearHotspot = kotlin.math.sqrt(((gx - (-28.0f)) * (gx - (-28.0f)) + (gz - 20.0f) * (gz - 20.0f)).toDouble()) <= 14.0
+            if (!nearMountain && !nearHotspot) {
+                return Pair(false, "Must be near mountain region or thermal hotspot")
+            }
+        }
+
         return Pair(true, "Valid location")
     }
 
@@ -663,13 +1019,255 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 openModal("market_screen")
             }
             InteractionTargetType.WATER_SOURCE -> {
-                drink("Fresh Spring Pond")
+                if (selectedTool.value == PlayerTool.FISHING_ROD) {
+                    val spot = when (prompt.targetId) {
+                        993 -> FishingSpotType.WETLAND_RIVER
+                        992 -> FishingSpotType.WETLAND_POND
+                        else -> FishingSpotType.GREEN_VALLEY_STREAM
+                    }
+                    startFishing(spot)
+                } else if (prompt.waterTypeKey == "well") {
+                    drinkCleanWater("Water Well")
+                } else {
+                    drinkRawWater(prompt.title)
+                }
+            }
+            InteractionTargetType.WATER_BUILDING -> {
+                when (prompt.waterTypeKey) {
+                    "barrel" -> drinkCleanWater("Rain Barrel")
+                    "filter" -> fillOrCollectFilter(prompt.targetId)
+                    "purifier" -> collectFromBuilding(prompt.targetId)
+                    "storage" -> collectFromBuilding(prompt.targetId)
+                    else -> collectFromBuilding(prompt.targetId)
+                }
+            }
+            InteractionTargetType.CAMPFIRE -> {
+                openModal("campfire_modal")
             }
             InteractionTargetType.FARMHOUSE -> {
                 restInFarmhouse()
             }
+            InteractionTargetType.NPC -> {
+                val npc = npcs.value.find { it.id == prompt.targetId }
+                if (npc != null) {
+                    openNpcDialogue(npc)
+                } else {
+                    openModal("sanctuary")
+                }
+            }
             InteractionTargetType.NONE -> {}
         }
+    }
+
+    fun onContextSecondaryActionButton() {
+        val prompt = _currentPrompt.value ?: return
+        haptics.vibrateButtonTap()
+        when (prompt.targetType) {
+            InteractionTargetType.WATER_SOURCE -> {
+                val spot = when (prompt.targetId) {
+                    993 -> FishingSpotType.WETLAND_RIVER
+                    992 -> FishingSpotType.WETLAND_POND
+                    else -> FishingSpotType.GREEN_VALLEY_STREAM
+                }
+                startFishing(spot)
+            }
+            InteractionTargetType.CAMPFIRE -> {
+                openModal("campfire_modal")
+            }
+            InteractionTargetType.WATER_BUILDING -> {
+                if (prompt.waterTypeKey == "filter") {
+                    fillFilter(prompt.targetId)
+                } else {
+                    collectFromBuilding(prompt.targetId)
+                }
+            }
+            else -> onContextActionButton()
+        }
+    }
+
+    fun drinkCleanWater(source: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.drinkWater(null, source)
+            if (success) {
+                audioSystem.playDrinkWater()
+                haptics.vibrateButtonTap()
+                addFloatingText("+40 Thirst (Clean)", CleanCyan)
+                showNotification("Clean Water", message, "water_drop")
+            } else {
+                audioSystem.playErrorSound()
+                showNotification("Cannot Drink", message, "warning")
+            }
+        }
+    }
+
+    fun drinkRawWater(source: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.drinkWater(null, source)
+            if (success) {
+                audioSystem.playDrinkWater()
+                haptics.vibrateError()
+                triggerScreenShake(0.35f)
+                addFloatingText("+30 Thirst ⚠️ SICK!", Color(0xFF81C784))
+                showNotification("Raw Water (Contaminated!)", "Restored +30 Thirst, but you got SICK! Stamina halves, HP drains slowly.", "warning")
+            }
+        }
+    }
+
+    fun fillFilter(buildingId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.fillFilter(buildingId)
+            if (success) {
+                audioSystem.playWaterSound()
+                haptics.vibrateButtonTap()
+                showNotification("Water Filter", message, "water_drop")
+            } else {
+                audioSystem.playErrorSound()
+                showNotification("Cannot Fill Filter", message, "warning")
+            }
+        }
+    }
+
+    fun collectFromBuilding(buildingId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.collectFromBuilding(buildingId)
+            if (success) {
+                audioSystem.playWaterSound()
+                haptics.vibrateButtonTap()
+                addFloatingText("+Clean Water", CleanCyan)
+                showNotification("Collected Water", message, "water_drop")
+            } else {
+                audioSystem.playErrorSound()
+                showNotification("Water Building", message, "warning")
+            }
+        }
+    }
+
+    fun fillOrCollectFilter(buildingId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val state = gameState.value ?: return@launch
+            if (state.rawWaterCarried > 0) {
+                fillFilter(buildingId)
+            } else {
+                collectFromBuilding(buildingId)
+            }
+        }
+    }
+
+    fun boilWater() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.boilWater()
+            if (success) {
+                audioSystem.playCraftSuccess()
+                haptics.vibrateButtonTap()
+                addFloatingText("+1 Clean Water", CleanCyan)
+                showNotification("Boiled Water", message, "whatshot")
+            } else {
+                audioSystem.playErrorSound()
+                showNotification("Cannot Boil", message, "warning")
+            }
+        }
+    }
+
+    fun cookFish(fishItemId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val (success, message) = repository.cookFish(fishItemId)
+            if (success) {
+                audioSystem.playCraftSuccess()
+                haptics.vibrateButtonTap()
+                addFloatingText("+Grilled Fish", SunGold)
+                showNotification("Cooked Fish", message, "restaurant")
+            } else {
+                audioSystem.playErrorSound()
+                showNotification("Cannot Cook", message, "warning")
+            }
+        }
+    }
+
+    fun startFishing(spot: FishingSpotType) {
+        val state = gameState.value ?: return
+        val rodTier = FishingRodTier.fromTier(state.fishingRodTier)
+        if (rodTier == FishingRodTier.NONE) {
+            showNotification("No Fishing Rod", "Equip or purchase a Fishing Rod from Sol City Market!", "warning")
+            return
+        }
+        selectTool(PlayerTool.FISHING_ROD)
+        openModal("fishing_minigame")
+        activeFishingSession.value = ActiveFishingSession(spot, FishingStage.CASTING)
+        audioSystem.playSelectToolSound()
+
+        viewModelScope.launch {
+            delay(1200)
+            activeFishingSession.value = activeFishingSession.value?.copy(stage = FishingStage.WAITING)
+            val waitSec = Random.nextDouble(rodTier.minWaitSec.toDouble(), rodTier.maxWaitSec.toDouble()).toFloat()
+            delay((waitSec * 1000).toLong())
+            if (activeFishingSession.value?.stage == FishingStage.WAITING) {
+                haptics.vibrateHarvest()
+                audioSystem.playWaterSound()
+                activeFishingSession.value = activeFishingSession.value?.copy(stage = FishingStage.BITE)
+            }
+        }
+    }
+
+    fun hookFish() {
+        val session = activeFishingSession.value ?: return
+        if (session.stage == FishingStage.BITE) {
+            haptics.vibrateButtonTap()
+            audioSystem.playWaterSound()
+            activeFishingSession.value = session.copy(stage = FishingStage.REELING, progress = 0.25f, sweetSpotCenter = 0.5f)
+        }
+    }
+
+    fun reelFishTick(isPressingReel: Boolean) {
+        val session = activeFishingSession.value ?: return
+        if (session.stage != FishingStage.REELING) return
+
+        val tensionDelta = if (isPressingReel) 0.045f else -0.035f
+        val newTension = (session.tension + tensionDelta).coerceIn(0f, 1f)
+        val sweetMin = (session.sweetSpotCenter - 0.20f).coerceAtLeast(0f)
+        val sweetMax = (session.sweetSpotCenter + 0.20f).coerceAtMost(1f)
+
+        val inSweetSpot = newTension in sweetMin..sweetMax
+        val progressDelta = if (inSweetSpot) 0.035f else -0.025f
+        val newProgress = (session.progress + progressDelta).coerceIn(0f, 1f)
+
+        val sweetShift = (Random.nextFloat() - 0.5f) * 0.04f
+        val newSweetCenter = (session.sweetSpotCenter + sweetShift).coerceIn(0.2f, 0.8f)
+
+        if (newProgress >= 1.0f) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val rod = FishingRodTier.fromTier(gameState.value?.fishingRodTier ?: 1)
+                val (fish, msg) = repository.catchFish(session.spot, rod)
+                audioSystem.playCoinEarned()
+                haptics.vibrateBuildPlacement()
+                activeFishingSession.value = session.copy(
+                    stage = FishingStage.SUCCESS,
+                    progress = 1.0f,
+                    caughtFish = fish,
+                    message = msg
+                )
+                if (fish != null) {
+                    addFloatingText("+${fish.displayName}!", SunGold)
+                }
+            }
+        } else if (newProgress <= 0.0f && session.progress > 0.05f) {
+            audioSystem.playErrorSound()
+            haptics.vibrateError()
+            activeFishingSession.value = session.copy(
+                stage = FishingStage.ESCAPED,
+                message = "The fish got away! The line went slack."
+            )
+        } else {
+            activeFishingSession.value = session.copy(
+                tension = newTension,
+                progress = newProgress,
+                sweetSpotCenter = newSweetCenter
+            )
+        }
+    }
+
+    fun closeFishingModal() {
+        activeFishingSession.value = null
+        openModal(null)
     }
 
     fun eat(foodItemId: String? = null) {

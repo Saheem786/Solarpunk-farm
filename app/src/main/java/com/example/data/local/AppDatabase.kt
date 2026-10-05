@@ -14,9 +14,16 @@ import androidx.room.TypeConverters
         LivestockEntity::class,
         InventoryEntity::class,
         ContractEntity::class,
-        PlacedBuildingEntity::class
+        PlacedBuildingEntity::class,
+        NpcEntity::class,
+        NpcArrivalEntity::class,
+        ResearchTechEntity::class,
+        StoryMissionEntity::class,
+        PoiEntity::class,
+        LoreEntryEntity::class,
+        TerminalLogEntity::class
     ],
-    version = 3,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

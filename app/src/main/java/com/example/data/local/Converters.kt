@@ -58,4 +58,22 @@ class Converters {
 
     @TypeConverter
     fun toBuildableType(value: String): BuildableType = enumValueOf(value)
+
+    @TypeConverter
+    fun fromNpcRole(value: com.example.data.model.NpcRole): String = value.name
+
+    @TypeConverter
+    fun toNpcRole(value: String): com.example.data.model.NpcRole = enumValueOf(value)
+
+    @TypeConverter
+    fun fromNpcPersonalityTrait(value: com.example.data.model.NpcPersonalityTrait): String = value.name
+
+    @TypeConverter
+    fun toNpcPersonalityTrait(value: String): com.example.data.model.NpcPersonalityTrait = enumValueOf(value)
+
+    @TypeConverter
+    fun fromNpcActivity(value: com.example.data.model.NpcActivity): String = value.name
+
+    @TypeConverter
+    fun toNpcActivity(value: String): com.example.data.model.NpcActivity = enumValueOf(value)
 }

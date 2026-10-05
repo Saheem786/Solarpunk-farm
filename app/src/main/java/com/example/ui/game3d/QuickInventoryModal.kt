@@ -2,11 +2,13 @@ package com.example.ui.game3d
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.Button
@@ -38,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.data.local.InventoryEntity
 import com.example.ui.theme.CleanCyan
 import com.example.ui.theme.SolarEmerald
@@ -48,12 +52,17 @@ fun QuickInventoryModal(
     inventory: List<InventoryEntity>,
     onSellItem: (String, Int) -> Unit,
     onConsumeItem: (String) -> Unit = {},
+    onOpenMap: () -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(0.92f)
+                .fillMaxHeight(0.92f)
                 .clip(RoundedCornerShape(24.dp))
                 .border(1.dp, CleanCyan.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
                 .testTag("quick_inventory_modal"),
@@ -84,15 +93,52 @@ fun QuickInventoryModal(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.testTag("close_inventory_modal")
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = Color.White
-                        )
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    onDismiss()
+                                    onOpenMap()
+                                }
+                                .testTag("btn_bag_open_map"),
+                            color = Color(0x3300E676),
+                            shape = RoundedCornerShape(12.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Explore,
+                                    contentDescription = "Map",
+                                    tint = SolarEmerald,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Text(
+                                    text = "World Map",
+                                    color = Color.White,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.testTag("close_inventory_modal")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
 
