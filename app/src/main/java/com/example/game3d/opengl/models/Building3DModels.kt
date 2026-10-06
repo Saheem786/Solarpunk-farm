@@ -71,15 +71,15 @@ class Building3DModels {
 
         // 0. Building Ground Shadow Meshes
         builder.reset()
-        builder.addBox(0f, 0.015f, 0f, 8.4f, 0.01f, 6.4f, 0.05f, 0.10f, 0.08f, 0.55f)
+        builder.addBox(0f, 0.02f, 0f, 8.4f, 0.01f, 6.4f, 0.18f, 0.14f, 0.11f, 0.38f)
         shadowLargeMesh = builder.build()
 
         builder.reset()
-        builder.addBox(0f, 0.015f, 0f, 5.6f, 0.01f, 4.8f, 0.05f, 0.10f, 0.08f, 0.55f)
+        builder.addBox(0f, 0.02f, 0f, 5.6f, 0.01f, 4.8f, 0.18f, 0.14f, 0.11f, 0.38f)
         shadowMediumMesh = builder.build()
 
         builder.reset()
-        builder.addBox(0f, 0.015f, 0f, 3.2f, 0.01f, 2.6f, 0.05f, 0.10f, 0.08f, 0.55f)
+        builder.addBox(0f, 0.02f, 0f, 3.2f, 0.01f, 2.6f, 0.18f, 0.14f, 0.11f, 0.38f)
         shadowSmallMesh = builder.build()
 
         // 1. FARM HOUSE / CABIN (Height = 3.5 units)

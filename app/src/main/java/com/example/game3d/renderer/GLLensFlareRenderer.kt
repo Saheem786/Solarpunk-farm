@@ -337,10 +337,13 @@ class GLLensFlareRenderer {
             param = 0.8f
         )
 
-        // 9. Restore Depth Test for standard rendering
+        // 9. Restore Depth Test & Blending for standard 3D rendering
         GLES20.glDisableVertexAttribArray(shader.aPositionLoc)
+        GLES20.glDisable(GLES20.GL_BLEND)
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         GLES20.glDepthMask(true)
+        GLES20.glEnable(GLES20.GL_CULL_FACE)
+        GLES20.glCullFace(GLES20.GL_BACK)
     }
 
     private fun drawFlareElement(

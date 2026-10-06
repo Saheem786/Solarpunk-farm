@@ -237,59 +237,59 @@ fun Game3DScreen(
                     .fillMaxSize()
                     .alpha(hudOpacity)
             ) {
-            // 3. HUD Top Bar (Top-Left Day/Time/Weather, Top-Center Survival Bars, Top-Right Money/Energy/Eco)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-            ) {
-                TopGameStatsBar(
-                    state = gameState,
-                    onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
-                    plots = plots,
-                    ecosystemScore = ecosystemHealth,
-                    energySummary = energySummary,
-                    researchPoints = researchPoints,
-                    activeMission = activeMission,
-                    onEnergyClick = { viewModel.openModal("energy_grid") },
-                    onResearchClick = { viewModel.openModal("research") },
-                    onJournalClick = { viewModel.openModal("journal") }
-                )
-                SolarpunkNotificationBanner(
-                    notification = bannerNotification
-                )
-            }
-
-            // 3B. Mini-Map HUD (Top-Left Corner, below Day/Time bar)
-            MiniMapHUD(
-                playerX = viewModel.player.posX,
-                playerZ = viewModel.player.posZ,
-                playerAngleDeg = viewModel.player.orientationAngleDeg,
-                discoveredPois = discoveredPois,
-                discoveredChunks = discoveredChunks,
-                currentBiome = currentBiome,
-                plots = plots,
-                placedBuildings = placedBuildings,
-                energyNodes = energyNodes,
-                onClick = {
-                    viewModel.openModal("world_map")
-                },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(start = 12.dp, top = 42.dp)
-            )
-
-            // 4. Primary Right-Side Action Buttons Column (Build, Bag, Save, Menu)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 16.dp, bottom = 14.dp)
-            ) {
+                // 3. HUD Top Bar (Top-Left Day/Time/Weather, Top-Center Survival Bars, Top-Right Money/Energy/Eco)
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
                 ) {
-                    // 1. Build Button (Hammer Icon)
+                    TopGameStatsBar(
+                        state = gameState,
+                        onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
+                        plots = plots,
+                        ecosystemScore = ecosystemHealth,
+                        energySummary = energySummary,
+                        researchPoints = researchPoints,
+                        activeMission = activeMission,
+                        onEnergyClick = { viewModel.openModal("energy_grid") },
+                        onResearchClick = { viewModel.openModal("research") },
+                        onJournalClick = { viewModel.openModal("journal") }
+                    )
+                    SolarpunkNotificationBanner(
+                        notification = bannerNotification
+                    )
+                }
+
+                // 3B. Mini-Map HUD (Top-Left Corner, below Day/Time bar)
+                MiniMapHUD(
+                    playerX = viewModel.player.posX,
+                    playerZ = viewModel.player.posZ,
+                    playerAngleDeg = viewModel.player.orientationAngleDeg,
+                    discoveredPois = discoveredPois,
+                    discoveredChunks = discoveredChunks,
+                    currentBiome = currentBiome,
+                    plots = plots,
+                    placedBuildings = placedBuildings,
+                    energyNodes = energyNodes,
+                    onClick = {
+                        viewModel.openModal("world_map")
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 12.dp, top = 38.dp)
+                )
+
+                // 4. Primary Right-Side Action Buttons Column (Build, Bag, Save, Menu)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 14.dp)
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // 1. Build Button (Hammer Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Construction,
                         label = if (isBuildMode) "Exit" else "Build",

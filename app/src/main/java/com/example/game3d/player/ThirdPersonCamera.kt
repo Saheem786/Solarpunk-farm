@@ -55,15 +55,6 @@ class ThirdPersonCamera(
         targetY += ((validPy + 1.4f) - targetY) * posLerpFactor
         targetZ += (validPz - targetZ) * posLerpFactor
 
-        if (playerMoving) {
-            val idealYaw = (playerOrientationDeg + 180.0f) % 360.0f
-            var diff = (idealYaw - desiredYawDeg) % 360.0f
-            if (diff > 180.0f) diff -= 360.0f
-            if (diff < -180.0f) diff += 360.0f
-            desiredYawDeg = (desiredYawDeg + diff * min(1.0f, 5.0f * deltaSec)) % 360.0f
-            if (desiredYawDeg < 0.0f) desiredYawDeg += 360.0f
-        }
-
         // Smooth rotation & zoom damping
         val rotLerpFactor = min(1.0f, 14.0f * deltaSec)
 

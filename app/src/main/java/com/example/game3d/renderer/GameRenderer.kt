@@ -116,7 +116,7 @@ class PerspectiveCamera(
     val up = Vector3(0f, 1f, 0f)
 
     var near: Float = 0.2f
-    var far: Float = 250.0f
+    var far: Float = 200.0f
 
     val projectionMatrix = FloatArray(16)
     val viewMatrix = FloatArray(16)

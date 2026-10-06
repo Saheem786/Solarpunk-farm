@@ -204,7 +204,7 @@ class Animal3DModels {
 
         // 13. DROP SHADOW DISK
         builder.reset()
-        builder.addCylinder(0f, 0.01f, 0f, 0.80f, 0.01f, 10, 0.06f, 0.12f, 0.08f, 0.50f)
+        builder.addCylinder(0f, 0.02f, 0f, 0.80f, 0.01f, 10, 0.18f, 0.14f, 0.11f, 0.38f)
         shadowMesh = builder.build()
     }
 
