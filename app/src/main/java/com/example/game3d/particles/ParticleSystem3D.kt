@@ -5,6 +5,7 @@ import android.opengl.Matrix
 import com.example.game3d.opengl.GLMesh
 import com.example.game3d.opengl.GLModelBuilder
 import com.example.game3d.opengl.GLShader
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -143,6 +144,7 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
 
     private val pool = ParticlePool(maxActiveParticles)
     private val activeParticles = ArrayList<LibGDXParticle3D>(maxActiveParticles)
+    private val pendingSpawns = ConcurrentLinkedQueue<LibGDXParticle3D>()
 
     // Pre-built low poly meshes for different particle shapes
     private val boxMesh: GLMesh
@@ -188,14 +190,12 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.type = if (onDirt) ParticleType.DUST_PUFF else ParticleType.GRASS_FLECK
 
             if (onDirt) {
-                // Billowy earth dust: warm ochre to soft sand
                 p.startR = 0.78f; p.startG = 0.62f; p.startB = 0.42f
                 p.endR = 0.55f; p.endG = 0.45f; p.endB = 0.32f
                 p.startScale = 0.09f
                 p.endScale = 0.02f
                 p.maxLifeSec = 0.38f
             } else {
-                // Meadow grass: vibrant emerald flecks
                 p.startR = 0.28f; p.startG = 0.88f; p.startB = 0.35f
                 p.endR = 0.18f; p.endG = 0.58f; p.endB = 0.22f
                 p.startScale = 0.07f
@@ -203,7 +203,7 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
                 p.maxLifeSec = 0.30f
             }
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -225,18 +225,17 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.velY = (Math.random() * 1.1 + 0.55).toFloat()
             p.velZ = sin(angle) * speed
 
-            p.accelY = -4.8f // Strong gravity pull for water arcs
+            p.accelY = -4.8f
             p.damping = 0.96f
             p.type = ParticleType.WATER_DROPLET
 
-            // Azure / Cyan hydration water
             p.startR = 0.15f; p.startG = 0.85f; p.startB = 1.0f
             p.endR = 0.05f; p.endG = 0.55f; p.endB = 0.92f
             p.startScale = 0.08f
             p.endScale = 0.03f
             p.maxLifeSec = 0.52f
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -258,19 +257,18 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.velY = (Math.random() * 0.65 + 0.35).toFloat()
             p.velZ = sin(angle) * speed
 
-            p.accelY = -1.0f // Gentle upward float
+            p.accelY = -1.0f
             p.damping = 0.92f
             p.rotSpeedDeg = (Math.random() * 160 - 80).toFloat()
             p.type = ParticleType.PLANT_SPROUT
 
-            // Lush sprout lime-green glow
             p.startR = 0.40f; p.startG = 0.98f; p.startB = 0.32f
             p.endR = 0.22f; p.endG = 0.72f; p.endB = 0.20f
             p.startScale = 0.06f
-            p.endScale = 0.11f // Grows slightly before fading
+            p.endScale = 0.11f
             p.maxLifeSec = 0.48f
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -303,7 +301,7 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.endScale = 0.02f
             p.maxLifeSec = 0.65f
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -336,7 +334,7 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.endScale = 0.02f
             p.maxLifeSec = 0.58f
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -370,7 +368,7 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
             p.endScale = 0.03f
             p.maxLifeSec = 0.52f
 
-            activeParticles.add(p)
+            pendingSpawns.offer(p)
         }
     }
 
@@ -378,6 +376,12 @@ class ParticleSystem3D(maxActiveParticles: Int = 180) {
      * Updates all active particles and returns finished ones to pool.
      */
     fun update(deltaSec: Float) {
+        // Safely consume queued particle spawn requests on the GL/render thread
+        while (true) {
+            val p = pendingSpawns.poll() ?: break
+            activeParticles.add(p)
+        }
+
         val iterator = activeParticles.iterator()
         while (iterator.hasNext()) {
             val p = iterator.next()
