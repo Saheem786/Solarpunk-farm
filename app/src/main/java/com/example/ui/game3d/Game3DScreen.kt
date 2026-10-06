@@ -848,36 +848,28 @@ private fun QuickActionCircleButton(
 
     Surface(
         modifier = Modifier
-            .size(48.dp)
+            .size(46.dp)
             .scale(scale)
             .clip(CircleShape)
             .clickable(
                 interactionSource = interactionSource,
-                indication = androidx.compose.material3.ripple(bounded = true, radius = 24.dp)
+                indication = androidx.compose.material3.ripple(bounded = true, radius = 23.dp)
             ) { onClick() }
             .testTag(testTag),
-        color = if (active) Color(0xEE1A3D34) else Color(0xCC112224),
+        color = if (active) Color(0xEE1A3D34) else Color(0xD90A1A1D),
         shape = CircleShape,
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.6f))
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.7f)),
+        shadowElevation = 6.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = color,
-                modifier = Modifier.size(19.dp)
-            )
-            Text(
-                text = label,
-                color = Color.White,
-                fontSize = 8.5.sp,
-                fontWeight = FontWeight.Bold
+                modifier = Modifier.size(22.dp)
             )
         }
     }
@@ -895,16 +887,16 @@ private fun SolarpunkBottomNavBar(
 ) {
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, SolarEmerald.copy(alpha = 0.6f), RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
+            .border(1.dp, SolarEmerald.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
             .testTag("solarpunk_bottom_nav_bar"),
-        color = Color(0xF009181A),
-        shape = RoundedCornerShape(20.dp),
-        shadowElevation = 8.dp
+        color = Color(0xE6081518),
+        shape = RoundedCornerShape(18.dp),
+        shadowElevation = 6.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. Research Tab
@@ -971,28 +963,28 @@ private fun BottomNavItemPill(
 ) {
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() }
             .testTag(testTag),
         color = if (isActive) color.copy(alpha = 0.25f) else Color.Transparent,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         border = if (isActive) androidx.compose.foundation.BorderStroke(1.dp, color) else null
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = if (isActive) color else Color(0xFFB0BEC5),
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(15.dp)
             )
             Text(
                 text = label,
                 color = if (isActive) Color.White else Color(0xFFB0BEC5),
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Medium
             )
         }
