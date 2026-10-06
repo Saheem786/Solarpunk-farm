@@ -467,7 +467,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 player.posY = 0.0f
                 player.posZ = 0.0f
                 player.orientationAngleDeg = 0.0f
-                camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+                camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 225.0f, pitch = 22.0f, dist = 5.5f)
                 android.util.Log.d("FarmViewModel", "NEW_GAME_SPAWN player=(0.0,0.0,0.0)")
             }
             // Dismiss initial loading after game state is ready
@@ -647,7 +647,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             player.posY = 0.0f
             player.posZ = 0.0f
             player.orientationAngleDeg = 0.0f
-            camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+            camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 225.0f, pitch = 22.0f, dist = 5.5f)
             android.util.Log.d("FarmViewModel", "NEW_GAME_SPAWN player=(0.0,0.0,0.0)")
             delay(600)
             _isLoading.value = false

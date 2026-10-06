@@ -19,6 +19,7 @@ import com.example.game3d.opengl.models.Crop3DModels
 import com.example.game3d.opengl.models.Environment3DModels
 import com.example.game3d.opengl.models.Npc3DModels
 import com.example.game3d.opengl.models.Player3DModel
+import com.example.game3d.opengl.models.FarmWorldLayout
 import com.example.game3d.player.ThirdPersonCamera
 import com.example.game3d.player.ThirdPersonPlayer
 import kotlin.math.cos
@@ -249,19 +250,11 @@ class GameRenderer {
 
     companion object {
         const val DEBUG_3D = false
-        const val DEBUG_3D_SCENE = true
+        const val DEBUG_3D_SCENE = false
     }
 
     private var isInitialized: Boolean = false
     private var lastAnimTimeSec: Float = 0.0f
-
-    // Obstacle coordinates for camera occlusion prevention
-    private val obstacles = listOf(
-        Pair(6.0f, 0.0f),    // Farmhouse
-        Pair(-12.0f, 10.0f), // Barn
-        Pair(0.0f, 14.0f),   // Workshop
-        Pair(-14.0f, -14.0f) // Market
-    )
 
     fun create() {
         if (isInitialized) return
@@ -274,6 +267,11 @@ class GameRenderer {
         val sh = GLShader()
         sh.init()
         shader = sh
+        if (sh.programId == 0) {
+            android.util.Log.e("GameRenderer", "FATAL: GLShader initialization failed. programId == 0")
+            isInitialized = false
+            return
+        }
         modelBatch.init(sh)
 
         playerModel = Player3DModel()
@@ -287,29 +285,6 @@ class GameRenderer {
         lensFlare?.init()
 
         isInitialized = true
-
-        if (DEBUG_3D_SCENE) {
-            android.util.Log.d("DEBUG_3D_SCENE", "NEW GAME SPAWN: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "LOAD GAME: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "PLAYER VISIBLE: ${if (playerModel != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "PLAYER SCALE: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "FARMHOUSE VISIBLE: ${if (buildingModels?.farmhouseMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "BARN VISIBLE: ${if (buildingModels?.barnMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "WORKSHOP VISIBLE: ${if (buildingModels?.workshopMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "MARKET VISIBLE: ${if (buildingModels?.marketStallMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "CROPS VISIBLE: ${if (cropModels != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "ANIMALS VISIBLE: ${if (animalModels != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "TREES VISIBLE: ${if (environmentModels != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "ROAD VISIBLE: ${if (environmentModels?.roadMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "TERRAIN VISIBLE: ${if (environmentModels?.valleyGroundMesh != null) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "CAMERA: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "CAMERA COLLISION: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "DEPTH BUFFER: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "FACE CULLING: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "SHADERS: ${if (sh.programId != 0) "PASS" else "FAIL"}")
-            android.util.Log.d("DEBUG_3D_SCENE", "MULTI-SLOT SAVE: PASS")
-            android.util.Log.d("DEBUG_3D_SCENE", "EXISTING GAMEPLAY: PASS")
-        }
     }
 
     fun resize(width: Int, height: Int) {
@@ -503,55 +478,30 @@ class GameRenderer {
             return true
         }
 
-        // 2. Farmhouse (6.0, 0.0)
-        if (x >= 6.0f - 3.7f && x <= 6.0f + 3.7f &&
-            z >= 0.0f - 2.6f && z <= 0.0f + 2.6f &&
-            y <= 3.5f) {
-            return true
+        // 2. Authoritative Static Buildings from FarmWorldLayout
+        for (b in FarmWorldLayout.staticBuildings) {
+            if (b.isCircular) {
+                val dx = x - b.x
+                val dz = z - b.z
+                if (dx * dx + dz * dz < (b.radius + 0.4f) * (b.radius + 0.4f) && y <= b.height) {
+                    return true
+                }
+            } else {
+                val halfW = (b.width / 2.0f) + 0.4f
+                val halfD = (b.depth / 2.0f) + 0.4f
+                if (x >= b.x - halfW && x <= b.x + halfW &&
+                    z >= b.z - halfD && z <= b.z + halfD &&
+                    y <= b.height) {
+                    return true
+                }
+            }
         }
 
-        // 3. Rustic Barn (-12.0, 10.0)
-        if (x >= -12.0f - 4.6f && x <= -12.0f + 4.6f &&
-            z >= 10.0f - 3.6f && z <= 10.0f + 3.6f &&
-            y <= 6.0f) {
-            return true
-        }
-
-        // 4. Artisan Eco-Workshop (0.0, 14.0)
-        if (x >= 0.0f - 3.3f && x <= 0.0f + 3.3f &&
-            z >= 14.0f - 2.7f && z <= 14.0f + 2.7f &&
-            y <= 4.5f) {
-            return true
-        }
-
-        // 5. Sol City Market Stall (-14.0, -14.0)
-        val toStallX = x - (-14.0f)
-        val toStallZ = z - (-14.0f)
-        if (toStallX * toStallX + toStallZ * toStallZ < 1.8f * 1.8f && y <= 2.5f) {
-            return true
-        }
-
-        // 6. Stone Well (8.0, -3.5)
-        val toWellX = x - 8.0f
-        val toWellZ = z - (-3.5f)
-        if (toWellX * toWellX + toWellZ * toWellZ < 1.0f * 1.0f && y <= 2.0f) {
-            return true
-        }
-
-        // 7. Trees (canopy has radius 1.2f, trunk has radius 0.4f. We block camera if within 1.2f to avoid leaves clipping)
-        val trees = listOf(
-            Pair(-18.0f, -12.0f), Pair(-22.0f, -6.0f), Pair(-16.0f, -2.0f), Pair(-22.0f, 4.0f),
-            Pair(-18.0f, 12.0f), Pair(-22.0f, 18.0f), Pair(-14.0f, 22.0f), Pair(-6.0f, 22.0f),
-            Pair(2.0f, 22.0f), Pair(10.0f, 22.0f), Pair(18.0f, 22.0f), Pair(10.0f, 6.0f),
-            Pair(12.0f, 14.0f), Pair(-6.0f, -16.0f), Pair(4.0f, -18.0f), Pair(-2.0f, -22.0f),
-            Pair(12.0f, -14.5f), Pair(6.0f, -11.0f), Pair(16.0f, -4.0f), Pair(18.0f, 4.0f),
-            Pair(18.0f, -18.0f)
-        )
-        for (tree in trees) {
-            val dx = x - tree.first
-            val dz = z - tree.second
+        // 3. Authoritative Trees from FarmWorldLayout
+        for (tree in FarmWorldLayout.treePositions) {
+            val dx = x - tree.x
+            val dz = z - tree.z
             val distSq = dx * dx + dz * dz
-            // Quick prune: skip if camera sample point is more than 2.0 units away from tree center
             if (distSq > 4.00f) continue
             if (y <= 5.0f) {
                 return true

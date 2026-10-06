@@ -73,35 +73,7 @@ class Environment3DModels {
     private val tempMatrix = FloatArray(16)
 
     // Tree Placements across 3 Biomes: (X, Z, TreeType: 0=Pine, 1=Oak, 2=Cherry, 3=Willow, 4=Ancient Oak, 5=Tall Pine)
-    private val worldTreePositions = listOf(
-        // === Green Valley Trees (Existing & Farm perimeter) ===
-        Triple(-18.0f, -12.0f, 0), Triple(-22.0f, -6.0f, 1), Triple(-16.0f, -2.0f, 2),
-        Triple(-22.0f, 4.0f, 0), Triple(-18.0f, 12.0f, 1), Triple(-22.0f, 18.0f, 0),
-        Triple(-14.0f, 22.0f, 1), Triple(-6.0f, 22.0f, 0), Triple(2.0f, 22.0f, 2),
-        Triple(10.0f, 22.0f, 1), Triple(18.0f, 22.0f, 0), Triple(10.0f, 6.0f, 2),
-        Triple(12.0f, 14.0f, 1), Triple(-6.0f, -16.0f, 2), Triple(4.0f, -18.0f, 0),
-        Triple(-2.0f, -22.0f, 1), Triple(12.0f, -14.5f, 3), Triple(6.0f, -11.0f, 3),
-        Triple(16.0f, -4.0f, 3), Triple(18.0f, 4.0f, 3), Triple(18.0f, -18.0f, 0),
-
-        // === Deep Forest Trees (35+ Dense Pine & Ancient Giant Oaks in North Z > 40) ===
-        Triple(-35.0f, 50.0f, 5), Triple(-15.0f, 48.0f, 4), Triple(10.0f, 52.0f, 5), Triple(32.0f, 55.0f, 4),
-        Triple(-45.0f, 70.0f, 4), Triple(-25.0f, 68.0f, 5), Triple(-8.0f, 72.0f, 4), Triple(15.0f, 70.0f, 5),
-        Triple(38.0f, 75.0f, 4), Triple(55.0f, 80.0f, 5), Triple(-50.0f, 95.0f, 5), Triple(-28.0f, 98.0f, 4),
-        Triple(-2.0f, 92.0f, 5), Triple(25.0f, 96.0f, 4), Triple(48.0f, 102.0f, 5), Triple(-42.0f, 118.0f, 4),
-        Triple(-18.0f, 122.0f, 5), Triple(2.0f, 115.0f, 4), Triple(28.0f, 120.0f, 5), Triple(50.0f, 125.0f, 4),
-        Triple(-55.0f, 140.0f, 5), Triple(-32.0f, 145.0f, 4), Triple(-5.0f, 138.0f, 5), Triple(20.0f, 142.0f, 4),
-        Triple(42.0f, 148.0f, 5), Triple(-48.0f, 165.0f, 5), Triple(-22.0f, 168.0f, 4), Triple(8.0f, 162.0f, 5),
-        Triple(32.0f, 166.0f, 4), Triple(58.0f, 172.0f, 5), Triple(-35.0f, 185.0f, 5), Triple(-10.0f, 188.0f, 4),
-        Triple(15.0f, 182.0f, 5), Triple(40.0f, 186.0f, 4), Triple(-2.0f, 175.0f, 4),
-
-        // === Wetland Trees (Weeping Willows & Marsh Birches in South Z < -40) ===
-        Triple(-30.0f, -55.0f, 3), Triple(-10.0f, -50.0f, 3), Triple(15.0f, -52.0f, 3), Triple(35.0f, -58.0f, 3),
-        Triple(-45.0f, -75.0f, 3), Triple(-18.0f, -70.0f, 1), Triple(8.0f, -72.0f, 3), Triple(28.0f, -78.0f, 3),
-        Triple(-38.0f, -92.0f, 3), Triple(-12.0f, -88.0f, 3), Triple(18.0f, -90.0f, 3), Triple(42.0f, -94.0f, 3),
-        Triple(-48.0f, -115.0f, 3), Triple(-20.0f, -112.0f, 1), Triple(10.0f, -118.0f, 3), Triple(32.0f, -122.0f, 3),
-        Triple(-35.0f, -140.0f, 3), Triple(-8.0f, -145.0f, 3), Triple(22.0f, -138.0f, 3), Triple(45.0f, -142.0f, 3),
-        Triple(-25.0f, -165.0f, 3), Triple(5.0f, -168.0f, 3), Triple(30.0f, -162.0f, 3)
-    )
+    private val worldTreePositions = FarmWorldLayout.treePositions.map { Triple(it.x, it.z, it.type) }
 
     init {
         val builder = GLModelBuilder()
