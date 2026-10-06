@@ -283,11 +283,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 2,
                     produceProgress = 0.7f,
                     readyToHarvest = false,
-                    posX = -12.0f,
+                    posX = -7.0f,
                     posY = 0.0f,
                     posZ = 4.0f,
-                    targetX = -10.0f,
-                    targetZ = 6.0f
+                    targetX = -7.0f,
+                    targetZ = 4.0f
                 ),
                 LivestockEntity(
                     id = 2,
@@ -298,11 +298,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 3,
                     produceProgress = 0.4f,
                     readyToHarvest = false,
-                    posX = -8.0f,
+                    posX = -5.0f,
                     posY = 0.0f,
-                    posZ = -4.0f,
-                    targetX = -8.0f,
-                    targetZ = -4.0f
+                    posZ = 2.0f,
+                    targetX = -5.0f,
+                    targetZ = 2.0f
                 ),
                 LivestockEntity(
                     id = 16,
@@ -313,11 +313,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 2,
                     produceProgress = 0.1f,
                     readyToHarvest = false,
-                    posX = -10.0f,
+                    posX = -5.0f,
                     posY = 0.0f,
-                    posZ = -8.0f,
-                    targetX = -10.0f,
-                    targetZ = -8.0f
+                    posZ = -2.0f,
+                    targetX = -5.0f,
+                    targetZ = -2.0f
                 ),
                 LivestockEntity(
                     id = 3,

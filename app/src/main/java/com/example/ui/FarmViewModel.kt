@@ -446,11 +446,14 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             }
             val savedState = repository.gameState.firstOrNull()
             if (savedState != null) {
-                player.posX = savedState.playerX
-                player.posY = savedState.playerY
-                player.posZ = savedState.playerZ
+                val px = if (savedState.playerX.isNaN() || savedState.playerX.isInfinite()) 0.0f else savedState.playerX
+                val py = if (savedState.playerY.isNaN() || savedState.playerY.isInfinite()) 0.0f else savedState.playerY
+                val pz = if (savedState.playerZ.isNaN() || savedState.playerZ.isInfinite()) 0.0f else savedState.playerZ
+                player.posX = px
+                player.posY = py
+                player.posZ = pz
                 player.orientationAngleDeg = savedState.playerAngle
-                camera.updateTarget(savedState.playerX, savedState.playerY, savedState.playerZ, 1.0f)
+                camera.instantReset(px, py, pz, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
 
                 val chunks = savedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
                 if (chunks.isNotEmpty()) discoveredChunks.value = chunks
@@ -597,11 +600,14 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             delay(600)
             val loadedState = repository.gameState.firstOrNull()
             if (loadedState != null) {
-                player.posX = loadedState.playerX
-                player.posY = loadedState.playerY
-                player.posZ = loadedState.playerZ
+                val px = if (loadedState.playerX.isNaN() || loadedState.playerX.isInfinite()) 0.0f else loadedState.playerX
+                val py = if (loadedState.playerY.isNaN() || loadedState.playerY.isInfinite()) 0.0f else loadedState.playerY
+                val pz = if (loadedState.playerZ.isNaN() || loadedState.playerZ.isInfinite()) 0.0f else loadedState.playerZ
+                player.posX = px
+                player.posY = py
+                player.posZ = pz
                 player.orientationAngleDeg = loadedState.playerAngle
-                camera.updateTarget(loadedState.playerX, loadedState.playerY, loadedState.playerZ, 1.0f)
+                camera.instantReset(px, py, pz, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
 
                 val chunks = loadedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
                 if (chunks.isNotEmpty()) discoveredChunks.value = chunks
@@ -633,7 +639,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             player.posY = 0.0f
             player.posZ = 0.0f
             player.orientationAngleDeg = 0.0f
-            camera.updateTarget(0.0f, 0.0f, 0.0f, 1.0f)
+            camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
             delay(600)
             _isLoading.value = false
             viewModelScope.launch(Dispatchers.Main) {
@@ -867,13 +873,13 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             audioSystem.playMenuWhoosh()
             _ghostOffsetX.value = 0.0f
             _ghostOffsetZ.value = 4.8f
-            camera.pitchDeg = 38.0f
-            camera.distance = 9.0f
+            camera.desiredPitchDeg = 35.0f
+            camera.desiredDistance = 7.0f
             showNotification("Build Mode Active", "Select structure, rotate & place in the sanctuary", "build")
         } else {
             audioSystem.playMenuWhoosh()
-            camera.pitchDeg = 24.0f
-            camera.distance = 7.5f
+            camera.desiredPitchDeg = 22.0f
+            camera.desiredDistance = 5.5f
         }
     }
 
@@ -979,8 +985,8 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 addFloatingText("Constructed!", SolarEmerald)
                 showNotification("Constructed!", message, "check_circle")
                 _isBuildMode.value = false
-                camera.pitchDeg = 24.0f
-                camera.distance = 7.5f
+                camera.desiredPitchDeg = 22.0f
+                camera.desiredDistance = 5.5f
             } else {
                 audioSystem.playErrorSound()
                 haptics.vibrateError()

@@ -521,9 +521,9 @@ class Building3DModels {
         Matrix.rotateM(modelMatrix, 0, -90.0f, 0f, 1f, 0f)
         renderMesh(shader, farmhouseMesh, modelMatrix, viewMatrix, projMatrix)
 
-        // 2. Draw Rustic Barn at X = -12.0, Z = 10.0 with Ground Shadow
+        // 2. Draw Rustic Barn at X = -8.0, Z = 6.0 with Ground Shadow
         Matrix.setIdentityM(modelMatrix, 0)
-        Matrix.translateM(modelMatrix, 0, -12.0f, 0.0f, 10.0f)
+        Matrix.translateM(modelMatrix, 0, -8.0f, 0.0f, 6.0f)
         renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
         Matrix.rotateM(modelMatrix, 0, 0.0f, 0f, 1f, 0f)
         renderMesh(shader, barnMesh, modelMatrix, viewMatrix, projMatrix)

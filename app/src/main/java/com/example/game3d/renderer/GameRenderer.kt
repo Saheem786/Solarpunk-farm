@@ -110,12 +110,12 @@ class PerspectiveCamera(
     var viewportWidth: Float = 1080.0f,
     var viewportHeight: Float = 1920.0f
 ) {
-    val position = Vector3(0f, 6f, 10f)
-    val target = Vector3(0f, 1.25f, 0f)
+    val position = Vector3(0f, 2f, -5.5f)
+    val target = Vector3(0f, 1.1f, 0f)
     val up = Vector3(0f, 1f, 0f)
 
-    var near: Float = 0.5f
-    var far: Float = 150.0f
+    var near: Float = 0.2f
+    var far: Float = 250.0f
 
     val projectionMatrix = FloatArray(16)
     val viewMatrix = FloatArray(16)
@@ -247,6 +247,11 @@ class GameRenderer {
     private var skybox: Skybox3D? = null
     private var lensFlare: GLLensFlareRenderer? = null
 
+    companion object {
+        const val DEBUG_3D = false
+        const val DEBUG_3D_SCENE = false
+    }
+
     private var isInitialized: Boolean = false
     private var lastAnimTimeSec: Float = 0.0f
 
@@ -327,11 +332,11 @@ class GameRenderer {
         val shakeY = if (screenShake > 0f) cos(animTimeSec * 35.0f) * screenShake * 0.25f else 0f
 
         val targetX = (player?.posX ?: 0.0f) + shakeX
-        val targetY = ((player?.posY ?: 0.0f) + 1.25f) + shakeY
-        val targetZ = player?.posZ ?: 0.0f
+        val targetY = ((player?.posY ?: 0.0f) + 1.1f) + shakeY
+        val targetZ = (player?.posZ ?: 0.0f)
 
-        val yawDeg = thirdPersonCamera?.yawDeg ?: 45.0f
-        val pitchDeg = (thirdPersonCamera?.pitchDeg ?: 24.0f).coerceIn(12.0f, 65.0f)
+        val yawDeg = thirdPersonCamera?.yawDeg ?: 180.0f
+        val pitchDeg = (thirdPersonCamera?.pitchDeg ?: 22.0f).coerceIn(12.0f, 65.0f)
 
         val yawRad = Math.toRadians(yawDeg.toDouble())
         val pitchRad = Math.toRadians(pitchDeg.toDouble())
@@ -345,20 +350,20 @@ class GameRenderer {
         val dirY = (sin(pitchRad)).toFloat()
         val dirZ = (cos(pitchRad) * cos(yawRad)).toFloat()
 
-        // 3. Desired distance chosen by player (clamped between 2.0 and 6.0 units, default is 5.0)
-        val desiredDist = (thirdPersonCamera?.desiredDistance ?: 5.0f).coerceIn(2.0f, 6.0f)
+        // 3. Desired distance chosen by player (clamped between 3.5 and 8.0 units, default is 5.5)
+        val desiredDist = (thirdPersonCamera?.desiredDistance ?: 5.5f).coerceIn(3.5f, 8.0f)
 
         // 4. Perform raycast sampling to find maximum allowed distance without clipping any solid structure
         var maxAllowedDist = desiredDist
         val step = 0.40f
-        var d = 0.3f // Start slightly away from player to avoid self-clipping
+        var d = 0.6f // Start 0.6m away from player to avoid self-clipping
         while (d <= desiredDist) {
             val sx = targetX + d * dirX
             val sy = targetY + d * dirY
             val sz = targetZ + d * dirZ
 
             if (checkCameraCollision(sx, sy, sz, placedBuildings, energyNodes)) {
-                maxAllowedDist = max(2.0f, d - 0.3f)
+                maxAllowedDist = max(3.5f, d - 0.4f)
                 break
             }
             d += step
