@@ -7,31 +7,31 @@ import kotlin.math.sin
 
 class ThirdPersonCamera(
     var targetX: Float = 0.0f,
-    var targetY: Float = 1.1f,
+    var targetY: Float = 1.4f,
     var targetZ: Float = 0.0f
 ) {
     // Current camera parameters
     var yawDeg: Float = 180.0f // Orbit around Y axis (180 deg looks towards +Z)
-    var pitchDeg: Float = 22.0f // Elevation angle
-    var distance: Float = 5.5f // Default distance
+    var pitchDeg: Float = 18.0f // Elevation angle (12-20 deg)
+    var distance: Float = 5.0f // Default distance (4.5 - 6.0 units)
 
     // Target values for smooth damping
     var desiredYawDeg: Float = 180.0f
-    var desiredPitchDeg: Float = 22.0f
-    var desiredDistance: Float = 5.5f
+    var desiredPitchDeg: Float = 18.0f
+    var desiredDistance: Float = 5.0f
 
-    val minDistance = 3.5f
-    val maxDistance = 8.0f
+    val minDistance = 4.0f
+    val maxDistance = 7.0f
     val minPitch = 12.0f
-    val maxPitch = 60.0f
+    val maxPitch = 30.0f
 
-    fun instantReset(px: Float, py: Float, pz: Float, yaw: Float = 180.0f, pitch: Float = 22.0f, dist: Float = 5.5f) {
+    fun instantReset(px: Float, py: Float, pz: Float, yaw: Float = 180.0f, pitch: Float = 18.0f, dist: Float = 5.0f) {
         val validPx = if (px.isNaN() || px.isInfinite()) 0.0f else px
         val validPy = if (py.isNaN() || py.isInfinite()) 0.0f else py
         val validPz = if (pz.isNaN() || pz.isInfinite()) 0.0f else pz
 
         targetX = validPx
-        targetY = validPy + 1.1f
+        targetY = validPy + 1.4f
         targetZ = validPz
 
         yawDeg = yaw
@@ -44,7 +44,7 @@ class ThirdPersonCamera(
         desiredDistance = clampedDist
     }
 
-    fun updateTarget(targetPlayerX: Float, targetPlayerY: Float, targetPlayerZ: Float, deltaSec: Float) {
+    fun updateTarget(targetPlayerX: Float, targetPlayerY: Float, targetPlayerZ: Float, deltaSec: Float, playerMoving: Boolean = false, playerOrientationDeg: Float = 0.0f) {
         val validPx = if (targetPlayerX.isNaN() || targetPlayerX.isInfinite()) 0.0f else targetPlayerX
         val validPy = if (targetPlayerY.isNaN() || targetPlayerY.isInfinite()) 0.0f else targetPlayerY
         val validPz = if (targetPlayerZ.isNaN() || targetPlayerZ.isInfinite()) 0.0f else targetPlayerZ
@@ -52,8 +52,17 @@ class ThirdPersonCamera(
         // Smooth target follow interpolation
         val posLerpFactor = min(1.0f, 12.0f * deltaSec)
         targetX += (validPx - targetX) * posLerpFactor
-        targetY += ((validPy + 1.1f) - targetY) * posLerpFactor
+        targetY += ((validPy + 1.4f) - targetY) * posLerpFactor
         targetZ += (validPz - targetZ) * posLerpFactor
+
+        if (playerMoving) {
+            val idealYaw = (playerOrientationDeg + 180.0f) % 360.0f
+            var diff = (idealYaw - desiredYawDeg) % 360.0f
+            if (diff > 180.0f) diff -= 360.0f
+            if (diff < -180.0f) diff += 360.0f
+            desiredYawDeg = (desiredYawDeg + diff * min(1.0f, 5.0f * deltaSec)) % 360.0f
+            if (desiredYawDeg < 0.0f) desiredYawDeg += 360.0f
+        }
 
         // Smooth rotation & zoom damping
         val rotLerpFactor = min(1.0f, 14.0f * deltaSec)

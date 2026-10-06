@@ -39,6 +39,7 @@ import com.example.data.model.WeatherType
 import com.example.data.model.*
 import com.example.data.repository.FarmRepository
 import com.example.data.repository.SaveLoadSystem
+import com.example.ui.game3d.HudManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -150,6 +151,23 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     val musicVolume = MutableStateFlow(prefs.getFloat("music_vol", 0.8f))
     val sfxVolume = MutableStateFlow(prefs.getFloat("sfx_vol", 0.9f))
     val vibrationEnabled = MutableStateFlow(prefs.getBoolean("vibration_on", true))
+    val hudManager = HudManager()
+    val hudOpacity = MutableStateFlow(prefs.getFloat("hud_opacity", 0.85f))
+    val isImmersiveMode = MutableStateFlow(prefs.getBoolean("immersive_mode", false)).also {
+        hudManager.setImmersiveMode(prefs.getBoolean("immersive_mode", false))
+    }
+
+    fun setHudOpacity(opacity: Float) {
+        val clamped = opacity.coerceIn(0.3f, 1.0f)
+        hudOpacity.value = clamped
+        prefs.edit().putFloat("hud_opacity", clamped).apply()
+    }
+
+    fun setImmersiveMode(enabled: Boolean) {
+        isImmersiveMode.value = enabled
+        hudManager.setImmersiveMode(enabled)
+        prefs.edit().putBoolean("immersive_mode", enabled).apply()
+    }
 
     // Phase 7: Main Menu, Tutorial, Achievements & Radial Quick Access Wheel StateFlows
     val isMainMenuVisible = MutableStateFlow(true)
@@ -788,19 +806,21 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 // 2. Update Camera Target
-                camera.updateTarget(player.posX, player.posY, player.posZ, deltaSec)
+                camera.updateTarget(player.posX, player.posY, player.posZ, deltaSec, player.isMoving, player.orientationAngleDeg)
 
                 // 3. Proximity Interaction Check
                 val pList = plots.value
                 val eList = energyNodes.value
                 val aList = livestock.value
-                _currentPrompt.value = InteractionSystem.findNearestInteraction(
+                val prompt = InteractionSystem.findNearestInteraction(
                     player.posX,
                     player.posZ,
                     pList,
                     eList,
                     aList
                 )
+                _currentPrompt.value = prompt
+                hudManager.updateContextualState(prompt != null)
 
                 // 4. Update Day/Night Lighting & Music Loop
                 val hour = gameState.value?.gameTimeHour ?: 8.5f

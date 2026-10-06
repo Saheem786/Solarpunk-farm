@@ -129,340 +129,165 @@ fun TopGameStatsBar(
     val thirstFrac = (thirst / state.maxThirst).coerceIn(0f, 1f)
     val staminaFrac = (stamina / state.maxStamina).coerceIn(0f, 1f)
 
-    Row(
+    val ecoScore = (ecosystemScore ?: state.ecoPrestige).coerceIn(0, 100)
+    val ecoColor = when {
+        ecoScore < 50 -> Color(0xFFE57373)
+        ecoScore <= 75 -> Color(0xFFFFD54F)
+        else -> Color(0xFF81C784)
+    }
+
+    val totalCap = if (state.batteryMaxCapacityKwh > 0f) state.batteryMaxCapacityKwh else 100f
+    val chargeRatio = (state.batteryChargeKwh / totalCap).coerceIn(0f, 1f)
+    val isLowEnergy = chargeRatio < 0.20f
+
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .testTag("top_game_stats_bar"),
+        color = Color(0xF00A1A1D),
+        shape = RoundedCornerShape(14.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676)),
+        shadowElevation = 4.dp
     ) {
-        // 1. TOP-LEFT CORNER: Day Counter + Time + Weather Icon
-        Surface(
+        Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(18.dp))
-                .clickable { onAdvanceTimeClick() }
-                .testTag("stat_time_button"),
-            color = Color(0xF00A1A1D),
-            shape = RoundedCornerShape(18.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x4400E676))
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // 1. Day / Time / Weather
             Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onAdvanceTimeClick() }
+                    .padding(horizontal = 3.dp, vertical = 2.dp)
+                    .testTag("stat_time_button"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-                // Day Counter
                 Text(
-                    text = "Day ${state.gameTimeDay}",
+                    text = "D${state.gameTimeDay}",
                     color = SunGold,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = "•",
-                    color = Color(0x66FFFFFF),
-                    fontSize = 10.sp
-                )
-                // Time (11:57 AM)
                 Text(
                     text = timeFormatted,
                     color = Color.White,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
-                // Weather Icon
                 Icon(
                     imageVector = weatherIcon,
                     contentDescription = weather.displayName,
                     tint = weatherTint,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(11.dp)
                 )
             }
-        }
 
-        // 2. TOP-CENTER: Survival Bars (Health, Hunger, Thirst, Stamina)
-        Surface(
-            modifier = Modifier
-                .clip(RoundedCornerShape(18.dp))
-                .testTag("survival_stats_hud"),
-            color = Color(0xF00A1A1D),
-            shape = RoundedCornerShape(18.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
-        ) {
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 2. Health
+            CompactSurvivalPill(
+                icon = Icons.Default.Favorite,
+                color = Color(0xFFFF5252),
+                text = "${(healthFrac * 100).toInt()}%",
+                fraction = healthFrac,
+                testTag = "stat_bar_health"
+            )
+
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 3. Hunger
+            CompactSurvivalPill(
+                icon = Icons.Default.Restaurant,
+                color = Color(0xFFFF9800),
+                text = "${(hungerFrac * 100).toInt()}%",
+                fraction = hungerFrac,
+                testTag = "stat_bar_hunger"
+            )
+
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 4. Water
+            CompactSurvivalPill(
+                icon = Icons.Default.WaterDrop,
+                color = Color(0xFF00E5FF),
+                text = "${(thirstFrac * 100).toInt()}%",
+                fraction = thirstFrac,
+                testTag = "stat_bar_thirst"
+            )
+
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 5. Coins
             Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Health (red, heart icon)
-                CompactSurvivalPill(
-                    icon = Icons.Default.Favorite,
-                    color = Color(0xFFFF5252),
-                    text = "${(healthFrac * 100).toInt()}%",
-                    fraction = healthFrac,
-                    testTag = "stat_bar_health"
-                )
-                if (state.isSick) {
-                    Surface(
-                        color = Color(0x442E7D32),
-                        shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF81C784))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Text(text = "🤢", fontSize = 10.sp)
-                            Text(
-                                text = "SICK",
-                                color = Color(0xFF81C784),
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
-                }
-                // Hunger (orange, food icon)
-                CompactSurvivalPill(
-                    icon = Icons.Default.Restaurant,
-                    color = Color(0xFFFF9800),
-                    text = "${(hungerFrac * 100).toInt()}%",
-                    fraction = hungerFrac,
-                    testTag = "stat_bar_hunger"
-                )
-                // Thirst (blue, water drop icon)
-                CompactSurvivalPill(
-                    icon = Icons.Default.WaterDrop,
-                    color = Color(0xFF00E5FF),
-                    text = "${(thirstFrac * 100).toInt()}%",
-                    fraction = thirstFrac,
-                    testTag = "stat_bar_thirst"
-                )
-                // Stamina (green, lightning icon)
-                CompactSurvivalPill(
-                    icon = Icons.Default.Bolt,
-                    color = Color(0xFF00E676),
-                    text = "${(staminaFrac * 100).toInt()}%",
-                    fraction = staminaFrac,
-                    testTag = "stat_bar_stamina"
-                )
-            }
-        }
-
-        // 3. TOP-RIGHT CORNER: Money + Energy + Ecosystem Score
-        val ecoScore = (ecosystemScore ?: state.ecoPrestige).coerceIn(0, 100)
-        val ecoColor = when {
-            ecoScore < 50 -> Color(0xFFE57373)
-            ecoScore <= 75 -> Color(0xFFFFD54F)
-            else -> Color(0xFF81C784)
-        }
-
-        Surface(
-            modifier = Modifier
-                .clip(RoundedCornerShape(18.dp))
-                .testTag("top_right_stats_hud"),
-            color = Color(0xF00A1A1D),
-            shape = RoundedCornerShape(18.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Money ($450)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.testTag("stat_coins")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MonetizationOn,
-                        contentDescription = "Money",
-                        tint = SunGold,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text(
-                        text = "$${state.solCoins}",
-                        color = SunGold,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1
-                    )
-                }
-
-                Text(
-                    text = "|",
-                    color = Color(0x33FFFFFF),
-                    fontSize = 10.sp
-                )
-
-                // Energy Display (Compact HUD - tap to open full Energy Tab)
-                val totalCap = if (state.batteryMaxCapacityKwh > 0f) state.batteryMaxCapacityKwh else 100f
-                val chargeRatio = (state.batteryChargeKwh / totalCap).coerceIn(0f, 1f)
-                val isLowEnergy = chargeRatio < 0.20f
-                val netFlow = energySummary?.netHourlyKwh ?: 0f
-
-                Surface(
-                    color = if (isLowEnergy) Color(0x44FF5252) else Color(0x2200E5FF),
-                    shape = RoundedCornerShape(8.dp),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (isLowEnergy) Color(0xFFFF5252) else CleanCyan.copy(alpha = 0.5f)
-                    ),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onEnergyClick() }
-                        .testTag("stat_energy")
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isLowEnergy) Icons.Default.BatteryAlert else Icons.Default.BatteryChargingFull,
-                            contentDescription = "Energy",
-                            tint = if (isLowEnergy) Color(0xFFFF5252) else CleanCyan,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "${state.batteryChargeKwh.toInt()}/${totalCap.toInt()} kWh",
-                            color = if (isLowEnergy) Color(0xFFFF8A80) else Color.White,
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        // Small arrow icon showing net flow
-                        val arrowIcon = when {
-                            netFlow > 0.05f -> Icons.Default.ArrowUpward
-                            netFlow < -0.05f -> Icons.Default.ArrowDownward
-                            else -> Icons.Default.Remove
-                        }
-                        val arrowTint = when {
-                            netFlow > 0.05f -> SolarEmerald
-                            netFlow < -0.05f -> Color(0xFFFF5252)
-                            else -> SunGold
-                        }
-                        Icon(
-                            imageVector = arrowIcon,
-                            contentDescription = "Flow",
-                            tint = arrowTint,
-                            modifier = Modifier.size(11.dp)
-                        )
-                        if (isLowEnergy) {
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = "LOW!",
-                                color = Color(0xFFFF5252),
-                                fontSize = 8.5.sp,
-                                fontWeight = FontWeight.ExtraBold
-                            )
-                        }
-                    }
-                }
-
-                Text(
-                    text = "|",
-                    color = Color(0x33FFFFFF),
-                    fontSize = 10.sp
-                )
-
-                // Ecosystem score (Ecosystem 75% with leaf icon)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.testTag("hud_ecosystem_score")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Eco,
-                        contentDescription = "Ecosystem",
-                        tint = ecoColor,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text(
-                        text = "Ecosystem $ecoScore%",
-                        color = ecoColor,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1
-                    )
-                }
-
-                Text(
-                    text = "|",
-                    color = Color(0x33FFFFFF),
-                    fontSize = 10.sp
-                )
-
-                // Research Points Display (Flask Icon)
-                Surface(
-                    color = Color(0x2200E5FF),
-                    shape = RoundedCornerShape(8.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan.copy(alpha = 0.5f)),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onResearchClick() }
-                        .testTag("stat_research_points")
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Science,
-                            contentDescription = "Research Points",
-                            tint = CleanCyan,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                            text = "${researchPoints} RP",
-                            color = CleanCyan,
-                            fontSize = 10.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    // Active Mission Banner below stats bar
-    if (activeMission != null) {
-        Spacer(modifier = Modifier.height(3.dp))
-        Surface(
-            modifier = Modifier
-                .padding(top = 2.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable { onJournalClick() }
-                .testTag("hud_active_mission_banner"),
-            color = Color(0xF00A1A1D),
-            shape = RoundedCornerShape(12.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, SunGold.copy(alpha = 0.7f))
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.testTag("stat_coins")
             ) {
                 Icon(
-                    imageVector = Icons.Default.Flag,
-                    contentDescription = "Active Mission",
+                    imageVector = Icons.Default.MonetizationOn,
+                    contentDescription = "Coins",
                     tint = SunGold,
-                    modifier = Modifier.size(13.dp)
+                    modifier = Modifier.size(11.dp)
                 )
                 Text(
-                    text = "${activeMission.title}: ${activeMission.objectiveDescription}",
+                    text = "$${state.solCoins}",
                     color = SunGold,
-                    fontSize = 10.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 6. Energy kWh
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onEnergyClick() }
+                    .padding(horizontal = 2.dp, vertical = 2.dp)
+                    .testTag("stat_energy"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Icon(
+                    imageVector = if (isLowEnergy) Icons.Default.BatteryAlert else Icons.Default.BatteryChargingFull,
+                    contentDescription = "Energy",
+                    tint = if (isLowEnergy) Color(0xFFFF5252) else CleanCyan,
+                    modifier = Modifier.size(11.dp)
+                )
+                Text(
+                    text = "${state.batteryChargeKwh.toInt()}kWh",
+                    color = if (isLowEnergy) Color(0xFFFF8A80) else Color.White,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+
+            // 7. Ecosystem
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.testTag("hud_ecosystem_score")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Eco,
+                    contentDescription = "Ecosystem",
+                    tint = ecoColor,
+                    modifier = Modifier.size(11.dp)
+                )
+                Text(
+                    text = "$ecoScore%",
+                    color = ecoColor,
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -480,31 +305,25 @@ private fun CompactSurvivalPill(
     Row(
         modifier = Modifier.testTag(testTag),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(13.dp)
-        )
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 9.5.sp,
-            fontWeight = FontWeight.Bold
+            modifier = Modifier.size(11.dp)
         )
         Box(
             modifier = Modifier
-                .width(22.dp)
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
+                .width(16.dp)
+                .height(3.dp)
+                .clip(RoundedCornerShape(1.5.dp))
                 .background(Color(0x55FFFFFF))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction.coerceIn(0f, 1f))
-                    .height(4.dp)
+                    .height(3.dp)
                     .background(color)
             )
         }

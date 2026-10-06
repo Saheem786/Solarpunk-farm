@@ -35,10 +35,14 @@ fun SettingsMenuModal(
     musicVolume: Float,
     sfxVolume: Float,
     vibrationEnabled: Boolean,
+    hudOpacity: Float,
+    immersiveMode: Boolean,
     onMasterVolumeChange: (Float) -> Unit,
     onMusicVolumeChange: (Float) -> Unit,
     onSfxVolumeChange: (Float) -> Unit,
     onVibrationToggle: (Boolean) -> Unit,
+    onHudOpacityChange: (Float) -> Unit,
+    onImmersiveModeToggle: (Boolean) -> Unit,
     onSaveClick: () -> Unit,
     onLoadClick: () -> Unit,
     onNewGameClick: () -> Unit,
@@ -205,10 +209,12 @@ fun SettingsMenuModal(
                             targetFps = targetFps,
                             fog = fogEnabled,
                             godRays = godRaysEnabled,
+                            hudOpacity = hudOpacity,
                             onPresetChange = { graphicsPreset = it },
                             onFpsChange = { targetFps = it },
                             onFogChange = { fogEnabled = it },
-                            onGodRaysChange = { godRaysEnabled = it }
+                            onGodRaysChange = { godRaysEnabled = it },
+                            onHudOpacityChange = onHudOpacityChange
                         )
                         2 -> ControlsSettingsTab(
                             sensitivity = sensitivity,
@@ -223,10 +229,12 @@ fun SettingsMenuModal(
                             showTooltips = showTooltips,
                             timeSpeed = timeSpeed,
                             difficulty = difficulty,
+                            immersiveMode = immersiveMode,
                             onTutorialsChange = { showTutorials = it },
                             onTooltipsChange = { showTooltips = it },
                             onTimeSpeedChange = { timeSpeed = it },
-                            onDifficultyChange = { difficulty = it }
+                            onDifficultyChange = { difficulty = it },
+                            onImmersiveModeToggle = onImmersiveModeToggle
                         )
                         4 -> AccessibilitySettingsTab(
                             colorblind = colorblindMode,
@@ -327,10 +335,12 @@ private fun GraphicsSettingsTab(
     targetFps: String,
     fog: Boolean,
     godRays: Boolean,
+    hudOpacity: Float,
     onPresetChange: (String) -> Unit,
     onFpsChange: (String) -> Unit,
     onFogChange: (Boolean) -> Unit,
-    onGodRaysChange: (Boolean) -> Unit
+    onGodRaysChange: (Boolean) -> Unit,
+    onHudOpacityChange: (Float) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -367,6 +377,17 @@ private fun GraphicsSettingsTab(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            Text("HUD Opacity (${(hudOpacity * 100).toInt()}%)", color = SunGold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+            Slider(
+                value = hudOpacity,
+                onValueChange = onHudOpacityChange,
+                valueRange = 0.3f..1f,
+                colors = SliderDefaults.colors(thumbColor = SunGold, activeTrackColor = SolarEmerald)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             ToggleRow("Volumetric Fog (Forest)", fog, Icons.Default.Cloud, onFogChange)
             Spacer(modifier = Modifier.height(6.dp))
@@ -417,10 +438,12 @@ private fun GameplaySettingsTab(
     showTooltips: Boolean,
     timeSpeed: String,
     difficulty: String,
+    immersiveMode: Boolean,
     onTutorialsChange: (Boolean) -> Unit,
     onTooltipsChange: (Boolean) -> Unit,
     onTimeSpeedChange: (String) -> Unit,
-    onDifficultyChange: (String) -> Unit
+    onDifficultyChange: (String) -> Unit,
+    onImmersiveModeToggle: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -431,6 +454,8 @@ private fun GameplaySettingsTab(
             ToggleRow("Show Tutorial Hints", showTutorials, Icons.Default.Help, onTutorialsChange)
             Spacer(modifier = Modifier.height(6.dp))
             ToggleRow("Show Context Tooltips", showTooltips, Icons.Default.Info, onTooltipsChange)
+            Spacer(modifier = Modifier.height(6.dp))
+            ToggleRow("Immersive Mode (Hide All HUD)", immersiveMode, Icons.Default.Fullscreen, onImmersiveModeToggle)
 
             Spacer(modifier = Modifier.height(12.dp))
 

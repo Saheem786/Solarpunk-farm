@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Inventory2
@@ -136,6 +137,8 @@ fun Game3DScreen(
     val musicVol by viewModel.musicVolume.collectAsStateWithLifecycle()
     val sfxVol by viewModel.sfxVolume.collectAsStateWithLifecycle()
     val vibrationOn by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val hudOpacity by viewModel.hudOpacity.collectAsStateWithLifecycle()
+    val isImmersiveMode by viewModel.isImmersiveMode.collectAsStateWithLifecycle()
 
     val discoveredChunks by viewModel.discoveredChunks.collectAsStateWithLifecycle()
     val discoveredPois by viewModel.discoveredPois.collectAsStateWithLifecycle()
@@ -163,6 +166,7 @@ fun Game3DScreen(
     val isQuickWheelVisible by viewModel.isQuickWheelVisible.collectAsStateWithLifecycle()
 
     var showActionsMenu by remember { mutableStateOf(false) }
+    val showBottomNavMenu = viewModel.hudManager.isNavMenuVisible.collectAsStateWithLifecycle().value
 
     val glRenderer = remember { GLWorldRenderer() }
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
@@ -226,197 +230,224 @@ fun Game3DScreen(
             modifier = Modifier.fillMaxSize()
         )
 
-        // 3. HUD Top Bar (Top-Left Day/Time/Weather, Top-Center Survival Bars, Top-Right Money/Energy/Eco)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-        ) {
-            TopGameStatsBar(
-                state = gameState,
-                onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
-                plots = plots,
-                ecosystemScore = ecosystemHealth,
-                energySummary = energySummary,
-                researchPoints = researchPoints,
-                activeMission = activeMission,
-                onEnergyClick = { viewModel.openModal("energy_grid") },
-                onResearchClick = { viewModel.openModal("research") },
-                onJournalClick = { viewModel.openModal("journal") }
-            )
-            SolarpunkNotificationBanner(
-                notification = bannerNotification
-            )
-        }
-
-        // 3B. Mini-Map HUD (Top-Left Corner, below Day/Time bar)
-        MiniMapHUD(
-            playerX = viewModel.player.posX,
-            playerZ = viewModel.player.posZ,
-            playerAngleDeg = viewModel.player.orientationAngleDeg,
-            discoveredPois = discoveredPois,
-            discoveredChunks = discoveredChunks,
-            currentBiome = currentBiome,
-            plots = plots,
-            placedBuildings = placedBuildings,
-            energyNodes = energyNodes,
-            onClick = {
-                viewModel.openModal("world_map")
-            },
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 12.dp, top = 42.dp)
-        )
-
-        // 4. Primary Right-Side Action Buttons Column (Build, Bag, Save, Menu)
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 14.dp)
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+        // HUD Overlays Container governed by global HUD opacity setting & immersive mode
+        if (!isImmersiveMode) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(hudOpacity)
             ) {
-                // 1. Build Button (Hammer Icon)
-                QuickActionCircleButton(
-                    icon = Icons.Default.Construction,
-                    label = if (isBuildMode) "Exit" else "Build",
-                    color = if (isBuildMode) SunGold else SolarEmerald,
-                    active = isBuildMode,
-                    testTag = "btn_build_mode",
-                    onClick = { viewModel.toggleBuildMode() }
-                )
-
-                // 2. Bag Button (Backpack Icon)
-                QuickActionCircleButton(
-                    icon = Icons.Default.Inventory2,
-                    label = "Bag",
-                    color = CleanCyan,
-                    testTag = "btn_inventory",
-                    onClick = { viewModel.openModal("inventory") }
-                )
-
-                // 3. Energy Grid Button (Bolt Icon)
-                QuickActionCircleButton(
-                    icon = Icons.Default.Bolt,
-                    label = "Grid",
-                    color = CleanCyan,
-                    testTag = "btn_energy_grid",
-                    onClick = { viewModel.openModal("energy_grid") }
-                )
-
-                // 4. Sanctuary Button (People Icon)
-                QuickActionCircleButton(
-                    icon = Icons.Default.People,
-                    label = "Sanctuary",
-                    color = SunGold,
-                    testTag = "btn_sanctuary",
-                    onClick = { viewModel.openModal("sanctuary") }
-                )
-
-                // 4. Save Button (Disk Icon)
-                QuickActionCircleButton(
-                    icon = Icons.Default.Save,
-                    label = "Save",
-                    color = SolarEmerald,
-                    testTag = "btn_manual_save",
-                    onClick = { viewModel.executeFullSaveFlow() }
-                )
-
-                // 5. Menu Button (Hamburger / Three Dots)
-                QuickActionCircleButton(
-                    icon = if (showActionsMenu) Icons.Default.Close else Icons.Default.Menu,
-                    label = if (showActionsMenu) "Close" else "Menu",
-                    color = if (showActionsMenu) SunGold else Color.White,
-                    active = showActionsMenu,
-                    testTag = "btn_expand_menu",
-                    onClick = {
-                        showActionsMenu = !showActionsMenu
-                        viewModel.audioSystem.playButtonTap()
-                    }
-                )
-            }
-        }
-
-        // 5. Slide-In Menu Panel (Opens from the right when Menu is tapped)
-        SlideInMenuPanel(
-            visible = showActionsMenu,
-            isSprinting = inputState.isSprinting,
-            isNight = lightingState?.isNight ?: false,
-            onEat = {
-                viewModel.eat()
-                showActionsMenu = false
-            },
-            onDrink = {
-                viewModel.drink()
-                showActionsMenu = false
-            },
-            onToggleWalkSprint = {
-                viewModel.setSprinting(!inputState.isSprinting)
-            },
-            onSleep = {
-                viewModel.restInFarmhouse()
-                showActionsMenu = false
-            },
-            onTimeSkip = {
-                viewModel.advanceTimeOfDay(2.0f)
-                showActionsMenu = false
-            },
-            onOpenSanctuary = {
-                viewModel.openModal("sanctuary")
-                showActionsMenu = false
-            },
-            onOpenResearch = {
-                viewModel.openModal("research")
-                showActionsMenu = false
-            },
-            onOpenJournal = {
-                viewModel.openModal("journal")
-                showActionsMenu = false
-            },
-            onOpenEnergyGrid = {
-                viewModel.openModal("energy_grid")
-                showActionsMenu = false
-            },
-            onOpenMap = {
-                viewModel.openModal("world_map")
-                showActionsMenu = false
-            },
-            onOpenSettings = {
-                viewModel.openModal("settings_menu")
-                showActionsMenu = false
-            },
-            onDismiss = {
-                showActionsMenu = false
-            },
-            modifier = Modifier.align(Alignment.CenterEnd)
-        )
-
-        // 6. Solarpunk Bottom Navigation Bar (Research, Journal, Sanctuary, Grid, Bag)
-        if (!isBuildMode) {
+            // 3. HUD Top Bar (Top-Left Day/Time/Weather, Top-Center Survival Bars, Top-Right Money/Energy/Eco)
             Column(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
             ) {
-                SolarpunkBottomNavBar(
-                    activeModal = activeModal,
-                    onOpenResearch = { viewModel.openModal("research") },
-                    onOpenJournal = { viewModel.openModal("journal") },
-                    onOpenSanctuary = { viewModel.openModal("sanctuary") },
-                    onOpenEnergyGrid = { viewModel.openModal("energy_grid") },
-                    onOpenInventory = { viewModel.openModal("inventory") }
+                TopGameStatsBar(
+                    state = gameState,
+                    onAdvanceTimeClick = { viewModel.advanceTimeOfDay(2.0f) },
+                    plots = plots,
+                    ecosystemScore = ecosystemHealth,
+                    energySummary = energySummary,
+                    researchPoints = researchPoints,
+                    activeMission = activeMission,
+                    onEnergyClick = { viewModel.openModal("energy_grid") },
+                    onResearchClick = { viewModel.openModal("research") },
+                    onJournalClick = { viewModel.openModal("journal") }
                 )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                ContextActionPrompt(
-                    prompt = currentPrompt,
-                    onActionClick = { viewModel.onContextActionButton() },
-                    onSecondaryActionClick = { viewModel.onContextSecondaryActionButton() }
+                SolarpunkNotificationBanner(
+                    notification = bannerNotification
                 )
+            }
+
+            // 3B. Mini-Map HUD (Top-Left Corner, below Day/Time bar)
+            MiniMapHUD(
+                playerX = viewModel.player.posX,
+                playerZ = viewModel.player.posZ,
+                playerAngleDeg = viewModel.player.orientationAngleDeg,
+                discoveredPois = discoveredPois,
+                discoveredChunks = discoveredChunks,
+                currentBiome = currentBiome,
+                plots = plots,
+                placedBuildings = placedBuildings,
+                energyNodes = energyNodes,
+                onClick = {
+                    viewModel.openModal("world_map")
+                },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 12.dp, top = 42.dp)
+            )
+
+            // 4. Primary Right-Side Action Buttons Column (Build, Bag, Save, Menu)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 16.dp, bottom = 14.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // 1. Build Button (Hammer Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Construction,
+                        label = if (isBuildMode) "Exit" else "Build",
+                        color = if (isBuildMode) SunGold else SolarEmerald,
+                        active = isBuildMode,
+                        testTag = "btn_build_mode",
+                        onClick = { viewModel.toggleBuildMode() }
+                    )
+
+                    // 2. Bag Button (Backpack Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Inventory2,
+                        label = "Bag",
+                        color = CleanCyan,
+                        testTag = "btn_inventory",
+                        onClick = { viewModel.openModal("inventory") }
+                    )
+
+                    // 3. Energy Grid Button (Bolt Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Bolt,
+                        label = "Grid",
+                        color = CleanCyan,
+                        testTag = "btn_energy_grid",
+                        onClick = { viewModel.openModal("energy_grid") }
+                    )
+
+                    // 4. Sanctuary Button (People Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.People,
+                        label = "Sanctuary",
+                        color = SunGold,
+                        testTag = "btn_sanctuary",
+                        onClick = { viewModel.openModal("sanctuary") }
+                    )
+
+                    // 4. Save Button (Disk Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Save,
+                        label = "Save",
+                        color = SolarEmerald,
+                        testTag = "btn_manual_save",
+                        onClick = { viewModel.executeFullSaveFlow() }
+                    )
+
+                    // 5. Navigation Hub Button (Dashboard Icon)
+                    QuickActionCircleButton(
+                        icon = Icons.Default.Dashboard,
+                        label = "Nav",
+                        color = CleanCyan,
+                        active = showBottomNavMenu,
+                        testTag = "btn_toggle_bottom_nav",
+                        onClick = {
+                            viewModel.hudManager.toggleNavMenu()
+                            viewModel.audioSystem.playButtonTap()
+                        }
+                    )
+
+                    // 6. Menu Button (Hamburger / Three Dots)
+                    QuickActionCircleButton(
+                        icon = if (showActionsMenu) Icons.Default.Close else Icons.Default.Menu,
+                        label = if (showActionsMenu) "Close" else "Menu",
+                        color = if (showActionsMenu) SunGold else Color.White,
+                        active = showActionsMenu,
+                        testTag = "btn_expand_menu",
+                        onClick = {
+                            showActionsMenu = !showActionsMenu
+                            viewModel.audioSystem.playButtonTap()
+                        }
+                    )
+                }
+            }
+
+            // 5. Slide-In Menu Panel (Opens from the right when Menu is tapped)
+            SlideInMenuPanel(
+                visible = showActionsMenu,
+                isSprinting = inputState.isSprinting,
+                isNight = lightingState?.isNight ?: false,
+                onEat = {
+                    viewModel.eat()
+                    showActionsMenu = false
+                },
+                onDrink = {
+                    viewModel.drink()
+                    showActionsMenu = false
+                },
+                onToggleWalkSprint = {
+                    viewModel.setSprinting(!inputState.isSprinting)
+                },
+                onSleep = {
+                    viewModel.restInFarmhouse()
+                    showActionsMenu = false
+                },
+                onTimeSkip = {
+                    viewModel.advanceTimeOfDay(2.0f)
+                    showActionsMenu = false
+                },
+                onOpenSanctuary = {
+                    viewModel.openModal("sanctuary")
+                    showActionsMenu = false
+                },
+                onOpenResearch = {
+                    viewModel.openModal("research")
+                    showActionsMenu = false
+                },
+                onOpenJournal = {
+                    viewModel.openModal("journal")
+                    showActionsMenu = false
+                },
+                onOpenEnergyGrid = {
+                    viewModel.openModal("energy_grid")
+                    showActionsMenu = false
+                },
+                onOpenMap = {
+                    viewModel.openModal("world_map")
+                    showActionsMenu = false
+                },
+                onOpenSettings = {
+                    viewModel.openModal("settings_menu")
+                    showActionsMenu = false
+                },
+                onDismiss = {
+                    showActionsMenu = false
+                },
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+
+            // 6. Solarpunk Bottom Navigation Bar (Research, Journal, Sanctuary, Grid, Bag) - Hidden by default, toggled via Nav button
+            if (!isBuildMode) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = showBottomNavMenu,
+                        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+                        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
+                    ) {
+                        SolarpunkBottomNavBar(
+                            activeModal = activeModal,
+                            onOpenResearch = { viewModel.openModal("research"); viewModel.hudManager.hideNavMenu() },
+                            onOpenJournal = { viewModel.openModal("journal"); viewModel.hudManager.hideNavMenu() },
+                            onOpenSanctuary = { viewModel.openModal("sanctuary"); viewModel.hudManager.hideNavMenu() },
+                            onOpenEnergyGrid = { viewModel.openModal("energy_grid"); viewModel.hudManager.hideNavMenu() },
+                            onOpenInventory = { viewModel.openModal("inventory"); viewModel.hudManager.hideNavMenu() }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    ContextActionPrompt(
+                        prompt = currentPrompt,
+                        onActionClick = { viewModel.onContextActionButton() },
+                        onSecondaryActionClick = { viewModel.onContextSecondaryActionButton() }
+                    )
+                }
             }
         }
 
@@ -510,10 +541,14 @@ fun Game3DScreen(
                 musicVolume = musicVol,
                 sfxVolume = sfxVol,
                 vibrationEnabled = vibrationOn,
+                hudOpacity = hudOpacity,
+                immersiveMode = isImmersiveMode,
                 onMasterVolumeChange = { viewModel.setMasterVolume(it) },
                 onMusicVolumeChange = { viewModel.setMusicVolume(it) },
                 onSfxVolumeChange = { viewModel.setSfxVolume(it) },
                 onVibrationToggle = { viewModel.setVibrationEnabled(it) },
+                onHudOpacityChange = { viewModel.setHudOpacity(it) },
+                onImmersiveModeToggle = { viewModel.setImmersiveMode(it) },
                 onSaveClick = { viewModel.executeFullSaveFlow() },
                 onLoadClick = { viewModel.loadSaveGame() },
                 onNewGameClick = { viewModel.startNewGameFresh() },
@@ -782,9 +817,10 @@ fun Game3DScreen(
         }
     }
 }
+}
 
 @Composable
-private fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
+fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -827,7 +863,7 @@ private fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
 }
 
 @Composable
-private fun QuickActionCircleButton(
+fun QuickActionCircleButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     color: Color,
@@ -876,7 +912,7 @@ private fun QuickActionCircleButton(
 }
 
 @Composable
-private fun SolarpunkBottomNavBar(
+fun SolarpunkBottomNavBar(
     activeModal: String?,
     onOpenResearch: () -> Unit,
     onOpenJournal: () -> Unit,
@@ -953,7 +989,7 @@ private fun SolarpunkBottomNavBar(
 }
 
 @Composable
-private fun BottomNavItemPill(
+fun BottomNavItemPill(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     color: Color,
