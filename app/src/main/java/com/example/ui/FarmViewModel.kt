@@ -441,27 +441,34 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             if (SaveLoadSystem.hasSave(getApplication())) {
                 SaveLoadSystem.loadGame(getApplication(), repository.farmDao)
+                val savedState = repository.gameState.firstOrNull()
+                if (savedState != null) {
+                    val px = if (savedState.playerX.isNaN() || savedState.playerX.isInfinite() || kotlin.math.abs(savedState.playerX) > 200f) 0.0f else savedState.playerX
+                    val py = if (savedState.playerY.isNaN() || savedState.playerY.isInfinite() || savedState.playerY < 0f || savedState.playerY > 50f) 0.0f else savedState.playerY
+                    val pz = if (savedState.playerZ.isNaN() || savedState.playerZ.isInfinite() || kotlin.math.abs(savedState.playerZ) > 200f) 0.0f else savedState.playerZ
+                    player.posX = px
+                    player.posY = py
+                    player.posZ = pz
+                    player.orientationAngleDeg = savedState.playerAngle
+                    camera.instantReset(px, py, pz, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+                    android.util.Log.d("FarmViewModel", "LOAD_GAME_SPAWN player=($px,$py,$pz)")
+
+                    val chunks = savedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
+                    if (chunks.isNotEmpty()) discoveredChunks.value = chunks
+                    val pois = savedState.discoveredPois.split(",").filter { it.isNotBlank() }.toSet()
+                    if (pois.isNotEmpty()) discoveredPois.value = pois
+                    val biomes = savedState.discoveredBiomes.split(",").filter { it.isNotBlank() }.toSet()
+                    if (biomes.isNotEmpty()) discoveredBiomes.value = biomes
+                    currentBiome.value = BiomeType.fromPosition(savedState.playerZ)
+                }
             } else {
                 repository.initializeDefaultDataIfEmpty()
-            }
-            val savedState = repository.gameState.firstOrNull()
-            if (savedState != null) {
-                val px = if (savedState.playerX.isNaN() || savedState.playerX.isInfinite()) 0.0f else savedState.playerX
-                val py = if (savedState.playerY.isNaN() || savedState.playerY.isInfinite()) 0.0f else savedState.playerY
-                val pz = if (savedState.playerZ.isNaN() || savedState.playerZ.isInfinite()) 0.0f else savedState.playerZ
-                player.posX = px
-                player.posY = py
-                player.posZ = pz
-                player.orientationAngleDeg = savedState.playerAngle
-                camera.instantReset(px, py, pz, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
-
-                val chunks = savedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
-                if (chunks.isNotEmpty()) discoveredChunks.value = chunks
-                val pois = savedState.discoveredPois.split(",").filter { it.isNotBlank() }.toSet()
-                if (pois.isNotEmpty()) discoveredPois.value = pois
-                val biomes = savedState.discoveredBiomes.split(",").filter { it.isNotBlank() }.toSet()
-                if (biomes.isNotEmpty()) discoveredBiomes.value = biomes
-                currentBiome.value = BiomeType.fromPosition(savedState.playerZ)
+                player.posX = 0.0f
+                player.posY = 0.0f
+                player.posZ = 0.0f
+                player.orientationAngleDeg = 0.0f
+                camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+                android.util.Log.d("FarmViewModel", "NEW_GAME_SPAWN player=(0.0,0.0,0.0)")
             }
             // Dismiss initial loading after game state is ready
             delay(900)
@@ -600,14 +607,15 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             delay(600)
             val loadedState = repository.gameState.firstOrNull()
             if (loadedState != null) {
-                val px = if (loadedState.playerX.isNaN() || loadedState.playerX.isInfinite()) 0.0f else loadedState.playerX
-                val py = if (loadedState.playerY.isNaN() || loadedState.playerY.isInfinite()) 0.0f else loadedState.playerY
-                val pz = if (loadedState.playerZ.isNaN() || loadedState.playerZ.isInfinite()) 0.0f else loadedState.playerZ
+                val px = if (loadedState.playerX.isNaN() || loadedState.playerX.isInfinite() || kotlin.math.abs(loadedState.playerX) > 200f) 0.0f else loadedState.playerX
+                val py = if (loadedState.playerY.isNaN() || loadedState.playerY.isInfinite() || loadedState.playerY < 0f || loadedState.playerY > 50f) 0.0f else loadedState.playerY
+                val pz = if (loadedState.playerZ.isNaN() || loadedState.playerZ.isInfinite() || kotlin.math.abs(loadedState.playerZ) > 200f) 0.0f else loadedState.playerZ
                 player.posX = px
                 player.posY = py
                 player.posZ = pz
                 player.orientationAngleDeg = loadedState.playerAngle
                 camera.instantReset(px, py, pz, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+                android.util.Log.d("FarmViewModel", "LOAD_GAME_SPAWN player=($px,$py,$pz)")
 
                 val chunks = loadedState.discoveredChunks.split(",").filter { it.isNotBlank() }.toSet()
                 if (chunks.isNotEmpty()) discoveredChunks.value = chunks
@@ -640,6 +648,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             player.posZ = 0.0f
             player.orientationAngleDeg = 0.0f
             camera.instantReset(0.0f, 0.0f, 0.0f, yaw = 180.0f, pitch = 22.0f, dist = 5.5f)
+            android.util.Log.d("FarmViewModel", "NEW_GAME_SPAWN player=(0.0,0.0,0.0)")
             delay(600)
             _isLoading.value = false
             viewModelScope.launch(Dispatchers.Main) {

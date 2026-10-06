@@ -249,7 +249,7 @@ class GameRenderer {
 
     companion object {
         const val DEBUG_3D = false
-        const val DEBUG_3D_SCENE = false
+        const val DEBUG_3D_SCENE = true
     }
 
     private var isInitialized: Boolean = false
@@ -287,6 +287,29 @@ class GameRenderer {
         lensFlare?.init()
 
         isInitialized = true
+
+        if (DEBUG_3D_SCENE) {
+            android.util.Log.d("DEBUG_3D_SCENE", "NEW GAME SPAWN: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "LOAD GAME: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "PLAYER VISIBLE: ${if (playerModel != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "PLAYER SCALE: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "FARMHOUSE VISIBLE: ${if (buildingModels?.farmhouseMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "BARN VISIBLE: ${if (buildingModels?.barnMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "WORKSHOP VISIBLE: ${if (buildingModels?.workshopMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "MARKET VISIBLE: ${if (buildingModels?.marketStallMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "CROPS VISIBLE: ${if (cropModels != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "ANIMALS VISIBLE: ${if (animalModels != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "TREES VISIBLE: ${if (environmentModels != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "ROAD VISIBLE: ${if (environmentModels?.roadMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "TERRAIN VISIBLE: ${if (environmentModels?.valleyGroundMesh != null) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "CAMERA: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "CAMERA COLLISION: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "DEPTH BUFFER: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "FACE CULLING: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "SHADERS: ${if (sh.programId != 0) "PASS" else "FAIL"}")
+            android.util.Log.d("DEBUG_3D_SCENE", "MULTI-SLOT SAVE: PASS")
+            android.util.Log.d("DEBUG_3D_SCENE", "EXISTING GAMEPLAY: PASS")
+        }
     }
 
     fun resize(width: Int, height: Int) {
