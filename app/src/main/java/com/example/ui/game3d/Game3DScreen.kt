@@ -168,6 +168,7 @@ fun Game3DScreen(
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
 
     DisposableEffect(glView) {
+        glView?.onResume()
         onDispose {
             try {
                 glView?.onPause()

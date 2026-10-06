@@ -661,10 +661,17 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     private fun startGameLoop() {
         viewModelScope.launch {
             var lastTime = System.nanoTime()
+            var lastPlayerLogTime = 0L
             while (isActive) {
                 val now = System.nanoTime()
                 val deltaSec = ((now - lastTime) / 1_000_000_000.0f).coerceIn(0.001f, 0.1f)
                 lastTime = now
+
+                val nowMs = System.currentTimeMillis()
+                if (nowMs - lastPlayerLogTime > 500L) {
+                    lastPlayerLogTime = nowMs
+                    android.util.Log.d("DIAGNOSTIC", "PLAYER_STATE: pos=(${player.posX}, ${player.posY}, ${player.posZ}) inputMove=(${_inputState.value.moveX}, ${_inputState.value.moveZ}) isMoving=${player.isMoving}")
+                }
 
                 _animTime.value += deltaSec
 

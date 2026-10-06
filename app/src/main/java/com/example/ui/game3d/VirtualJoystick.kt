@@ -1,5 +1,6 @@
 package com.example.ui.game3d
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ fun VirtualJoystick(
                         thumbOffset = clampedOffset
                         val normX = (clampedOffset.x / maxDistance).coerceIn(-1.0f, 1.0f)
                         val normZ = (-clampedOffset.y / maxDistance).coerceIn(-1.0f, 1.0f)
+                        Log.d("VirtualJoystick", "onDragStart: x=$normX, z=$normZ")
                         onMove(normX, normZ)
                     },
                     onDrag = { change, dragAmount ->
@@ -68,14 +70,17 @@ fun VirtualJoystick(
                         thumbOffset = clampedOffset
                         val normX = (clampedOffset.x / maxDistance).coerceIn(-1.0f, 1.0f)
                         val normZ = (-clampedOffset.y / maxDistance).coerceIn(-1.0f, 1.0f)
+                        Log.d("VirtualJoystick", "onDrag: x=$normX, z=$normZ")
                         onMove(normX, normZ)
                     },
                     onDragEnd = {
                         thumbOffset = Offset.Zero
+                        Log.d("VirtualJoystick", "onDragEnd: x=0.0, z=0.0")
                         onMove(0.0f, 0.0f)
                     },
                     onDragCancel = {
                         thumbOffset = Offset.Zero
+                        Log.d("VirtualJoystick", "onDragCancel: x=0.0, z=0.0")
                         onMove(0.0f, 0.0f)
                     }
                 )

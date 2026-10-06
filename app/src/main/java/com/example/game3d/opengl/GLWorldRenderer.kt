@@ -40,6 +40,9 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
     @Volatile var actionProgressRef: Float = 0.0f
     @Volatile var screenShakeRef: Float = 0.0f
 
+    private var lastDiagnosticLogTime = 0L
+    private var drawFrameCount = 0
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         gameRenderer.dispose()
         gameRenderer.create()
@@ -50,6 +53,14 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
     }
 
     override fun onDrawFrame(gl: GL10?) {
+        drawFrameCount++
+        val now = System.currentTimeMillis()
+        if (now - lastDiagnosticLogTime > 500L) {
+            lastDiagnosticLogTime = now
+            val p = playerRef
+            android.util.Log.d("DIAGNOSTIC", "RENDER: onDrawFrame count=$drawFrameCount | PLAYER pos=(${p?.posX}, ${p?.posY}, ${p?.posZ}) isMoving=${p?.isMoving} speed=${p?.currentSpeed}")
+        }
+
         gameRenderer.render(
             player = playerRef,
             thirdPersonCamera = cameraRef,

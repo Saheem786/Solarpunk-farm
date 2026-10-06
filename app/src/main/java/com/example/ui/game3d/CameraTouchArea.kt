@@ -17,14 +17,19 @@ fun CameraTouchArea(
         modifier = modifier
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, _ ->
-                    // Pan X rotates camera Yaw, Pan Y tilts camera Pitch
+                val joystickZoneWidth = 210f * density
+                val joystickZoneHeight = 210f * density
+
+                detectTransformGestures { centroid, pan, zoom, _ ->
+                    // Do not rotate camera if touch gesture starts in bottom-left virtual joystick zone
+                    if (centroid.x < joystickZoneWidth && centroid.y > size.height - joystickZoneHeight) {
+                        return@detectTransformGestures
+                    }
                     if (pan.x != 0f || pan.y != 0f) {
                         val deltaYaw = pan.x * 0.35f
                         val deltaPitch = -pan.y * 0.25f
                         onRotate(deltaYaw, deltaPitch)
                     }
-                    // Pinch zoom
                     if (zoom != 1.0f) {
                         val zoomDelta = (1.0f - zoom) * 6.0f
                         onZoom(zoomDelta)
