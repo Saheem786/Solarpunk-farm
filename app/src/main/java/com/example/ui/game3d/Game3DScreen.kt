@@ -884,12 +884,12 @@ fun QuickActionCircleButton(
 
     Surface(
         modifier = Modifier
-            .size(46.dp)
+            .size(48.dp)
             .scale(scale)
             .clip(CircleShape)
             .clickable(
                 interactionSource = interactionSource,
-                indication = androidx.compose.material3.ripple(bounded = true, radius = 23.dp)
+                indication = androidx.compose.material3.ripple(bounded = true, radius = 24.dp)
             ) { onClick() }
             .testTag(testTag),
         color = if (active) Color(0xEE1A3D34) else Color(0xD90A1A1D),
@@ -905,7 +905,7 @@ fun QuickActionCircleButton(
                 imageVector = icon,
                 contentDescription = label,
                 tint = color,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }

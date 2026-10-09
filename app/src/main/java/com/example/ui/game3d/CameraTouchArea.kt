@@ -26,8 +26,8 @@ fun CameraTouchArea(
                         return@detectTransformGestures
                     }
                     if (pan.x != 0f || pan.y != 0f) {
-                        val deltaYaw = pan.x * 0.15f
-                        val deltaPitch = -pan.y * 0.10f
+                        val deltaYaw = pan.x * 0.075f
+                        val deltaPitch = -pan.y * 0.05f
                         onRotate(deltaYaw, deltaPitch)
                     }
                     if (zoom != 1.0f) {

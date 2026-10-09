@@ -85,17 +85,17 @@ class Environment3DModels {
 
         // 1. GREEN VALLEY TERRAIN MEADOW (Z: -40 to +40, 400m wide)
         builder.reset()
-        builder.addBox(0f, -0.10f, 0f, 400.0f, 0.20f, 80.0f, 0.28f, 0.68f, 0.26f) // Vibrant Meadow
+        builder.addBox(0f, -0.10f, 0f, 400.0f, 0.20f, 80.0f, 0.40f, 0.70f, 0.30f) // Cozy Meadow
         valleyGroundMesh = builder.build()
 
         // 2. DEEP FOREST TERRAIN FLOOR (Z: +40 to +200, 400m wide)
         builder.reset()
-        builder.addBox(0f, -0.09f, 120.0f, 400.0f, 0.20f, 160.0f, 0.14f, 0.36f, 0.16f) // Dark Mossy Earth
+        builder.addBox(0f, -0.09f, 120.0f, 400.0f, 0.20f, 160.0f, 0.20f, 0.40f, 0.20f) // Rich Mossy Earth
         forestGroundMesh = builder.build()
 
         // 3. WETLAND & MARSH TERRAIN (Z: -200 to -40, 400m wide)
         builder.reset()
-        builder.addBox(0f, -0.11f, -120.0f, 400.0f, 0.20f, 160.0f, 0.20f, 0.44f, 0.32f) // Marsh Mud
+        builder.addBox(0f, -0.11f, -120.0f, 400.0f, 0.20f, 160.0f, 0.30f, 0.40f, 0.30f) // Muted Marsh Mud
         wetlandGroundMesh = builder.build()
 
         // 4. WORLD BOUNDARY CLIFFS & MOUNTAIN PERIMETER (400m x 400m)
@@ -182,26 +182,26 @@ class Environment3DModels {
 
         // 12. STANDARD PINE TREE (Height = 4.8m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.18f, 1.50f, 6, 0.42f, 0.26f, 0.14f)
-        builder.addCone(0f, 1.20f, 0f, 1.30f, 1.60f, 7, 0.12f, 0.44f, 0.18f)
-        builder.addCone(0f, 2.30f, 0f, 1.05f, 1.50f, 7, 0.15f, 0.52f, 0.22f)
-        builder.addCone(0f, 3.40f, 0f, 0.75f, 1.40f, 7, 0.18f, 0.60f, 0.25f)
+        builder.addCylinder(0f, 0f, 0f, 0.18f, 1.50f, 6, 0.40f, 0.25f, 0.15f) // Warm brown trunk
+        builder.addCone(0f, 1.20f, 0f, 1.30f, 1.60f, 7, 0.15f, 0.50f, 0.20f)
+        builder.addCone(0f, 2.30f, 0f, 1.05f, 1.50f, 7, 0.15f, 0.55f, 0.20f)
+        builder.addCone(0f, 3.40f, 0f, 0.75f, 1.40f, 7, 0.15f, 0.60f, 0.20f)
         pineTreeMesh = builder.build()
 
         // 13. TALL DEEP FOREST PINE (Height = 7.5m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.32f, 2.40f, 6, 0.38f, 0.22f, 0.12f)
-        builder.addCone(0f, 2.00f, 0f, 2.10f, 2.40f, 8, 0.08f, 0.34f, 0.14f)
-        builder.addCone(0f, 3.80f, 0f, 1.70f, 2.20f, 8, 0.10f, 0.42f, 0.16f)
-        builder.addCone(0f, 5.50f, 0f, 1.20f, 2.00f, 8, 0.12f, 0.50f, 0.20f)
+        builder.addCylinder(0f, 0f, 0f, 0.32f, 2.40f, 6, 0.40f, 0.25f, 0.15f)
+        builder.addCone(0f, 2.00f, 0f, 2.10f, 2.40f, 8, 0.10f, 0.40f, 0.15f)
+        builder.addCone(0f, 3.80f, 0f, 1.70f, 2.20f, 8, 0.12f, 0.50f, 0.20f)
+        builder.addCone(0f, 5.50f, 0f, 1.20f, 2.00f, 8, 0.15f, 0.60f, 0.25f)
         tallForestPineMesh = builder.build()
 
         // 14. OAK TREE (Height = 4.85m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.22f, 1.80f, 6, 0.46f, 0.30f, 0.16f)
-        builder.addSphere(0f, 3.20f, 0f, 1.40f, 6, 8, 0.22f, 0.68f, 0.24f)
-        builder.addSphere(-0.60f, 2.80f, 0.35f, 1.00f, 5, 7, 0.26f, 0.74f, 0.28f)
-        builder.addSphere(0.60f, 2.90f, -0.35f, 0.95f, 5, 7, 0.24f, 0.70f, 0.26f)
+        builder.addCylinder(0f, 0f, 0f, 0.22f, 1.80f, 6, 0.45f, 0.30f, 0.20f)
+        builder.addSphere(0f, 3.20f, 0f, 1.40f, 6, 8, 0.25f, 0.65f, 0.30f)
+        builder.addSphere(-0.60f, 2.80f, 0.35f, 1.00f, 5, 7, 0.30f, 0.75f, 0.35f)
+        builder.addSphere(0.60f, 2.90f, -0.35f, 0.95f, 5, 7, 0.28f, 0.70f, 0.32f)
         oakTreeMesh = builder.build()
 
         // 15. ANCIENT GIANT OAK (Height = 8.2m)

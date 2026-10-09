@@ -85,32 +85,35 @@ class Building3DModels {
         // 1. FARM HOUSE / CABIN (Height = 3.5 units)
         builder.reset()
         // Stone Foundation
-        builder.addBox(0f, 0.15f, 0f, 7.4f, 0.30f, 5.2f, 0.48f, 0.48f, 0.50f)
-        // Timber/Clapboard Walls
-        builder.addBox(0f, 1.30f, 0f, 7.0f, 2.00f, 4.8f, 0.92f, 0.88f, 0.78f)
-        // Pitched Roof
-        builder.addRoofPrism(0f, 2.30f, 0f, 7.6f, 1.20f, 5.4f, 0.82f, 0.38f, 0.22f)
+        builder.addBox(0f, 0.15f, 0f, 7.4f, 0.30f, 5.2f, 0.40f, 0.40f, 0.45f)
+        // Timber/Clapboard Walls (Warmer wood)
+        builder.addBox(0f, 1.30f, 0f, 7.0f, 2.00f, 4.8f, 0.85f, 0.75f, 0.60f)
+        // Pitched Roof (Darker, more saturated)
+        builder.addRoofPrism(0f, 2.30f, 0f, 7.6f, 1.20f, 5.4f, 0.70f, 0.30f, 0.15f)
         // Chimney
-        builder.addBox(2.2f, 3.10f, -0.8f, 0.70f, 1.00f, 0.70f, 0.65f, 0.28f, 0.22f)
-        // Front Door & Windows
-        builder.addBox(0f, 0.90f, 2.42f, 1.10f, 1.50f, 0.08f, 0.42f, 0.26f, 0.16f)
-        builder.addBox(-1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.98f, 0.92f, 0.50f)
-        builder.addBox(1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.98f, 0.92f, 0.50f)
+        builder.addBox(2.2f, 3.10f, -0.8f, 0.70f, 1.00f, 0.70f, 0.50f, 0.20f, 0.15f)
+        // Front Door
+        builder.addBox(0f, 0.90f, 2.42f, 1.10f, 1.50f, 0.08f, 0.35f, 0.20f, 0.10f)
+        // Windows (more vibrant frame)
+        builder.addBox(-1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.90f, 0.80f, 0.50f)
+        builder.addBox(-1.8f, 0.80f, 2.42f, 1.30f, 0.10f, 0.08f, 0.80f, 0.70f, 0.40f) // sill
+        builder.addBox(1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.90f, 0.80f, 0.50f)
+        builder.addBox(1.8f, 0.80f, 2.42f, 1.30f, 0.10f, 0.08f, 0.80f, 0.70f, 0.40f) // sill
         // Covered Porch
-        builder.addBox(0f, 0.15f, 3.30f, 5.4f, 0.30f, 1.8f, 0.55f, 0.38f, 0.24f)
-        builder.addCylinder(-2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.88f, 0.85f, 0.78f)
-        builder.addCylinder(2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.88f, 0.85f, 0.78f)
-        builder.addRoofPrism(0f, 1.90f, 3.30f, 5.6f, 0.60f, 2.0f, 0.82f, 0.38f, 0.22f)
+        builder.addBox(0f, 0.15f, 3.30f, 5.4f, 0.30f, 1.8f, 0.45f, 0.30f, 0.20f)
+        builder.addCylinder(-2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.80f, 0.70f, 0.50f)
+        builder.addCylinder(2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.80f, 0.70f, 0.50f)
+        builder.addRoofPrism(0f, 1.90f, 3.30f, 5.6f, 0.60f, 2.0f, 0.70f, 0.30f, 0.15f)
         farmhouseMesh = builder.build()
 
         // 2. RUSTIC BARN (Height = 3.8 units)
         builder.reset()
-        builder.addBox(0f, 1.10f, 0f, 7.2f, 2.20f, 5.6f, 0.78f, 0.20f, 0.18f)
+        builder.addBox(0f, 1.10f, 0f, 7.2f, 2.20f, 5.6f, 0.70f, 0.30f, 0.20f)
         builder.addBox(-3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
         builder.addBox(3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
         builder.addBox(-3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
         builder.addBox(3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
-        builder.addRoofPrism(0f, 2.20f, 0f, 7.6f, 1.60f, 6.0f, 0.28f, 0.30f, 0.34f)
+        builder.addRoofPrism(0f, 2.20f, 0f, 7.6f, 1.60f, 6.0f, 0.20f, 0.10f, 0.05f)
         builder.addBox(0f, 1.00f, 2.82f, 2.4f, 2.00f, 0.08f, 0.95f, 0.95f, 0.95f)
         barnMesh = builder.build()
 
