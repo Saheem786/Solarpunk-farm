@@ -19,14 +19,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 data class FloatingTextData(
     val id: Long = System.nanoTime(),
     val text: String,
-    val color: Color = SolarEmerald
+    val color: Color = AgedGold
 )
 
 @Composable

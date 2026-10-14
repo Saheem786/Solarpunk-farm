@@ -283,11 +283,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 2,
                     produceProgress = 0.7f,
                     readyToHarvest = false,
-                    posX = -7.0f,
+                    posX = -12.0f,
                     posY = 0.0f,
-                    posZ = 4.0f,
-                    targetX = -7.0f,
-                    targetZ = 4.0f
+                    posZ = 5.0f,
+                    targetX = -12.0f,
+                    targetZ = 5.0f
                 ),
                 LivestockEntity(
                     id = 2,
@@ -298,11 +298,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 3,
                     produceProgress = 0.4f,
                     readyToHarvest = false,
-                    posX = -5.0f,
+                    posX = -10.0f,
                     posY = 0.0f,
-                    posZ = 2.0f,
-                    targetX = -5.0f,
-                    targetZ = 2.0f
+                    posZ = 7.0f,
+                    targetX = -10.0f,
+                    targetZ = 7.0f
                 ),
                 LivestockEntity(
                     id = 16,
@@ -313,11 +313,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 2,
                     produceProgress = 0.1f,
                     readyToHarvest = false,
-                    posX = -5.0f,
+                    posX = -14.0f,
                     posY = 0.0f,
-                    posZ = -2.0f,
-                    targetX = -5.0f,
-                    targetZ = -2.0f
+                    posZ = 10.0f,
+                    targetX = -14.0f,
+                    targetZ = 10.0f
                 ),
                 LivestockEntity(
                     id = 3,
@@ -361,9 +361,9 @@ class FarmRepository(private val dao: FarmDao) {
                     readyToHarvest = false,
                     posX = 4.5f,
                     posY = 0.0f,
-                    posZ = 1.5f,
+                    posZ = 5.5f,
                     targetX = 4.5f,
-                    targetZ = 1.5f
+                    targetZ = 5.5f
                 ),
                 LivestockEntity(
                     id = 11,
@@ -374,11 +374,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 1,
                     produceProgress = 0.4f,
                     readyToHarvest = false,
-                    posX = 7.5f,
+                    posX = 5.5f,
                     posY = 0.0f,
-                    posZ = 2.0f,
-                    targetX = 7.5f,
-                    targetZ = 2.0f
+                    posZ = 4.0f,
+                    targetX = 5.5f,
+                    targetZ = 4.0f
                 ),
                 LivestockEntity(
                     id = 12,
@@ -389,11 +389,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 2,
                     produceProgress = 0.6f,
                     readyToHarvest = false,
-                    posX = 5.0f,
+                    posX = 3.5f,
                     posY = 0.0f,
-                    posZ = -2.5f,
-                    targetX = 5.0f,
-                    targetZ = -2.5f
+                    posZ = 4.5f,
+                    targetX = 3.5f,
+                    targetZ = 4.5f
                 ),
                 LivestockEntity(
                     id = 13,
@@ -404,11 +404,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 1,
                     produceProgress = 0.3f,
                     readyToHarvest = false,
-                    posX = 8.5f,
+                    posX = 4.0f,
                     posY = 0.0f,
-                    posZ = 1.0f,
-                    targetX = 8.5f,
-                    targetZ = 1.0f
+                    posZ = 3.0f,
+                    targetX = 4.0f,
+                    targetZ = 3.0f
                 ),
                 LivestockEntity(
                     id = 14,
@@ -419,11 +419,11 @@ class FarmRepository(private val dao: FarmDao) {
                     age = 1,
                     produceProgress = 0.2f,
                     readyToHarvest = false,
-                    posX = 6.0f,
+                    posX = 5.0f,
                     posY = 0.0f,
-                    posZ = 3.5f,
-                    targetX = 6.0f,
-                    targetZ = 3.5f
+                    posZ = 4.5f,
+                    targetX = 5.0f,
+                    targetZ = 4.5f
                 )
             )
             dao.insertLivestockList(initialLivestock)

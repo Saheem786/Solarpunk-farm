@@ -41,10 +41,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -95,21 +92,21 @@ fun SunMoonTrackerDial(
 
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(22.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = SunGold)
+                indication = ripple(bounded = true, color = AgedGold)
             ) { onDialClick() }
             .testTag("sun_moon_tracker_dial"),
-        color = Color(0xF00D2220),
-        shape = RoundedCornerShape(22.dp),
+        color = Parchment.copy(alpha = 0.9f),
+        shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(
-            width = 1.2.dp,
-            color = if (isDaytime) SunGold.copy(alpha = 0.65f) else CleanCyan.copy(alpha = 0.65f)
+            width = 2.dp,
+            color = if (isDaytime) AgedGold else RoyalBlue.copy(alpha = 0.8f)
         )
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
@@ -137,20 +134,22 @@ fun SunMoonTrackerDial(
                 ) {
                     Text(
                         text = "Day $gameTimeDay",
-                        color = Color.White,
+                        color = MedievalCrimson,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Text(
                         text = "•",
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = MedievalTextSecondary.copy(alpha = 0.5f),
                         fontSize = 10.sp
                     )
                     Text(
                         text = timeFormatted,
-                        color = if (isDaytime) SunGold else CleanCyan,
+                        color = if (isDaytime) AgedGoldDark else RoyalBlue,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                 }
 
@@ -160,15 +159,17 @@ fun SunMoonTrackerDial(
                 ) {
                     Text(
                         text = phaseName.uppercase(),
-                        color = if (isDuskOrDawn) Color(0xFFFFAB40) else if (isDaytime) Color(0xFFFFF176) else Color(0xFF80DEEA),
+                        color = if (isDuskOrDawn) MedievalCrimson else if (isDaytime) AgedGoldDark else RoyalBlue,
                         fontSize = 8.5.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp
+                        letterSpacing = 0.5.sp,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Text(
-                        text = "(+2h ⏩)",
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = 7.5.sp
+                        text = "(Advance ⏳)",
+                        color = MedievalTextSecondary.copy(alpha = 0.6f),
+                        fontSize = 7.5.sp,
+                        fontFamily = AlmendraFontFamily
                     )
                 }
             }

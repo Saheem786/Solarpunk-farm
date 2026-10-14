@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlin.random.Random
 import com.example.game3d.audio.HapticFeedbackHelper
+import com.example.game3d.audio.AmbientAudioManager
 import com.example.game3d.audio.SpatialLivestockAudioSystem
 import com.example.game3d.interaction.InteractionPrompt
 import com.example.game3d.interaction.InteractionSystem
@@ -105,6 +106,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application)
     val repository = FarmRepository(db.farmDao())
     val audioSystem = SpatialLivestockAudioSystem(viewModelScope)
+    val ambientAudio = AmbientAudioManager(viewModelScope)
     val haptics = HapticFeedbackHelper(application)
     val particleSystem = ParticleSystem3D()
 
@@ -456,6 +458,16 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
         audioSystem.sfxVolume = sfxVolume.value
         haptics.vibrationEnabled = vibrationEnabled.value
 
+        ambientAudio.setVolumes(masterVolume.value, sfxVolume.value * 0.7f)
+
+        viewModelScope.launch {
+            gameState.collect { state ->
+                state?.let {
+                    ambientAudio.updateTime(it.gameTimeHour)
+                }
+            }
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             if (SaveLoadSystem.hasSave(getApplication())) {
                 SaveLoadSystem.loadGame(getApplication(), repository.farmDao)
@@ -513,6 +525,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     fun setMasterVolume(vol: Float) {
         masterVolume.value = vol
         audioSystem.masterVolume = vol
+        ambientAudio.setVolumes(vol, sfxVolume.value * 0.7f)
         prefs.edit().putFloat("master_vol", vol).apply()
     }
 
@@ -525,6 +538,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     fun setSfxVolume(vol: Float) {
         sfxVolume.value = vol
         audioSystem.sfxVolume = vol
+        ambientAudio.setVolumes(masterVolume.value, vol * 0.7f)
         prefs.edit().putFloat("sfx_vol", vol).apply()
     }
 
@@ -1458,6 +1472,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 if (plot != null) {
                     particleSystem.spawnPlantSprout(plot.posX, 0.1f, plot.posZ)
                 }
+                triggerPlayerActionAnim(PlayerActionAnim.TINKERING)
                 addFloatingText("Soil Enriched!", SunGold)
                 showNotification("Soil Enriched", "Bio-Nutrient Serum applied to Plot #${plotId + 1}", "compost")
             } else {
@@ -1497,6 +1512,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                 audioSystem.playSheepBaa()
             }
             haptics.vibrateButtonTap()
+            triggerPlayerActionAnim(PlayerActionAnim.PETTING)
             addFloatingText("Happiness +15%", SunGold)
             showNotification("Affection", "Pet animal (+2 Eco Prestige)", "favorite")
         }
@@ -1508,6 +1524,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
             if (success) {
                 audioSystem.playEatFood()
                 haptics.vibrateButtonTap()
+                triggerPlayerActionAnim(PlayerActionAnim.FEEDING)
                 addFloatingText("Fed Animal (+20%)", SolarEmerald)
                 showNotification("Fed Animal", "Fed organic grain (+20% Happiness)", "restaurant")
             } else {
@@ -1534,6 +1551,7 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
                     addFloatingText("+1 $product", SolarEmerald)
                 }
                 haptics.vibrateHarvest()
+                triggerPlayerActionAnim(PlayerActionAnim.COLLECTING)
                 showNotification("Collected Product", "Obtained 1x $product", "shopping_bag")
             }
         }
@@ -1719,5 +1737,6 @@ class FarmViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         audioSystem.release()
+        ambientAudio.release()
     }
 }

@@ -18,7 +18,7 @@ import com.example.game3d.renderer.LightingState
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class GLWorldRenderer : GLSurfaceView.Renderer {
+class GLWorldRenderer(private val context: android.content.Context) : GLSurfaceView.Renderer {
 
     val gameRenderer: GameRenderer = GameRenderer()
 
@@ -45,7 +45,7 @@ class GLWorldRenderer : GLSurfaceView.Renderer {
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         gameRenderer.dispose()
-        gameRenderer.create()
+        gameRenderer.create(context)
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

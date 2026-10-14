@@ -19,9 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 data class QuickActionItem(
     val title: String,
@@ -43,14 +41,14 @@ fun QuickActionWheelModal(
     onDismiss: () -> Unit
 ) {
     val items = listOf(
-        QuickActionItem("Eat", Icons.Default.Restaurant, Color(0xFFFF9800), onEat),
+        QuickActionItem("Eat", Icons.Default.Restaurant, MedievalCrimson, onEat),
         QuickActionItem("Drink", Icons.Default.WaterDrop, Color(0xFF00E5FF), onDrink),
-        QuickActionItem("Rest", Icons.Default.Bed, Color(0xFF00E676), onRest),
-        QuickActionItem("Build", Icons.Default.Handyman, SunGold, onOpenBuild),
-        QuickActionItem("Bag", Icons.Default.ShoppingBag, CleanCyan, onOpenInventory),
-        QuickActionItem("Research", Icons.Default.Science, Color(0xFFE040FB), onOpenResearch),
-        QuickActionItem("Journal", Icons.Default.Book, SunGold, onOpenJournal),
-        QuickActionItem("Energy", Icons.Default.Bolt, SolarEmerald, onOpenEnergy)
+        QuickActionItem("Sleep", Icons.Default.Bed, Color(0xFF81C784), onRest),
+        QuickActionItem("Build", Icons.Default.Handyman, AgedGold, onOpenBuild),
+        QuickActionItem("Stash", Icons.Default.ShoppingBag, AgedGold, onOpenInventory),
+        QuickActionItem("Alchemy", Icons.Default.Science, MedievalCrimsonLight, onOpenResearch),
+        QuickActionItem("Chronicle", Icons.Default.Book, AgedGold, onOpenJournal),
+        QuickActionItem("Essence", Icons.Default.Bolt, AgedGold, onOpenEnergy)
     )
 
     Dialog(onDismissRequest = onDismiss) {
@@ -58,9 +56,9 @@ fun QuickActionWheelModal(
             modifier = Modifier
                 .size(320.dp)
                 .clip(CircleShape)
-                .border(2.dp, CleanCyan, CircleShape)
+                .border(3.dp, AgedGold, CircleShape)
                 .testTag("quick_action_radial_wheel"),
-            color = Color(0xF209181A)
+            color = Color(0xF22D1B0D) // Dark Wood
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -72,13 +70,13 @@ fun QuickActionWheelModal(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(Color(0x44FFFFFF))
-                        .border(1.dp, Color.White, CircleShape)
+                        .background(MedievalCrimson.copy(alpha = 0.2f))
+                        .border(1.dp, AgedGold, CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close Wheel",
-                        tint = Color.White
+                        tint = AgedGold
                     )
                 }
 
@@ -136,8 +134,8 @@ private fun ActionBubble(item: QuickActionItem, onDismiss: () -> Unit) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(item.color.copy(alpha = 0.25f))
-                .border(1.dp, item.color, CircleShape),
+                .background(item.color.copy(alpha = 0.15f))
+                .border(1.dp, item.color.copy(alpha = 0.6f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -149,8 +147,9 @@ private fun ActionBubble(item: QuickActionItem, onDismiss: () -> Unit) {
         }
         Text(
             text = item.title,
-            color = Color.White,
-            fontSize = 10.sp,
+            color = Parchment,
+            fontFamily = AlmendraFontFamily,
+            fontSize = 11.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 2.dp)
         )

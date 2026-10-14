@@ -57,12 +57,9 @@ import com.example.data.local.PlotEntity
 import com.example.data.model.CropStage
 import com.example.data.model.CropType
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
 import com.example.ui.game3d.CropPlantModal
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun AgricultureScreen(
@@ -76,7 +73,7 @@ fun AgricultureScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF091416))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .testTag("agriculture_screen")
     ) {
         Column(
@@ -92,15 +89,16 @@ fun AgricultureScreen(
             ) {
                 Column {
                     Text(
-                        text = "Permaculture & Hydroponics",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        text = "SACRED GROVES & ROYAL GARDENS",
+                        color = AgedGold,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Text(
-                        text = "Regenerative soil management & vertical growth columns",
-                        color = Color(0xFF80CBC4),
-                        fontSize = 12.sp
+                        text = "Regenerative earth management & ancient growth rituals",
+                        color = MedievalTextSecondary,
+                        fontSize = 11.sp
                     )
                 }
 
@@ -113,22 +111,23 @@ fun AgricultureScreen(
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = CleanCyan),
-                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("water_all_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.WaterDrop,
                         contentDescription = null,
-                        tint = Color(0xFF091215),
+                        tint = Parchment,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Hydrate All",
-                        color = Color(0xFF091215),
+                        text = "Bless All",
+                        color = Parchment,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        fontSize = 11.sp,
+                        fontFamily = MedievalSharpFontFamily
                     )
                 }
             }
@@ -139,20 +138,20 @@ fun AgricultureScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFF112326))
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0x33000000))
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 TabButton(
-                    label = "Active Plots (${plots.count { it.cropType != null }}/${plots.size})",
+                    label = "Fertile Fields (${plots.count { it.cropType != null }}/${plots.size})",
                     isSelected = selectedTab == 0,
                     testTag = "tab_plots",
                     onClick = { selectedTab = 0 },
                     modifier = Modifier.weight(1f)
                 )
                 TabButton(
-                    label = "Crop Encyclopedia",
+                    label = "Herbalist's Grimoire",
                     isSelected = selectedTab == 1,
                     testTag = "tab_crops",
                     onClick = { selectedTab = 1 },
@@ -223,13 +222,13 @@ private fun PlotCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .testTag("plot_card_${plot.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF13292C)),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
         border = androidx.compose.foundation.BorderStroke(
-            width = 1.dp,
-            color = if (plot.stage == CropStage.HARVEST_READY) SunGold else Color(0x3300E676)
+            width = 2.dp,
+            color = if (plot.stage == CropStage.HARVEST_READY) AgedGold else Bronze.copy(alpha = 0.5f)
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -240,9 +239,10 @@ private fun PlotCard(
             ) {
                 Text(
                     text = "${plot.plotType.displayName} #${plot.id + 1}",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    color = MedievalCrimson,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 if (plot.cropType != null) {
                     val stageLabel = when (plot.stage) {
@@ -255,7 +255,7 @@ private fun PlotCard(
                     }
                     Text(
                         text = stageLabel,
-                        color = if (plot.stage == CropStage.HARVEST_READY) SunGold else SolarEmerald,
+                        color = if (plot.stage == CropStage.HARVEST_READY) MedievalCrimson else Bronze,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -271,7 +271,7 @@ private fun PlotCard(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(crop.primaryColor).copy(alpha = 0.3f)),
+                            .background(Color(crop.primaryColor).copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -285,13 +285,14 @@ private fun PlotCard(
                     Column {
                         Text(
                             text = crop.displayName,
-                            color = Color.White,
+                            color = MedievalCrimson,
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Text(
-                            text = "Yield: +${crop.harvestYield} • +${crop.energyBonusKwh} kWh",
-                            color = Color(0xFFB0BEC5),
+                            text = "Yield: +${crop.harvestYield} • +${crop.energyBonusKwh} Mana",
+                            color = MedievalTextSecondary,
                             fontSize = 10.sp
                         )
                     }
@@ -302,13 +303,12 @@ private fun PlotCard(
                 // Growth Progress
                 Text(
                     text = "Growth: ${(plot.progress * 100).toInt()}%",
-                    color = Color(0xFFB0BEC5),
+                    color = MedievalTextSecondary,
                     fontSize = 10.sp
                 )
-                SolarpunkProgressBar(
+                MedievalProgressBar(
                     progress = plot.progress,
-                    color = if (plot.stage == CropStage.HARVEST_READY) SunGold else SolarEmerald,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(10.dp)
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -319,21 +319,20 @@ private fun PlotCard(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Moisture",
-                        color = Color(0xFF80D8FF),
+                        text = "Divine Blessing",
+                        color = Bronze,
                         fontSize = 10.sp
                     )
                     Text(
                         text = "${(plot.moisture * 100).toInt()}%",
-                        color = Color(0xFF80D8FF),
+                        color = Bronze,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
-                SolarpunkProgressBar(
+                MedievalProgressBar(
                     progress = plot.moisture,
-                    color = CleanCyan,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().height(10.dp)
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -342,7 +341,7 @@ private fun PlotCard(
                 if (plot.stage == CropStage.HARVEST_READY) {
                     Button(
                         onClick = onHarvest,
-                        colors = ButtonDefaults.buttonColors(containerColor = SunGold),
+                        colors = ButtonDefaults.buttonColors(containerColor = AgedGold),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -350,10 +349,11 @@ private fun PlotCard(
                             .testTag("harvest_plot_${plot.id}")
                     ) {
                         Text(
-                            text = "Harvest Crop",
-                            color = Color(0xFF091215),
+                            text = "Reap Bounty",
+                            color = MedievalCrimsonDark,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                     }
                 } else {
@@ -361,25 +361,27 @@ private fun PlotCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        OutlinedButton(
+                        Button(
                             onClick = onWater,
+                            colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson.copy(alpha = 0.1f)),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(32.dp)
                                 .testTag("water_plot_${plot.id}")
                         ) {
-                            Text(text = "Water", fontSize = 10.sp, color = CleanCyan)
+                            Text(text = "Bless", fontSize = 10.sp, color = MedievalCrimson, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                         }
-                        OutlinedButton(
+                        Button(
                             onClick = onFertilize,
+                            colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson.copy(alpha = 0.1f)),
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
                                 .weight(1f)
                                 .height(32.dp)
                                 .testTag("fertilize_plot_${plot.id}")
                         ) {
-                            Text(text = "Compost", fontSize = 10.sp, color = SolarEmerald)
+                            Text(text = "Enrich", fontSize = 10.sp, color = MedievalCrimson, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                         }
                     }
                 }
@@ -389,8 +391,8 @@ private fun PlotCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFF0D1D1F))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0x11000000))
                         .clickable { onPlant() }
                         .testTag("empty_plot_${plot.id}"),
                     contentAlignment = Alignment.Center
@@ -399,15 +401,16 @@ private fun PlotCard(
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
-                            tint = SolarEmerald,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Sow Seeds",
-                            color = SolarEmerald,
+                            color = MedievalCrimson,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                     }
                 }
@@ -425,9 +428,9 @@ private fun CropCatalogCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("crop_catalog_${crop.name.lowercase()}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF12282B)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3380CBC4))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -445,9 +448,9 @@ private fun CropCatalogCard(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Eco,
+                    imageVector = Icons.Default.LocalFlorist,
                     contentDescription = null,
-                    tint = Color(0xFF091215),
+                    tint = Parchment,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -455,32 +458,33 @@ private fun CropCatalogCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = crop.displayName,
-                    color = Color.White,
+                    color = MedievalCrimson,
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
                     text = crop.description,
-                    color = Color(0xFFB0BEC5),
+                    color = MedievalTextSecondary,
                     fontSize = 11.sp
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = "⏱ ${(crop.growthDurationSec).toInt()}s",
-                        color = SunGold,
+                        color = Bronze,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
-                        text = "⚡ +${crop.energyBonusKwh} kWh",
-                        color = CleanCyan,
+                        text = "✨ +${crop.energyBonusKwh} Mana",
+                        color = MedievalCrimson,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = "💰 ${crop.baseSellPrice} Coins",
-                        color = SolarEmerald,
+                        color = Bronze,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -489,15 +493,16 @@ private fun CropCatalogCard(
 
             Button(
                 onClick = onBuySeeds,
-                colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.testTag("buy_5_seeds_${crop.name.lowercase()}")
             ) {
                 Text(
                     text = "5x (${crop.seedCost * 5}🪙)",
-                    color = Color(0xFF091215),
+                    color = Parchment,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
             }
         }
@@ -514,8 +519,8 @@ private fun TabButton(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) SolarEmerald else Color.Transparent)
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isSelected) MedievalCrimson else Color.Transparent)
             .clickable { onClick() }
             .padding(vertical = 8.dp)
             .testTag(testTag),
@@ -523,9 +528,10 @@ private fun TabButton(
     ) {
         Text(
             text = label,
-            color = if (isSelected) Color(0xFF091215) else Color(0xFFB0BEC5),
-            fontSize = 12.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+            color = if (isSelected) Parchment else MedievalTextSecondary,
+            fontSize = 11.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            fontFamily = MedievalSharpFontFamily
         )
     }
 }

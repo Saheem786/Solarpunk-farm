@@ -85,16 +85,19 @@ class Environment3DModels {
 
         // 1. GREEN VALLEY TERRAIN MEADOW (Z: -40 to +40, 400m wide)
         builder.reset()
+        builder.setTextureScale(40.0f) // Tiling for 400x80 area
         builder.addBox(0f, -0.10f, 0f, 400.0f, 0.20f, 80.0f, 0.40f, 0.70f, 0.30f) // Cozy Meadow
         valleyGroundMesh = builder.build()
 
         // 2. DEEP FOREST TERRAIN FLOOR (Z: +40 to +200, 400m wide)
         builder.reset()
+        builder.setTextureScale(50.0f)
         builder.addBox(0f, -0.09f, 120.0f, 400.0f, 0.20f, 160.0f, 0.20f, 0.40f, 0.20f) // Rich Mossy Earth
         forestGroundMesh = builder.build()
 
         // 3. WETLAND & MARSH TERRAIN (Z: -200 to -40, 400m wide)
         builder.reset()
+        builder.setTextureScale(45.0f)
         builder.addBox(0f, -0.11f, -120.0f, 400.0f, 0.20f, 160.0f, 0.30f, 0.40f, 0.30f) // Muted Marsh Mud
         wetlandGroundMesh = builder.build()
 
@@ -112,6 +115,7 @@ class Environment3DModels {
 
         // 5. COBBLESTONE PATHWAYS & TRAILS
         builder.reset()
+        builder.setTextureScale(8.0f)
         // Central Main Street
         builder.addBox(0f, 0.02f, 0f, 3.2f, 0.04f, 32.0f, 0.72f, 0.68f, 0.62f)
         // East-West Farmhouse Lane
@@ -128,18 +132,21 @@ class Environment3DModels {
 
         // 6. WATER POND (Farmstead Pond)
         builder.reset()
+        builder.setTextureScale(2.0f)
         builder.addCylinder(0f, 0.01f, 0f, 4.9f, 0.14f, 16, 0.52f, 0.50f, 0.48f)
         builder.addCylinder(0f, 0.07f, 0f, 4.5f, 0.04f, 16, 0.12f, 0.72f, 0.92f, 0.92f)
         pondMesh = builder.build()
 
         // 6B. WETLAND POND (Murky, rich wetland marsh pond)
         builder.reset()
+        builder.setTextureScale(2.5f)
         builder.addCylinder(0f, 0.01f, 0f, 6.2f, 0.16f, 16, 0.28f, 0.38f, 0.32f) // muddy bank
         builder.addCylinder(0f, 0.07f, 0f, 5.8f, 0.04f, 16, 0.08f, 0.52f, 0.60f, 0.95f) // murky wetland water
         wetlandPondMesh = builder.build()
 
         // 7. GREEN VALLEY RIVER (East stream)
         builder.reset()
+        builder.setTextureScale(5.0f)
         builder.addBox(17.0f, 0.01f, -16.0f, 4.2f, 0.12f, 12.0f, 0.50f, 0.48f, 0.46f)
         builder.addBox(17.0f, 0.06f, -16.0f, 3.6f, 0.04f, 12.0f, 0.10f, 0.68f, 0.90f)
         builder.addBox(16.0f, 0.01f, 0f, 4.4f, 0.12f, 16.0f, 0.50f, 0.48f, 0.46f)
@@ -150,6 +157,7 @@ class Environment3DModels {
 
         // 8. WETLAND WIDE RIVER (East-to-West, 10m wide across 360m)
         builder.reset()
+        builder.setTextureScale(20.0f)
         builder.addBox(0f, 0.01f, -100.0f, 360.0f, 0.16f, 14.0f, 0.35f, 0.48f, 0.42f) // Sandy Riverbed
         builder.addBox(0f, 0.07f, -100.0f, 360.0f, 0.04f, 11.5f, 0.10f, 0.65f, 0.88f) // Flowing Water
         wetlandRiverMesh = builder.build()
@@ -182,49 +190,49 @@ class Environment3DModels {
 
         // 12. STANDARD PINE TREE (Height = 4.8m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.18f, 1.50f, 6, 0.40f, 0.25f, 0.15f) // Warm brown trunk
-        builder.addCone(0f, 1.20f, 0f, 1.30f, 1.60f, 7, 0.15f, 0.50f, 0.20f)
-        builder.addCone(0f, 2.30f, 0f, 1.05f, 1.50f, 7, 0.15f, 0.55f, 0.20f)
-        builder.addCone(0f, 3.40f, 0f, 0.75f, 1.40f, 7, 0.15f, 0.60f, 0.20f)
+        builder.addCylinder(0f, 0f, 0f, 0.18f, 1.50f, 16, 0.40f, 0.25f, 0.15f) // Warm brown trunk
+        builder.addCone(0f, 1.20f, 0f, 1.30f, 1.60f, 16, 0.15f, 0.50f, 0.20f)
+        builder.addCone(0f, 2.30f, 0f, 1.05f, 1.50f, 16, 0.15f, 0.55f, 0.20f)
+        builder.addCone(0f, 3.40f, 0f, 0.75f, 1.40f, 16, 0.15f, 0.60f, 0.20f)
         pineTreeMesh = builder.build()
 
         // 13. TALL DEEP FOREST PINE (Height = 7.5m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.32f, 2.40f, 6, 0.40f, 0.25f, 0.15f)
-        builder.addCone(0f, 2.00f, 0f, 2.10f, 2.40f, 8, 0.10f, 0.40f, 0.15f)
-        builder.addCone(0f, 3.80f, 0f, 1.70f, 2.20f, 8, 0.12f, 0.50f, 0.20f)
-        builder.addCone(0f, 5.50f, 0f, 1.20f, 2.00f, 8, 0.15f, 0.60f, 0.25f)
+        builder.addCylinder(0f, 0f, 0f, 0.32f, 2.40f, 16, 0.40f, 0.25f, 0.15f)
+        builder.addCone(0f, 2.00f, 0f, 2.10f, 2.40f, 18, 0.10f, 0.40f, 0.15f)
+        builder.addCone(0f, 3.80f, 0f, 1.70f, 2.20f, 18, 0.12f, 0.50f, 0.20f)
+        builder.addCone(0f, 5.50f, 0f, 1.20f, 2.00f, 18, 0.15f, 0.60f, 0.25f)
         tallForestPineMesh = builder.build()
 
         // 14. OAK TREE (Height = 4.85m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.22f, 1.80f, 6, 0.45f, 0.30f, 0.20f)
-        builder.addSphere(0f, 3.20f, 0f, 1.40f, 6, 8, 0.25f, 0.65f, 0.30f)
-        builder.addSphere(-0.60f, 2.80f, 0.35f, 1.00f, 5, 7, 0.30f, 0.75f, 0.35f)
-        builder.addSphere(0.60f, 2.90f, -0.35f, 0.95f, 5, 7, 0.28f, 0.70f, 0.32f)
+        builder.addCylinder(0f, 0f, 0f, 0.22f, 1.80f, 12, 0.45f, 0.30f, 0.20f)
+        builder.addSphere(0f, 3.20f, 0f, 1.40f, 12, 16, 0.25f, 0.65f, 0.30f)
+        builder.addSphere(-0.60f, 2.80f, 0.35f, 1.00f, 10, 14, 0.30f, 0.75f, 0.35f)
+        builder.addSphere(0.60f, 2.90f, -0.35f, 0.95f, 10, 14, 0.28f, 0.70f, 0.32f)
         oakTreeMesh = builder.build()
 
         // 15. ANCIENT GIANT OAK (Height = 8.2m)
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.55f, 3.20f, 8, 0.42f, 0.26f, 0.14f)
-        builder.addSphere(0f, 5.20f, 0f, 2.80f, 7, 9, 0.16f, 0.52f, 0.18f)
-        builder.addSphere(-1.40f, 4.50f, 0.80f, 1.90f, 6, 8, 0.18f, 0.58f, 0.20f)
-        builder.addSphere(1.50f, 4.60f, -0.80f, 1.85f, 6, 8, 0.18f, 0.56f, 0.20f)
+        builder.addCylinder(0f, 0f, 0f, 0.55f, 3.20f, 16, 0.42f, 0.26f, 0.14f)
+        builder.addSphere(0f, 5.20f, 0f, 2.80f, 16, 20, 0.16f, 0.52f, 0.18f)
+        builder.addSphere(-1.40f, 4.50f, 0.80f, 1.90f, 14, 18, 0.18f, 0.58f, 0.20f)
+        builder.addSphere(1.50f, 4.60f, -0.80f, 1.85f, 14, 18, 0.18f, 0.56f, 0.20f)
         ancientOakMesh = builder.build()
 
         // 16. CHERRY BLOSSOM TREE
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.20f, 1.70f, 6, 0.48f, 0.32f, 0.20f)
-        builder.addSphere(0f, 3.10f, 0f, 1.35f, 6, 8, 0.98f, 0.68f, 0.78f)
-        builder.addSphere(-0.55f, 2.70f, 0.30f, 0.90f, 5, 7, 0.96f, 0.78f, 0.84f)
-        builder.addSphere(0.55f, 2.75f, -0.30f, 0.90f, 5, 7, 0.95f, 0.60f, 0.72f)
+        builder.addCylinder(0f, 0f, 0f, 0.20f, 1.70f, 12, 0.48f, 0.32f, 0.20f)
+        builder.addSphere(0f, 3.10f, 0f, 1.35f, 12, 16, 0.98f, 0.68f, 0.78f)
+        builder.addSphere(-0.55f, 2.70f, 0.30f, 0.90f, 10, 14, 0.96f, 0.78f, 0.84f)
+        builder.addSphere(0.55f, 2.75f, -0.30f, 0.90f, 10, 14, 0.95f, 0.60f, 0.72f)
         cherryTreeMesh = builder.build()
 
         // 17. WEEPING WILLOW TREE
         builder.reset()
-        builder.addCylinder(0f, 0f, 0f, 0.24f, 1.90f, 6, 0.44f, 0.28f, 0.18f)
-        builder.addSphere(0f, 3.40f, 0f, 1.45f, 6, 8, 0.35f, 0.75f, 0.30f)
-        builder.addCone(0f, 1.60f, 0f, 1.70f, 2.10f, 8, 0.28f, 0.68f, 0.25f)
+        builder.addCylinder(0f, 0f, 0f, 0.24f, 1.90f, 12, 0.44f, 0.28f, 0.18f)
+        builder.addSphere(0f, 3.40f, 0f, 1.45f, 14, 18, 0.35f, 0.75f, 0.30f)
+        builder.addCone(0f, 1.60f, 0f, 1.70f, 2.10f, 16, 0.28f, 0.68f, 0.25f)
         willowTreeMesh = builder.build()
 
         // 18. BUSH & WILDFLOWERS & GRASS
@@ -406,78 +414,84 @@ class Environment3DModels {
         projMatrix: FloatArray,
         animTime: Float = 0.0f,
         hour: Float = 12.0f,
-        weather: WeatherType = WeatherType.SUNNY_CLEAR
+        weather: WeatherType = WeatherType.SUNNY_CLEAR,
+        texGrass: Int = 0,
+        texWood: Int = 0,
+        texStone: Int = 0,
+        texLeaves: Int = 0,
+        texDirt: Int = 0,
+        texWater: Int = 0
     ) {
         // 1. 3 Connected Biome Terrains (Green Valley, Deep Forest, Wetland)
         Matrix.setIdentityM(modelMatrix, 0)
-        renderMesh(shader, valleyGroundMesh, modelMatrix, viewMatrix, projMatrix)
-        renderMesh(shader, forestGroundMesh, modelMatrix, viewMatrix, projMatrix)
-        renderMesh(shader, wetlandGroundMesh, modelMatrix, viewMatrix, projMatrix)
-        renderMesh(shader, worldBoundaryMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, valleyGroundMesh, modelMatrix, viewMatrix, projMatrix, textureId = texGrass)
+        renderMesh(shader, forestGroundMesh, modelMatrix, viewMatrix, projMatrix, textureId = texLeaves)
+        renderMesh(shader, wetlandGroundMesh, modelMatrix, viewMatrix, projMatrix, textureId = texDirt)
+        renderMesh(shader, worldBoundaryMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
 
         // 2. Pathways & Roads across Biomes
-        renderMesh(shader, roadMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, roadMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
 
         // 3. Waterways & Rivers
-        renderMesh(shader, riverMesh, modelMatrix, viewMatrix, projMatrix)
-        renderMesh(shader, wetlandRiverMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, riverMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWater)
+        renderMesh(shader, wetlandRiverMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWater)
 
         // Green Valley Pond
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 10.0f, 0f, -10.0f)
-        renderMesh(shader, pondMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, pondMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWater)
 
         // Wetland Lily Pond (X=20, Z=-120)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 20.0f, 0f, -120.0f)
-        renderMesh(shader, wetlandPondMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, wetlandPondMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWater)
 
         // Green Valley Stone Well
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 8.0f, 0f, -3.5f)
-        renderMesh(shader, wellMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, wellMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
 
         // Green Valley Bridge
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 16.0f, 0f, 0f)
-        renderMesh(shader, woodenBridgeMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, woodenBridgeMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // 4. Points of Interest across Biomes
         // A. Deep Forest: Ranger Tower (X=14, Z=110)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 14.0f, 0f, 110.0f)
-        renderMesh(shader, rangerTowerMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, rangerTowerMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // B. Deep Forest: Old Campsite (X=-32, Z=85)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -32.0f, 0f, 85.0f)
-        renderMesh(shader, campsiteMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, campsiteMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // C. Deep Forest: Mysterious Stone Circle (X=-12, Z=148)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -12.0f, 0f, 148.0f)
-        renderMesh(shader, stoneCircleMesh, modelMatrix, viewMatrix, projMatrix, emissionG = 0.35f)
+        renderMesh(shader, stoneCircleMesh, modelMatrix, viewMatrix, projMatrix, emissionG = 0.35f, textureId = texStone)
 
         // D. Wetland: Old Fishing Hut & Dock (X=-24, Z=-95)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -24.0f, 0f, -95.0f)
-        renderMesh(shader, fishingHutMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, fishingHutMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // E. Wetland: Broken Timber Bridge (X=16, Z=-75)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 16.0f, 0f, -75.0f)
-        renderMesh(shader, brokenBridgeMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, brokenBridgeMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // F. Wetland: Sunken Supply Boat (X=35, Z=-135)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 35.0f, 0f, -135.0f)
         Matrix.rotateM(modelMatrix, 0, 18.0f, 0f, 0f, 1f) // tilted in marsh
-        renderMesh(shader, sunkenBoatMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, sunkenBoatMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // G. Green Valley: Crystal Resource Cave (X=-28, Z=20)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -28.0f, 0f, 20.0f)
-        renderMesh(shader, caveEntranceMesh, modelMatrix, viewMatrix, projMatrix, emissionB = 0.30f)
+        renderMesh(shader, caveEntranceMesh, modelMatrix, viewMatrix, projMatrix, emissionB = 0.30f, textureId = texStone)
 
         // 5. Forest & Wetland Details (Mossy Rocks, Fallen Logs, Mushrooms, Herbs, Cattails)
         // Forest Rocks & Logs
@@ -546,7 +560,9 @@ class Environment3DModels {
                 5 -> tallForestPineMesh
                 else -> pineTreeMesh
             }
-            renderMesh(shader, mesh, modelMatrix, viewMatrix, projMatrix)
+            // For now, trees use leaves texture for the whole mesh as it's the primary visual. 
+            // Better would be split meshes for trunk/leaves.
+            renderMesh(shader, mesh, modelMatrix, viewMatrix, projMatrix, textureId = if (tType == 2) 0 else texLeaves)
         }
 
         // 7. Celestial Sun & Moon
@@ -619,7 +635,8 @@ class Environment3DModels {
         pMatrix: FloatArray,
         emissionR: Float = 0f,
         emissionG: Float = 0f,
-        emissionB: Float = 0f
+        emissionB: Float = 0f,
+        textureId: Int = 0
     ) {
         Matrix.multiplyMM(mvMatrix, 0, vMatrix, 0, mMatrix, 0)
         Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
@@ -632,6 +649,15 @@ class Environment3DModels {
         GLES20.glUniformMatrix4fv(shader.uNormalMatrixLoc, 1, false, normalMatrix, 0)
         GLES20.glUniform3f(shader.uEmissionColorLoc, emissionR, emissionG, emissionB)
         GLES20.glUniform1f(shader.uShininessLoc, 8.0f)
+
+        if (textureId != 0 && shader.uTextureLoc >= 0) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+            GLES20.glUniform1i(shader.uTextureLoc, 0)
+            GLES20.glUniform1i(shader.uUseTextureLoc, 1)
+        } else {
+            GLES20.glUniform1i(shader.uUseTextureLoc, 0)
+        }
 
         mesh.draw(shader)
     }

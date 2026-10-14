@@ -25,18 +25,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.FarmViewModel
-import com.example.ui.theme.CleanCyan
+import com.example.ui.theme.*
 
 @Composable
-fun SolarEnergyScreen(
+fun ManaEnergyScreen(
     viewModel: FarmViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF071316))
-            .testTag("solar_energy_screen")
+            .background(Color(0xFF1A0F0A)) // Deep Wood
+            .testTag("mana_energy_screen")
     ) {
         // Top Header
         Row(
@@ -49,28 +49,30 @@ fun SolarEnergyScreen(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(CircleShape)
-                    .background(CleanCyan.copy(alpha = 0.2f)),
+                    .background(AgedGold.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = null,
-                    tint = CleanCyan,
+                    tint = AgedGold,
                     modifier = Modifier.size(20.dp)
                 )
             }
             Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
-                    text = "Solarpunk Clean Energy & Power Grid",
-                    color = Color.White,
+                    text = "ANCIENT MANA & MYSTIC CIRCLES",
+                    color = AgedGold,
                     fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Version 2, Phase 4 • Storage, Generation, Auto-Grid & Priority Shedding",
-                    color = Color(0xFF80D8FF),
-                    fontSize = 11.sp
+                    text = "Ancient energy gathering & mana storage rituals",
+                    color = MedievalTextSecondary,
+                    fontSize = 11.sp,
+                    fontFamily = AlmendraFontFamily
                 )
             }
         }

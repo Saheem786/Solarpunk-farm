@@ -31,9 +31,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -62,10 +61,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.LoreEntryData
 import com.example.data.model.PointOfInterestData
 import com.example.data.model.StoryMission
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun JournalTabModal(
@@ -85,10 +82,10 @@ fun JournalTabModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, SunGold.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("modal_journal_notebook"),
-            color = Color(0xFD09181A)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -106,28 +103,30 @@ fun JournalTabModal(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Brush.radialGradient(listOf(SunGold, SolarEmerald))),
+                                .background(Brush.radialGradient(listOf(MedievalCrimson, MedievalCrimsonDark))),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Book,
-                                contentDescription = "Journal",
-                                tint = Color(0xFF091215),
+                                contentDescription = "Chronicle",
+                                tint = Parchment,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "SANCTUARY JOURNAL & FIELD LOGS",
-                                color = SunGold,
+                                text = "KINGDOM CHRONICLES & LEGENDS",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "Missions, points of interest, SDZ history & unlocked blueprints",
-                                color = Color(0xFF90A4AE),
+                                text = "Tasks, secret lands, ancient history, and forgotten designs",
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
                                 fontSize = 11.sp
                             )
                         }
@@ -138,13 +137,13 @@ fun JournalTabModal(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(Color(0x33FFFFFF))
+                            .background(MedievalCrimson.copy(alpha = 0.15f))
                             .testTag("btn_close_journal_modal")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.White
+                            tint = MedievalCrimson
                         )
                     }
                 }
@@ -156,21 +155,21 @@ fun JournalTabModal(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    val tabs = listOf("Missions", "Discoveries (15)", "Lore & Logs", "Blueprints")
+                    val tabs = listOf("Quests", "Lands", "Legends", "Designs")
                     tabs.forEachIndexed { index, label ->
                         val isSelected = selectedTab == index
                         Surface(
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(horizontal = 3.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .clickable { selectedTab = index }
                                 .testTag("btn_journal_subtab_$index"),
-                            color = if (isSelected) SunGold else Color(0x221E3A3A),
-                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) MedievalCrimson else AgedGold.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(8.dp),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isSelected) SolarEmerald else Color(0x4400E5FF)
+                                if (isSelected) AgedGold else AgedGold.copy(alpha = 0.4f)
                             )
                         ) {
                             Box(
@@ -179,8 +178,9 @@ fun JournalTabModal(
                             ) {
                                 Text(
                                     text = label,
-                                    color = if (isSelected) Color(0xFF091215) else Color.White,
-                                    fontSize = 12.sp,
+                                    color = if (isSelected) Parchment else MedievalTextPrimary,
+                                    fontFamily = MedievalSharpFontFamily,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -211,16 +211,16 @@ private fun MissionsListView(missions: List<StoryMission>) {
     ) {
         items(missions, key = { it.id }) { mission ->
             val cardBorder = when {
-                mission.isCompleted -> SolarEmerald
-                mission.isUnlocked -> SunGold
-                else -> Color(0xFF455A64)
+                mission.isCompleted -> ForestMoss
+                mission.isUnlocked -> AgedGold
+                else -> IronGrey.copy(alpha = 0.5f)
             }
 
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("mission_card_${mission.id}"),
-                colors = CardDefaults.cardColors(containerColor = Color(0x1F1A2C2E)),
+                colors = CardDefaults.cardColors(containerColor = Color(0x0A2D1B0D)),
                 border = androidx.compose.foundation.BorderStroke(1.5.dp, cardBorder)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
@@ -233,13 +233,14 @@ private fun MissionsListView(missions: List<StoryMission>) {
                             Icon(
                                 imageVector = if (mission.isCompleted) Icons.Default.CheckCircle else if (mission.isUnlocked) Icons.Default.Flag else Icons.Default.Lock,
                                 contentDescription = mission.title,
-                                tint = if (mission.isCompleted) SolarEmerald else if (mission.isUnlocked) SunGold else Color(0xFF78909C),
+                                tint = if (mission.isCompleted) ForestMoss else if (mission.isUnlocked) AgedGoldDark else IronGrey,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Mission ${mission.missionNumber}: ${mission.title}",
-                                color = Color.White,
+                                text = "Quest ${mission.missionNumber}: ${mission.title}",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -247,12 +248,13 @@ private fun MissionsListView(missions: List<StoryMission>) {
 
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = Color(0x3300E5FF)
+                            color = AgedGold.copy(alpha = 0.15f)
                         ) {
                             Text(
-                                text = "+${mission.rpReward} RP",
-                                color = SunGold,
-                                fontSize = 11.sp,
+                                text = "+${mission.rpReward} Essence",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
@@ -263,7 +265,8 @@ private fun MissionsListView(missions: List<StoryMission>) {
 
                     Text(
                         text = mission.description,
-                        color = Color(0xFFCFD8DC),
+                        color = MedievalTextPrimary,
+                        fontFamily = AlmendraFontFamily,
                         fontSize = 12.sp
                     )
 
@@ -271,16 +274,17 @@ private fun MissionsListView(missions: List<StoryMission>) {
 
                     Text(
                         text = "Objective: ${mission.objectiveDescription} (${mission.currentProgress}/${mission.targetProgress})",
-                        color = CleanCyan,
-                        fontSize = 11.5.sp,
+                        color = MedievalCrimsonDark,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
 
-                    SolarpunkProgressBar(
+                    MedievalProgressBar(
                         progress = (mission.currentProgress.toFloat() / mission.targetProgress.toFloat()).coerceIn(0f, 1f),
-                        color = if (mission.isCompleted) SolarEmerald else SunGold,
+                        color = if (mission.isCompleted) ForestMoss else MedievalCrimson,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(6.dp)
@@ -304,11 +308,11 @@ private fun DiscoveriesListView(pois: List<PointOfInterestData>) {
                     .fillMaxWidth()
                     .testTag("poi_card_${poi.id}"),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (poi.isDiscovered) Color(0x1F00E676) else Color(0x1A263238)
+                    containerColor = if (poi.isDiscovered) ForestMoss.copy(alpha = 0.08f) else Color(0x052D1B0D)
                 ),
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (poi.isDiscovered) SolarEmerald else Color(0xFF455A64)
+                    if (poi.isDiscovered) ForestMoss else IronGrey.copy(alpha = 0.4f)
                 )
             ) {
                 Row(
@@ -325,20 +329,22 @@ private fun DiscoveriesListView(pois: List<PointOfInterestData>) {
                         Icon(
                             imageVector = if (poi.isDiscovered) Icons.Default.Explore else Icons.Default.Lock,
                             contentDescription = poi.name,
-                            tint = if (poi.isDiscovered) CleanCyan else Color(0xFF78909C),
+                            tint = if (poi.isDiscovered) MedievalCrimson else IronGrey,
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = if (poi.isDiscovered) poi.name else "??? Undiscovered Location",
-                                color = if (poi.isDiscovered) Color.White else Color(0xFFB0BEC5),
-                                fontSize = 13.5.sp,
+                                text = if (poi.isDiscovered) poi.name else "??? Hidden Realm",
+                                color = if (poi.isDiscovered) MedievalCrimson else MedievalTextSecondary,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = if (poi.isDiscovered) poi.description else "Explore ${poi.biome.displayName} to discover this point of interest.",
-                                color = Color(0xFF90A4AE),
+                                text = if (poi.isDiscovered) poi.description else "Venture into ${poi.biome.displayName} to reveal this location.",
+                                color = MedievalTextPrimary.copy(alpha = 0.8f),
+                                fontFamily = AlmendraFontFamily,
                                 fontSize = 11.sp,
                                 maxLines = 2
                             )
@@ -348,12 +354,13 @@ private fun DiscoveriesListView(pois: List<PointOfInterestData>) {
                     if (poi.isDiscovered) {
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = SolarEmerald.copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                            color = ForestMoss.copy(alpha = 0.15f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, ForestMoss)
                         ) {
                             Text(
-                                text = "DISCOVERED",
-                                color = SolarEmerald,
+                                text = "REVEALED",
+                                color = ForestMoss,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -378,10 +385,10 @@ private fun LoreEntriesListView(entries: List<LoreEntryData>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("lore_card_${log.id}"),
-                colors = CardDefaults.cardColors(containerColor = Color(0x1F1A2326)),
+                colors = CardDefaults.cardColors(containerColor = Color(0x0A2D1B0D)),
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (log.isUnlocked) SunGold else Color(0xFF37474F)
+                    if (log.isUnlocked) AgedGold else IronGrey.copy(alpha = 0.3f)
                 )
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
@@ -392,22 +399,24 @@ private fun LoreEntriesListView(entries: List<LoreEntryData>) {
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = if (log.category == "TERMINAL") Icons.Default.Terminal else Icons.Default.Description,
+                                imageVector = if (log.category == "TERMINAL") Icons.Default.AutoFixHigh else Icons.Default.Description,
                                 contentDescription = log.title,
-                                tint = if (log.isUnlocked) SunGold else Color(0xFF78909C),
+                                tint = if (log.isUnlocked) MedievalCrimson else IronGrey,
                                 modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (log.isUnlocked) log.title else "Encrypted Lore Entry",
-                                color = Color.White,
-                                fontSize = 13.5.sp,
+                                text = if (log.isUnlocked) log.title else "Forbidden Manuscript",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         Text(
-                            text = if (log.isUnlocked) "By ${log.author}" else "LOCKED",
-                            color = CleanCyan,
+                            text = if (log.isUnlocked) "By ${log.author}" else "SEALED",
+                            color = MedievalTextSecondary,
+                            fontFamily = AlmendraFontFamily,
                             fontSize = 11.sp,
                             fontStyle = FontStyle.Italic
                         )
@@ -418,14 +427,16 @@ private fun LoreEntriesListView(entries: List<LoreEntryData>) {
                     if (log.isUnlocked) {
                         Text(
                             text = log.textContent,
-                            color = Color(0xFFECEFF1),
+                            color = MedievalTextPrimary,
+                            fontFamily = AlmendraFontFamily,
                             fontSize = 12.sp,
                             fontStyle = FontStyle.Italic
                         )
                     } else {
                         Text(
-                            text = "Find journal entries & inspect terminal logs across Green Valley, Deep Forest, and Wetlands to decrypt this story archive.",
-                            color = Color(0xFF78909C),
+                            text = "Find ancient scrolls and decypher stone inscriptions across the realms to unlock this forbidden knowledge.",
+                            color = MedievalTextSecondary,
+                            fontFamily = AlmendraFontFamily,
                             fontSize = 11.5.sp
                         )
                     }
@@ -449,9 +460,10 @@ private fun BlueprintsListView(unlockedBlueprints: List<String>) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No blueprints unlocked yet.\nUnlock technology nodes in the Research Tree or discover world POIs!",
-                color = Color(0xFF90A4AE),
-                fontSize = 13.sp,
+                text = "No designs found yet.\nMaster the alchemy tree or discover lost ruins to find forgotten plans!",
+                color = MedievalTextSecondary,
+                fontFamily = AlmendraFontFamily,
+                fontSize = 14.sp,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
@@ -466,8 +478,8 @@ private fun BlueprintsListView(unlockedBlueprints: List<String>) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("blueprint_card_${item.id}"),
-                    colors = CardDefaults.cardColors(containerColor = Color(0x1F00E5FF)),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan)
+                    colors = CardDefaults.cardColors(containerColor = AgedGold.copy(alpha = 0.05f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.6f))
                 ) {
                     Row(
                         modifier = Modifier
@@ -479,13 +491,13 @@ private fun BlueprintsListView(unlockedBlueprints: List<String>) {
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(CleanCyan.copy(alpha = 0.2f)),
+                                .background(AgedGold.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Construction,
                                 contentDescription = item.title,
-                                tint = CleanCyan,
+                                tint = AgedGoldDark,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -493,25 +505,28 @@ private fun BlueprintsListView(unlockedBlueprints: List<String>) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = item.title,
-                                color = Color.White,
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = item.description,
-                                color = Color(0xFFB0BEC5),
+                                color = MedievalTextPrimary.copy(alpha = 0.8f),
+                                fontFamily = AlmendraFontFamily,
                                 fontSize = 11.5.sp
                             )
                         }
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = SolarEmerald.copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                            color = ForestMoss.copy(alpha = 0.15f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, ForestMoss)
                         ) {
                             Text(
-                                text = "UNLOCKED",
-                                color = SolarEmerald,
+                                text = "DESIGNED",
+                                color = ForestMoss,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -531,23 +546,23 @@ private data class BlueprintDisplayItem(
 )
 
 private fun getBlueprintDetails(bpId: String): BlueprintDisplayItem = when (bpId) {
-    "tech_water_purification" -> BlueprintDisplayItem(bpId, "Water Filter Building", "Filters raw river water into purified clean drinking water.")
-    "tech_better_tools" -> BlueprintDisplayItem(bpId, "Iron Axe & Iron Pickaxe", "Reinforced iron tools for 2x faster timber & stone harvesting.")
-    "tech_crop_rotation" -> BlueprintDisplayItem(bpId, "Crop Rotation Technique", "Nitrogen-fixing soil management boosting crop growth speed by +10%.")
-    "tech_basic_cooking" -> BlueprintDisplayItem(bpId, "Electric Cooking Station", "Cooktop structure & 5 culinary recipes to restore health and hunger.")
-    "tech_advanced_solar" -> BlueprintDisplayItem(bpId, "Advanced Solar Glass Array", "Dual-axis photovoltaic tracking panels generating 25 kWh/day clean energy.")
-    "tech_irrigation_systems" -> BlueprintDisplayItem(bpId, "Irrigation Pipes & Nodes", "Subsurface drip irrigation for automated permaculture watering.")
-    "tech_animal_breeding" -> BlueprintDisplayItem(bpId, "Livestock Breeding Sanctuary", "Nutritional breeding program allowing chickens and cows to reproduce every 5 days.")
-    "tech_herbal_medicine" -> BlueprintDisplayItem(bpId, "Medical Station Infirmary", "Infirmary structure brewing herbal cures and passively healing settlement residents.")
-    "tech_hydro_power" -> BlueprintDisplayItem(bpId, "Small Hydro Generator", "Micro-hydro river wheel generating 35 kWh/day baseload hydroelectricity.")
-    "tech_electric_vehicles" -> BlueprintDisplayItem(bpId, "Electric Utility Cart", "High-torque e-vehicle for rapid transit across Green Valley & Wetlands.")
-    "tech_automation" -> BlueprintDisplayItem(bpId, "Auto-Harvesters & Auto-Planters", "Automated cybernetic machinery for automatic seeding and harvesting.")
-    "tech_advanced_greenhouse" -> BlueprintDisplayItem(bpId, "Climate-Controlled Bio-Dome", "Glass greenhouse structure doubling crop yield under climate control.")
-    "tech_smart_grid" -> BlueprintDisplayItem(bpId, "Smart Grid Power Inverter", "Micro-inverter power balance system reducing line loss by 20%.")
-    "tech_drone_network" -> BlueprintDisplayItem(bpId, "Scout Drone Aerial Tracker", "Autonomous drone hub conducting aerial biome mapping and wildlife tracking.")
-    "tech_geothermal_power" -> BlueprintDisplayItem(bpId, "Geothermal Vent Generator", "Deep subterranean thermal vent tap producing 80 kWh/day zero-emission power.")
-    "tech_vertical_farming" -> BlueprintDisplayItem(bpId, "Aeroponic Vertical Tower", "10x crop yield in compact footprint using closed-loop nutrient mists.")
-    "tech_fusion_research" -> BlueprintDisplayItem(bpId, "Micro-Fusion Reactor", "Compact aneutronic fusion reactor generating 200 kWh/day endgame power.")
-    "tech_new_dawn" -> BlueprintDisplayItem(bpId, "New Dawn Civilization Blueprint", "Master eco-city blueprint to rebuild civilization.")
-    else -> BlueprintDisplayItem(bpId, bpId.replace("tech_", "").replace("_", " ").capitalize(), "Unlocked Solarpunk blueprint.")
+    "tech_water_purification" -> BlueprintDisplayItem(bpId, "Holy Water Filter", "Filters raw river water into purified sacred drinking water.")
+    "tech_better_tools" -> BlueprintDisplayItem(bpId, "Steel Axe & Steel Pickaxe", "Reinforced steel tools for 2x faster timber & stone harvesting.")
+    "tech_crop_rotation" -> BlueprintDisplayItem(bpId, "Druidic Permaculture", "Moon-blessed soil management boosting crop growth speed by +10%.")
+    "tech_basic_cooking" -> BlueprintDisplayItem(bpId, "Grand Stone Hearth", "Stone hearth structure & 5 legendary recipes to restore health and hunger.")
+    "tech_advanced_solar" -> BlueprintDisplayItem(bpId, "Ancient Mana Circle", "Stone circles that gather mana from ley lines generating 25 Mana/day.")
+    "tech_irrigation_systems" -> BlueprintDisplayItem(bpId, "Stone Aqueducts", "Carved stone waterways for automated field irrigation.")
+    "tech_animal_breeding" -> BlueprintDisplayItem(bpId, "Noble Breeding Sanctuary", "Sacred breeding program allowing chickens and cows to reproduce every 5 days.")
+    "tech_herbal_medicine" -> BlueprintDisplayItem(bpId, "Healer's Sanctum", "Apothecary structure brewing herbal cures and passively healing the realm's citizens.")
+    "tech_hydro_power" -> BlueprintDisplayItem(bpId, "Great Water Wheel", "Massive oak water wheel generating 35 Mana/day from the island's streams.")
+    "tech_electric_vehicles" -> BlueprintDisplayItem(bpId, "Royal Carriage", "High-speed noble carriage for rapid transit across the kingdom.")
+    "tech_automation" -> BlueprintDisplayItem(bpId, "Clockwork Golems", "Runically animated golems for automatic seeding and harvesting.")
+    "tech_advanced_greenhouse" -> BlueprintDisplayItem(bpId, "Crystal Conservatory", "Prismatic glasshouse doubling crop yield through captured light.")
+    "tech_smart_grid" -> BlueprintDisplayItem(bpId, "Ley Line Stabilizer", "Runic mana-balancing system reducing energy leakage by 20%.")
+    "tech_drone_network" -> BlueprintDisplayItem(bpId, "Royal Falcon Aviary", "Network of trained falcons conducting aerial biome mapping and tracking.")
+    "tech_geothermal_power" -> BlueprintDisplayItem(bpId, "Volcanic Power Forge", "Tap the earth's fiery core producing 80 Mana/day eternal power.")
+    "tech_vertical_farming" -> BlueprintDisplayItem(bpId, "Grand Hanging Gardens", "10x crop yield in compact footprint using divine tiered irrigation.")
+    "tech_fusion_research" -> BlueprintDisplayItem(bpId, "Aetheric Reactor", "Bound shard of pure Aether generating 200 Mana/day endgame power.")
+    "tech_new_dawn" -> BlueprintDisplayItem(bpId, "Eternal Kingdom Blueprint", "The master blueprint to crown your eternal kingdom.")
+    else -> BlueprintDisplayItem(bpId, bpId.replace("tech_", "").replace("_", " ").capitalize(), "Unlocked Medieval blueprint.")
 }

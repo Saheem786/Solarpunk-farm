@@ -84,8 +84,8 @@ enum class CropType(
         secondaryColor = 0xFF00E676
     ),
     SOLAR_SUNFLOWER(
-        displayName = "Solar Sunflower",
-        description = "Photovoltaic flora that generates clean energy while blooming.",
+        displayName = "Mana Sunflower",
+        description = "Radiant flora that gathers arcane energy from the sun while blooming.",
         growthDurationSec = 15f,
         waterNeed = 0.4f,
         sunNeed = 0.8f,
@@ -97,8 +97,8 @@ enum class CropType(
         secondaryColor = 0xFFFFA000
     ),
     BIOLUMINESCENT_MUSHROOM(
-        displayName = "Biolum Spores",
-        description = "Glows at night, thrives in misty weather without direct sunlight.",
+        displayName = "Moon Spores",
+        description = "Glows with a soft silver light at night, thrives in misty weather.",
         growthDurationSec = 22f,
         waterNeed = 0.8f,
         sunNeed = 0.1f,
@@ -110,8 +110,8 @@ enum class CropType(
         secondaryColor = 0xFF7C4DFF
     ),
     TERRACED_WHEAT(
-        displayName = "Golden Grain",
-        description = "Heritage wheat enriching regenerative soil.",
+        displayName = "Noble Grain",
+        description = "Royal wheat variety enriching the island's soil.",
         growthDurationSec = 16f,
         waterNeed = 0.3f,
         sunNeed = 0.7f,
@@ -123,8 +123,8 @@ enum class CropType(
         secondaryColor = 0xFF8D6E63
     ),
     SOLAR_CORN(
-        displayName = "Prismatic Corn",
-        description = "Tall architectural stalks with iridescent holographic kernels.",
+        displayName = "Royal Corn",
+        description = "Tall architectural stalks with golden sun-blessed kernels.",
         growthDurationSec = 22f,
         waterNeed = 0.5f,
         sunNeed = 0.85f,
@@ -136,8 +136,8 @@ enum class CropType(
         secondaryColor = 0xFF388E3C
     ),
     CYBER_BERRIES(
-        displayName = "Cyber Berries",
-        description = "Antioxidant-dense berries with bio-electric pulsing stems.",
+        displayName = "Cursed Berries",
+        description = "Dark, potent berries that pulse with a mysterious energy.",
         growthDurationSec = 25f,
         waterNeed = 0.5f,
         sunNeed = 0.6f,
@@ -149,8 +149,8 @@ enum class CropType(
         secondaryColor = 0xFF536DFE
     ),
     SKY_SPIRULINA(
-        displayName = "Sky Spirulina",
-        description = "Algae suspension harvested in vertical hydroponic columns.",
+        displayName = "Medicinal Moss",
+        description = "Ancient moss harvested from the high cliffs and springs.",
         growthDurationSec = 12f,
         waterNeed = 0.9f,
         sunNeed = 0.5f,
@@ -162,8 +162,8 @@ enum class CropType(
         secondaryColor = 0xFF00B0FF
     ),
     HYDROPONIC_MELON(
-        displayName = "Hydro Melon",
-        description = "Sweet crystalline melons grown in mineral nutrient film.",
+        displayName = "Crystalline Melon",
+        description = "Sweet melons infused with the purity of the island's crystals.",
         growthDurationSec = 30f,
         waterNeed = 0.7f,
         sunNeed = 0.6f,
@@ -175,8 +175,8 @@ enum class CropType(
         secondaryColor = 0xFF69F0AE
     ),
     NITRO_BEANS(
-        displayName = "Bio-Nitro Beans",
-        description = "Fixes nitrogen naturally into the soil, boosting neighboring crops.",
+        displayName = "Earth Beans",
+        description = "Restores the vitality of the soil, aiding neighboring crops.",
         growthDurationSec = 16f,
         waterNeed = 0.5f,
         sunNeed = 0.5f,
@@ -213,283 +213,283 @@ enum class BuildableType(
     val previewColor: Long
 ) {
     CABIN(
-        displayName = "Wooden Cabin",
-        description = "Small wooden house with slanted roof. Sleep here at night to fully restore stamina.",
+        displayName = "Royal Cabin",
+        description = "Sturdy wooden lodge with a thatched roof. Rest here to fully restore thy vitality.",
         costCoins = 200,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
-        gameplayEffect = "Sleeping spot — restores stamina fully at night",
+        materialName = "Hewn Timber",
+        gameplayEffect = "Resting spot — restores stamina fully at night",
         previewColor = 0xFF8D6E63
     ),
     GREENHOUSE(
-        displayName = "Greenhouse",
-        description = "Glass panels with wooden frame, green tint. Nearby crops (within 5 units) grow 1.3x faster.",
+        displayName = "Crystal Conservatory",
+        description = "Enchanted glass panels focusing the sun's rays. Nearby crops grow 1.3x faster.",
         costCoins = 500,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
+        materialName = "Prismatic Glass",
         gameplayEffect = "Crops within 5 units grow 1.3x faster",
         previewColor = 0xFF80DEEA
     ),
     SOLAR_PANEL(
-        displayName = "Solar Panel",
-        description = "Blue-black rectangular panel on small stand. Generates 10 kWh/day during sunlight.",
+        displayName = "Mana Stone",
+        description = "Inscribed stone slab that gathers 10 Mana/day from direct sunlight.",
         costCoins = 300,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "Generates 10 kWh/day during sunlight",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "Gathers 10 Mana/day during sunlight",
         previewColor = 0xFFFFD54F
     ),
     WINDMILL(
-        displayName = "Windmill",
-        description = "Tall wooden tower with rotating blades. Generates 15 kWh/day 24/7 (30% less at night).",
+        displayName = "Aeolian Spire",
+        description = "Tall wooden spire with canvas sails. Gathers 15 Mana/day from the island's breezes.",
         costCoins = 400,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Generates 15 kWh/day 24/7 (30% less at night)",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Gathers 15 Mana/day 24/7",
         previewColor = 0xFF80D8FF
     ),
     STORAGE(
-        displayName = "Storage Shed",
-        description = "Small wooden shed with door. Increases inventory capacity by +50 slots.",
+        displayName = "Strongbox Shed",
+        description = "Reinforced shed for storing kingdom goods. Increases inventory by +50 slots.",
         costCoins = 250,
         requiredMaterialId = "material_bio_polymer",
         requiredMaterialQty = 0,
-        materialName = "Bio-Polymer",
+        materialName = "Hardened Resin",
         gameplayEffect = "+50 inventory space",
         previewColor = 0xFF00E5FF
     ),
     WELL(
-        displayName = "Water Well",
-        description = "Stone circle with wooden roof and bucket. Infinite water source — player can drink here anytime.",
+        displayName = "Sacred Well",
+        description = "Stone-lined well tapping into the island's pure spirit springs. Drink freely.",
         costCoins = 150,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
+        materialName = "Enchanted Alloy",
         gameplayEffect = "Infinite water source — drink anytime",
         previewColor = 0xFF80CBC4
     ),
     FENCE(
-        displayName = "Fence Section",
-        description = "Wooden fence post and rails. Decorative boundary marker to block paths.",
+        displayName = "Palisade Section",
+        description = "Sharpened wooden posts to defend and mark thy territory.",
         costCoins = 20,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
+        materialName = "Hewn Timber",
         gameplayEffect = "Decorative boundary section",
         previewColor = 0xFFB0BEC5
     ),
     COMPOST_BIN(
-        displayName = "Compost Bin",
-        description = "Wooden box with dark organic material. Converts 3 harvested crops into 1 seed of any type.",
+        displayName = "Alchemical Vat",
+        description = "Stone vat for fermenting offerings into sacred seeds.",
         costCoins = 100,
         requiredMaterialId = "material_bio_polymer",
         requiredMaterialQty = 0,
-        materialName = "Bio-Polymer",
+        materialName = "Hardened Resin",
         gameplayEffect = "Converts 3 harvested crops into 1 random seed",
         previewColor = 0xFFA1887F
     ),
     RAIN_BARREL(
-        displayName = "Rain Barrel",
-        description = "Catches rainwater during showers (20 units/hr, holds 100). Safe to drink and connects to irrigation.",
+        displayName = "Water Basin",
+        description = "Catches the heavens' tears (20 units/hr). Pure and safe for the kingdom.",
         costCoins = 80,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
-        gameplayEffect = "Fills 20/hr in rain (holds 100). Clean water.",
+        materialName = "Hewn Timber",
+        gameplayEffect = "Fills 20/hr in rain. Clean water.",
         previewColor = 0xFF5D4037
     ),
     WATER_FILTER(
-        displayName = "Water Filter",
-        description = "Gravity sand & activated carbon filter. Automatically converts raw water into clean water (1 unit/3 min).",
+        displayName = "Holy Filter",
+        description = "Purifies raw stream water through blessed sands (1 unit/3 min).",
         costCoins = 150,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
+        materialName = "Enchanted Alloy",
         gameplayEffect = "Converts raw water to clean water automatically",
         previewColor = 0xFF00ACC1
     ),
     WATER_PURIFIER(
-        displayName = "Water Purifier",
-        description = "High-tech solar-powered UV purifier. Consumes 2 kWh/hr to purify 5 units of raw water per minute.",
+        displayName = "Alchemical Purifier",
+        description = "Advanced purifying station using focused sunbeams. Requires 2 Mana/hr.",
         costCoins = 400,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "Requires 2 kWh/hr. Purifies 5 units/min",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "Requires 2 Mana/hr. Purifies 5 units/min",
         previewColor = 0xFF00E5FF
     ),
     IRRIGATION_PIPE(
-        displayName = "Irrigation Pipe",
-        description = "Copper pipe segment (1x1 unit). Transports water from wells, barrels, or purifiers to sprinkler nodes.",
+        displayName = "Stone Aqueduct",
+        description = "Carved stone segment for transporting the life-blood of the island.",
         costCoins = 80,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
+        materialName = "Enchanted Alloy",
         gameplayEffect = "Transports water to irrigation nodes",
         previewColor = 0xFFB87333
     ),
     IRRIGATION_NODE(
-        displayName = "Irrigation Node",
-        description = "Sprinkler head attached to pipe network. Automatically waters all crops within 3 units at 6:00 AM.",
+        displayName = "Blessing Fountain",
+        description = "Small fountain that auto-waters nearby fields at the break of dawn.",
         costCoins = 40,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Auto-waters crops within 3 units at 6 AM (5 water/day)",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Auto-waters crops at 6 AM",
         previewColor = 0xFF00B0FF
     ),
     WATER_STORAGE_SHED(
-        displayName = "Water Storage Shed",
-        description = "High-capacity cistern holding up to 100 units of clean water. Fills from connected filters or purifiers.",
+        displayName = "Great Cistern",
+        description = "High-capacity stone basin holding up to 100 units of sacred water.",
         costCoins = 250,
         requiredMaterialId = "material_bio_polymer",
         requiredMaterialQty = 0,
-        materialName = "Bio-Polymer",
+        materialName = "Hardened Resin",
         gameplayEffect = "Stores up to 100 units of water",
         previewColor = 0xFF0288D1
     ),
     HYDRO_GENERATOR(
-        displayName = "Small Hydro Generator",
-        description = "Water wheel harnessing flowing river or stream currents. Generates 20 kWh/day 24/7 continuous clean power.",
+        displayName = "Great Water Wheel",
+        description = "Massive oak wheel harnessing the river's fury. Gathers 20 Mana/day.",
         costCoins = 800,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Generates 20 kWh/day 24/7 (Must be near river/stream)",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Gathers 20 Mana/day (Must be near water)",
         previewColor = 0xFF00E5FF
     ),
     ADVANCED_SOLAR(
-        displayName = "Advanced Solar Array",
-        description = "4x4 motorized solar array with sun tracking. Rotates to face the sun throughout the day (+20% efficiency, 30 kWh/day).",
+        displayName = "Crystal Sun Obelisk",
+        description = "Runically aligned obelisk that tracks the sun's path (+20% efficiency, 30 Mana/day).",
         costCoins = 1200,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "Generates 30 kWh/day (Daylight only, Sun-tracking)",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "Gathers 30 Mana/day (Sun-tracking)",
         previewColor = 0xFFFFD54F
     ),
     BIOGAS_GENERATOR(
-        displayName = "Biogas Generator",
-        description = "Dome tank converting farm compost and livestock manure into 12 kWh/day 24/7 base-load power.",
+        displayName = "Earth Spirit Vat",
+        description = "Stone dome converting farm waste into 12 Mana/day 24/7 constant energy.",
         costCoins = 600,
         requiredMaterialId = "material_bio_polymer",
         requiredMaterialQty = 0,
-        materialName = "Bio-Polymer",
-        gameplayEffect = "Generates 12 kWh/day 24/7 (Consumes 1 compost/day)",
+        materialName = "Hardened Resin",
+        gameplayEffect = "Gathers 12 Mana/day (Consumes 1 compost/day)",
         previewColor = 0xFF81C784
     ),
     GEOTHERMAL_VENT(
-        displayName = "Geothermal Vent",
-        description = "Deep thermal steam turbine providing heavy industrial 40 kWh/day continuous 24/7 power.",
+        displayName = "Volcanic Forge",
+        description = "Taps the island's fiery core to provide heavy industrial 40 Mana/day.",
         costCoins = 2000,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Generates 40 kWh/day 24/7 continuous base-load",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Gathers 40 Mana/day continuous base-load",
         previewColor = 0xFFFF7043
     ),
     BASIC_BATTERY(
-        displayName = "Basic Battery",
-        description = "2x2 compact solid-state battery unit. Holds 50 kWh capacity with 5 kWh/hour charge rate.",
+        displayName = "Mana Vessel",
+        description = "Compact stone basin holding 50 Mana essence.",
         costCoins = 200,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "+50 kWh storage capacity (Charge rate: 5 kWh/hr)",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "+50 Mana capacity",
         previewColor = 0xFF29B6F6
     ),
     ADVANCED_BATTERY(
-        displayName = "Advanced Battery",
-        description = "3x3 multi-cell battery bank with status LEDs. Holds 150 kWh capacity with 15 kWh/hour charge rate.",
+        displayName = "Greater Mana Vessel",
+        description = "Reinforced stone basin holding 150 Mana essence with glowing runes.",
         costCoins = 500,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "+150 kWh storage capacity (Charge rate: 15 kWh/hr)",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "+150 Mana capacity",
         previewColor = 0xFF00B0FF
     ),
     BATTERY_BANK(
-        displayName = "Industrial Battery Bank",
-        description = "5x5 high-density grid storage bank with cooling fans. Holds 500 kWh capacity with 50 kWh/hour charge rate.",
+        displayName = "Royal Mana Vault",
+        description = "Large-scale crystalline vault holding 500 Mana essence for the kingdom.",
         costCoins = 1200,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "+500 kWh storage capacity (Charge rate: 50 kWh/hr)",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "+500 Mana capacity",
         previewColor = 0xFF00E5FF
     ),
     POWER_POLE(
-        displayName = "Power Pole",
-        description = "Wooden transmission pole with ceramic high-voltage insulators. Extends electrical grid reach by 15 units.",
+        displayName = "Ley Line Conduit",
+        description = "Iron-bound pole to extend the kingdom's mana grid reach.",
         costCoins = 30,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
-        gameplayEffect = "Extends power grid by 15 units",
+        materialName = "Hewn Timber",
+        gameplayEffect = "Extends mana grid reach",
         previewColor = 0xFF8D6E63
     ),
     NPC_CABIN(
-        displayName = "NPC Cabin",
-        description = "Cozy wooden cottage with 2 warm beds. Provides safe shelter and high morale for 2 settlement survivors.",
+        displayName = "Citizens' Cottage",
+        description = "Cozy wooden cottage for 2 loyal subjects. Provides high loyalty and rest.",
         costCoins = 300,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
-        gameplayEffect = "Housing for 2 NPCs (+High Morale & Recovery)",
+        materialName = "Hewn Timber",
+        gameplayEffect = "Housing for 2 citizens (+High Loyalty)",
         previewColor = 0xFF8D6E63
     ),
     BUNKHOUSE(
-        displayName = "Settlement Bunkhouse",
-        description = "Spacious communal lodge fitted with 6 comfortable bunks. Large-scale housing for expanding communities.",
+        displayName = "Royal Barracks",
+        description = "Spacious communal lodge for 6 citizens. Expanding the kingdom's reach.",
         costCoins = 800,
         requiredMaterialId = "material_bio_timber",
         requiredMaterialQty = 0,
-        materialName = "Bio-Timber",
-        gameplayEffect = "Housing for 6 NPCs (Communal living shelter)",
+        materialName = "Hewn Timber",
+        gameplayEffect = "Housing for 6 citizens",
         previewColor = 0xFF795548
     ),
     KITCHEN(
-        displayName = "Community Kitchen",
-        description = "Solar-powered communal galley where survivors gather for meals and player can cook nutritious feasts.",
+        displayName = "Royal Hearth",
+        description = "Large communal kitchen where citizens gather to feast on thy bountiful harvests.",
         costCoins = 500,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Survivors eat here. Requires 1 kWh/hr.",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Citizens eat here. Requires 1 Mana/hr.",
         previewColor = 0xFFFFB74D
     ),
     MEDIC_STATION(
-        displayName = "Sanctuary Clinic",
-        description = "Sterile dispensary and triage station. Stationed Medic heals player and produces herbal remedies.",
+        displayName = "Healer's Sanctum",
+        description = "Serene clinic where station Medics heal thy wounds and brew elixirs.",
         costCoins = 600,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "Medic heals & cures sickness. Requires 1 kWh/hr.",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "Heals & cures sickness. Requires 1 Mana/hr.",
         previewColor = 0xFFE57373
     ),
     WORKSHOP(
-        displayName = "Tech Workshop",
-        description = "Heavy-duty engineering bench with CNC fabricator. Engineers stationed here boost crafting speed by 30%.",
+        displayName = "Master's Forge",
+        description = "Heavy-duty forge for crafting legendary items and royal tools.",
         costCoins = 450,
         requiredMaterialId = "material_eco_alloy",
         requiredMaterialQty = 0,
-        materialName = "Eco-Alloy",
-        gameplayEffect = "Crafting speed +30% with Engineer. Requires 3 kWh/hr.",
+        materialName = "Enchanted Alloy",
+        gameplayEffect = "Crafting speed +30% with Engineer. Requires 3 Mana/hr.",
         previewColor = 0xFF90A4AE
     ),
     RESEARCH_LAB(
-        displayName = "Bio-Tech Research Lab",
-        description = "Advanced solarpunk laboratory with cleanroom hood. Researchers stationed here produce +2 RP/day.",
+        displayName = "Alchemy Chamber",
+        description = "Sacred laboratory where researchers discover forgotten island secrets.",
         costCoins = 800,
         requiredMaterialId = "material_solar_glass",
         requiredMaterialQty = 0,
-        materialName = "Solar Glass",
-        gameplayEffect = "Generates +2 RP/day. Requires 2 kWh/hr.",
+        materialName = "Prismatic Glass",
+        gameplayEffect = "Generates +2 Prestige/day. Requires 2 Mana/hr.",
         previewColor = 0xFF80DEEA
     );
 
@@ -543,10 +543,10 @@ enum class CropStage {
  * Types of farming plots.
  */
 enum class PlotType(val displayName: String, val maxMoistureRetention: Float) {
-    PERMACULTURE_BED("Permaculture Bed", 1.0f),
-    HYDROPONIC_TOWER("Hydroponic Tower", 1.5f),
-    BIO_DOME("Glass Bio-Dome", 2.0f),
-    SOLAR_SOIL_PATCH("Solar Ground Patch", 0.8f)
+    PERMACULTURE_BED("Herb Garden Bed", 1.0f),
+    HYDROPONIC_TOWER("Arcane Aqueduct Tower", 1.5f),
+    BIO_DOME("Glass Conservatory", 2.0f),
+    SOLAR_SOIL_PATCH("Sun-Blessed Ground", 0.8f)
 }
 
 /**
@@ -561,32 +561,32 @@ enum class EnergyNodeType(
     val iconColor: Long
 ) {
     PHOTOVOLTAIC_ARRAY(
-        displayName = "Solar Glass Array",
-        description = "Converts sunlight directly into electrical charge.",
+        displayName = "Mana Stone Array",
+        description = "Inscribed stone slabs gathering the sun's arcane warmth.",
         baseOutputKwhPerSec = 3.5f,
         baseStorageCapacityKwh = 0f,
         buildCostCoins = 150,
         iconColor = 0xFFFFD54F
     ),
     VERTICAL_WIND_TURBINE(
-        displayName = "Aero-Spire Turbine",
-        description = "Silent helical turbine harvesting wind and breeze.",
+        displayName = "Aeolian Spire",
+        description = "Silent spire harvesting the island's eternal breezes.",
         baseOutputKwhPerSec = 2.8f,
         baseStorageCapacityKwh = 0f,
         buildCostCoins = 200,
         iconColor = 0xFF80D8FF
     ),
     BIOGAS_DIGESTER(
-        displayName = "Biomass Digester",
-        description = "Converts organic farm compost into steady base-load power.",
+        displayName = "Alchemical Digester",
+        description = "Converts farm offerings into steady arcane energy.",
         baseOutputKwhPerSec = 2.0f,
         baseStorageCapacityKwh = 0f,
         buildCostCoins = 180,
         iconColor = 0xFF81C784
     ),
     BATTERY_STORAGE_BANK(
-        displayName = "Solid-State Battery",
-        description = "Stores surplus energy generated during peak sunshine.",
+        displayName = "Mana Vessel",
+        description = "Stores surplus mana essence generated by the kingdom.",
         baseOutputKwhPerSec = 0f,
         baseStorageCapacityKwh = 50.0f,
         buildCostCoins = 220,
@@ -607,26 +607,26 @@ enum class LivestockType(
     val tintColor: Long
 ) {
     SOLAR_SHEEP(
-        displayName = "Solar Sheep",
-        description = "Silky fleece woven with micro-photovoltaic fibers.",
-        productProduced = "Solar Wool",
+        displayName = "Golden Sheep",
+        description = "Gentle creatures with golden fleece that gather sun essence.",
+        productProduced = "Golden Wool",
         produceIntervalSec = 20f,
         productSellPrice = 75,
         purchaseCostCoins = 250,
         tintColor = 0xFFFFF9C4
     ),
     CYBER_BOVINE(
-        displayName = "Meadow Cow",
-        description = "Regenerative pasture grazer producing organic elixir & compost.",
-        productProduced = "Organic Bio-Milk",
+        displayName = "Royal Cow",
+        description = "Noble beast producing sacred milk and fertile offerings.",
+        productProduced = "Royal Milk",
         produceIntervalSec = 25f,
         productSellPrice = 110,
         purchaseCostCoins = 380,
         tintColor = 0xFFE0E0E0
     ),
     CHICKEN(
-        displayName = "Chicken",
-        description = "A friendly low-poly farm chicken laying organic eggs.",
+        displayName = "Island Hen",
+        description = "A hardy island chicken laying sun-touched eggs.",
         productProduced = "Egg",
         produceIntervalSec = 30f,
         productSellPrice = 25,
@@ -634,9 +634,9 @@ enum class LivestockType(
         tintColor = 0xFFFFF8E1
     ),
     ROBO_BEE_POLLINATOR(
-        displayName = "Bio-Bees Colony",
-        description = "Dramatically enhances surrounding crop growth and yields.",
-        productProduced = "Solar Honey",
+        displayName = "Mystic Bees",
+        description = "Ethereal bees that dramatically enhance thy harvests.",
+        productProduced = "Forest Honey",
         produceIntervalSec = 15f,
         productSellPrice = 60,
         purchaseCostCoins = 180,
@@ -644,7 +644,7 @@ enum class LivestockType(
     ),
     MEADOW_ALPACA(
         displayName = "Cloud Alpaca",
-        description = "Gentle companion producing ultra-soft thermal fiber.",
+        description = "Gentle companion producing ultra-soft divine fiber.",
         productProduced = "Alpaca Yarn",
         produceIntervalSec = 30f,
         productSellPrice = 140,
@@ -715,11 +715,11 @@ enum class ItemCategory {
  */
 enum class PlayerTool(val displayName: String, val iconRes: String, val description: String) {
     HAND("Free Hands", "hand", "Inspect, pet animals, and pick ripe crops."),
-    WATER_CAN("Smart Sprinkler", "water_drop", "Hydrate dry permaculture soil plots."),
-    FERTILIZER("Bio-Nutrient Serum", "compost", "Accelerate plant growth and increase yield."),
-    SOLAR_WRENCH("Plasma Wrench", "build", "Construct, repair, or upgrade clean energy nodes."),
-    SHEARS("Laser Clippers", "content_cut", "Gently shear solar wool and collect alpaca yarn."),
-    SEED_POUCH("Seed Pouch", "eco", "Sow chosen crops into fertile plots."),
+    WATER_CAN("Blessing Vessel", "water_drop", "Hydrate dry fields with sacred water."),
+    FERTILIZER("Earth Vitality", "compost", "Accelerate plant growth with alchemical salts."),
+    SOLAR_WRENCH("Mystic Hammer", "build", "Construct, repair, or upgrade arcane kingdom nodes."),
+    SHEARS("Iron Shears", "content_cut", "Gently shear wool and collect alpaca yarn."),
+    SEED_POUCH("Seed Pouch", "eco", "Sow chosen crops into fertile fields."),
     FISHING_ROD("Fishing Rod", "phishing", "Cast into rivers, streams, and ponds to catch wild fish.")
 }
 
@@ -733,22 +733,22 @@ enum class WaterQuality(
     val description: String
 ) {
     CLEAN(
-        displayName = "Clean Water",
+        displayName = "Sacred Water",
         thirstRestored = 40.0f,
         causesSickness = false,
-        description = "Pure, fresh ground or rainwater. Safe to drink."
+        description = "Pure, fresh island water. Safe to drink."
     ),
     RAW(
-        displayName = "Raw Water",
+        displayName = "River Water",
         thirstRestored = 30.0f,
         causesSickness = true,
-        description = "Unfiltered river, stream, or pond water. May cause sickness unless boiled or filtered."
+        description = "Unfiltered stream water. May cause sickness unless boiled."
     ),
     PURIFIED(
-        displayName = "Purified Water",
+        displayName = "Blessed Elixir",
         thirstRestored = 45.0f,
         causesSickness = false,
-        description = "High-tech UV sterilized mineral water. Safe and deeply hydrating."
+        description = "Alchemically purified water. Deeply hydrating."
     )
 }
 
@@ -806,7 +806,7 @@ enum class FishType(
         colorHex = 0xFFFFB74D
     ),
     GOLDEN_FISH(
-        displayName = "Solar Golden Fish",
+        displayName = "Golden Sun Fish",
         rarity = "Rare",
         sellPrice = 150,
         hungerRestoreRaw = 50.0f,
@@ -981,13 +981,13 @@ enum class PointOfInterestType(
     // Green Valley POIs
     OLD_FARM(
         id = "poi_old_farm",
-        displayName = "Solarpunk Homestead",
+        displayName = "Forgotten Citadel",
         biome = BiomeType.GREEN_VALLEY,
         worldX = 6.0f,
         worldZ = 0.0f,
         iconName = "home",
-        discoveryRewardTitle = "Homestead Territory",
-        discoveryRewardDesc = "Your regenerative farm and energy nexus",
+        discoveryRewardTitle = "Citadel Territory",
+        discoveryRewardDesc = "Thy kingdom's heart and mana nexus",
         rewardCoins = 50,
         rewardEcoScore = 5,
         rewardItemName = "Heritage Seeds"
@@ -1048,16 +1048,16 @@ enum class PointOfInterestType(
     ),
     RESEARCH_FACILITY(
         id = "poi_research_facility",
-        displayName = "SDZ Research Facility",
+        displayName = "Ancient Mage Academy",
         biome = BiomeType.DEEP_FOREST,
         worldX = -45.0f,
         worldZ = 160.0f,
         iconName = "science",
-        discoveryRewardTitle = "SDZ Research Facility Discovered!",
-        discoveryRewardDesc = "Abandoned eco-tech complex with encrypted terminal logs & geothermal blueprints",
+        discoveryRewardTitle = "Academy Discovered!",
+        discoveryRewardDesc = "Abandoned magical complex with encrypted scrolls & volcanic forge blueprints",
         rewardCoins = 300,
         rewardEcoScore = 30,
-        rewardItemName = "Geothermal Blueprint"
+        rewardItemName = "Volcanic Blueprint"
     ),
     STONE_CIRCLE(
         id = "poi_stone_circle",
@@ -1209,16 +1209,16 @@ enum class DeviceType(
     val category: String,
     val iconName: String = "bolt"
 ) {
-    REFRIGERATOR("device_fridge", "Farmhouse Refrigerator", "Tier 1 (Critical)", 1.5f, PowerPriority.CRITICAL, "Food Preservation", "kitchen"),
-    WATER_PURIFIER("device_purifier", "UV Water Purifier", "Tier 1 (Critical)", 2.0f, PowerPriority.CRITICAL, "Hydration", "water_drop"),
-    MEDICAL_STATION("device_medical", "Medical Dispensary", "Tier 1 (Critical)", 1.0f, PowerPriority.CRITICAL, "Healthcare", "medical_services"),
+    REFRIGERATOR("device_fridge", "Cold Storage Cellar", "Tier 1 (Critical)", 1.5f, PowerPriority.CRITICAL, "Food Preservation", "kitchen"),
+    WATER_PURIFIER("device_purifier", "Alchemical Purifier", "Tier 1 (Critical)", 2.0f, PowerPriority.CRITICAL, "Hydration", "water_drop"),
+    MEDICAL_STATION("device_medical", "Healer's Sanctum", "Tier 1 (Critical)", 1.0f, PowerPriority.CRITICAL, "Healthcare", "medical_services"),
 
-    GREENHOUSE_HEATER("device_gh_heater", "Greenhouse Climate Heater", "Tier 2 (Important)", 4.0f, PowerPriority.IMPORTANT, "Crop Climate", "thermostat"),
-    WATER_PUMP("device_water_pump", "Irrigation Water Pump", "Tier 2 (Important)", 1.0f, PowerPriority.IMPORTANT, "Irrigation", "water"),
-    WORKSHOP("device_workshop", "Artisan Tech Workshop", "Tier 2 (Important)", 3.0f, PowerPriority.IMPORTANT, "Crafting", "build"),
+    GREENHOUSE_HEATER("device_gh_heater", "Conservatory Hearth", "Tier 2 (Important)", 4.0f, PowerPriority.IMPORTANT, "Crop Climate", "thermostat"),
+    WATER_PUMP("device_water_pump", "Aqueduct Sluice", "Tier 2 (Important)", 1.0f, PowerPriority.IMPORTANT, "Irrigation", "water"),
+    WORKSHOP("device_workshop", "Artisan's Forge", "Tier 2 (Important)", 3.0f, PowerPriority.IMPORTANT, "Crafting", "build"),
 
-    LIGHTS("device_lights", "Farmhouse & Barn Lights", "Tier 3 (Normal)", 0.5f, PowerPriority.NORMAL, "Lighting", "lightbulb"),
-    COOKING_STATION("device_cooking", "Electric Cooktop", "Tier 3 (Normal)", 1.0f, PowerPriority.NORMAL, "Cooking", "restaurant"),
+    LIGHTS("device_lights", "Citadel Lanterns", "Tier 3 (Normal)", 0.5f, PowerPriority.NORMAL, "Lighting", "lightbulb"),
+    COOKING_STATION("device_cooking", "Arcane Hearth", "Tier 3 (Normal)", 1.0f, PowerPriority.NORMAL, "Cooking", "restaurant"),
     ELECTRIC_FENCE("device_elec_fence", "Perimeter Shock Fence", "Tier 3 (Normal)", 0.5f, PowerPriority.NORMAL, "Sanctuary Security", "fence"),
 
     TV_ENTERTAINMENT("device_tv", "Entertainment Terminal", "Tier 4 (Comfort)", 0.8f, PowerPriority.COMFORT, "Recreation", "tv"),

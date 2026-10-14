@@ -25,6 +25,9 @@ class Building3DModels {
     val wellMesh: GLMesh
     val compostBinMesh: GLMesh
     val chickenCoopMesh: GLMesh
+    val windmillTowerMesh: GLMesh
+    val hayBaleMesh: GLMesh
+    val barrelMesh: GLMesh
 
     // Phase 3: Water, Irrigation & Fishing Meshes
     val rainBarrelMesh: GLMesh
@@ -82,39 +85,44 @@ class Building3DModels {
         builder.addBox(0f, 0.02f, 0f, 3.2f, 0.01f, 2.6f, 0.18f, 0.14f, 0.11f, 0.38f)
         shadowSmallMesh = builder.build()
 
-        // 1. FARM HOUSE / CABIN (Height = 3.5 units)
+        // 1. COZY FARMHOUSE
         builder.reset()
-        // Stone Foundation
-        builder.addBox(0f, 0.15f, 0f, 7.4f, 0.30f, 5.2f, 0.40f, 0.40f, 0.45f)
-        // Timber/Clapboard Walls (Warmer wood)
-        builder.addBox(0f, 1.30f, 0f, 7.0f, 2.00f, 4.8f, 0.85f, 0.75f, 0.60f)
-        // Pitched Roof (Darker, more saturated)
-        builder.addRoofPrism(0f, 2.30f, 0f, 7.6f, 1.20f, 5.4f, 0.70f, 0.30f, 0.15f)
-        // Chimney
-        builder.addBox(2.2f, 3.10f, -0.8f, 0.70f, 1.00f, 0.70f, 0.50f, 0.20f, 0.15f)
-        // Front Door
-        builder.addBox(0f, 0.90f, 2.42f, 1.10f, 1.50f, 0.08f, 0.35f, 0.20f, 0.10f)
-        // Windows (more vibrant frame)
-        builder.addBox(-1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.90f, 0.80f, 0.50f)
-        builder.addBox(-1.8f, 0.80f, 2.42f, 1.30f, 0.10f, 0.08f, 0.80f, 0.70f, 0.40f) // sill
-        builder.addBox(1.8f, 1.25f, 2.42f, 1.20f, 0.80f, 0.06f, 0.90f, 0.80f, 0.50f)
-        builder.addBox(1.8f, 0.80f, 2.42f, 1.30f, 0.10f, 0.08f, 0.80f, 0.70f, 0.40f) // sill
-        // Covered Porch
-        builder.addBox(0f, 0.15f, 3.30f, 5.4f, 0.30f, 1.8f, 0.45f, 0.30f, 0.20f)
-        builder.addCylinder(-2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.80f, 0.70f, 0.50f)
-        builder.addCylinder(2.4f, 0.30f, 4.0f, 0.12f, 1.60f, 6, 0.80f, 0.70f, 0.50f)
-        builder.addRoofPrism(0f, 1.90f, 3.30f, 5.6f, 0.60f, 2.0f, 0.70f, 0.30f, 0.15f)
+        // Stone Foundation (Stone texture)
+        builder.addBox(0f, 0.15f, 0f, 7.4f, 0.30f, 5.2f, 0.50f, 0.50f, 0.50f)
+        // Main Walls (Wood texture)
+        builder.addBox(0f, 1.45f, 0f, 7.0f, 2.30f, 4.8f, 0.95f, 0.85f, 0.70f)
+        // Roof (Wood texture but colored dark)
+        builder.addRoofPrism(0f, 2.75f, 0f, 7.6f, 1.40f, 5.4f, 0.40f, 0.20f, 0.10f)
+        // Chimney (Stone texture)
+        builder.addBox(2.2f, 3.40f, -0.8f, 0.80f, 1.20f, 0.80f, 0.60f, 0.55f, 0.55f)
+        // Front Porch
+        builder.addBox(0f, 0.15f, 3.40f, 5.6f, 0.30f, 2.0f, 0.60f, 0.45f, 0.30f)
+        builder.addCylinder(-2.4f, 0.30f, 4.2f, 0.14f, 1.80f, 12, 0.85f, 0.75f, 0.60f)
+        builder.addCylinder(2.4f, 0.30f, 4.2f, 0.14f, 1.80f, 12, 0.85f, 0.75f, 0.60f)
+        builder.addRoofPrism(0f, 2.10f, 3.40f, 5.8f, 0.70f, 2.2f, 0.40f, 0.20f, 0.10f)
+        // Door
+        builder.addBox(0f, 1.05f, 2.42f, 1.20f, 1.80f, 0.08f, 0.45f, 0.30f, 0.15f)
+        // Windows
+        builder.addBox(-1.8f, 1.50f, 2.42f, 1.20f, 1.00f, 0.06f, 0.90f, 0.95f, 1.00f)
+        builder.addBox(1.8f, 1.50f, 2.42f, 1.20f, 1.00f, 0.06f, 0.90f, 0.95f, 1.00f)
         farmhouseMesh = builder.build()
 
-        // 2. RUSTIC BARN (Height = 3.8 units)
+        // 2. LARGE RED RUSTIC BARN
         builder.reset()
-        builder.addBox(0f, 1.10f, 0f, 7.2f, 2.20f, 5.6f, 0.70f, 0.30f, 0.20f)
-        builder.addBox(-3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(3.55f, 1.10f, -2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(-3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
-        builder.addBox(3.55f, 1.10f, 2.75f, 0.25f, 2.25f, 0.25f, 0.95f, 0.95f, 0.95f)
-        builder.addRoofPrism(0f, 2.20f, 0f, 7.6f, 1.60f, 6.0f, 0.20f, 0.10f, 0.05f)
-        builder.addBox(0f, 1.00f, 2.82f, 2.4f, 2.00f, 0.08f, 0.95f, 0.95f, 0.95f)
+        // Main Structure (Wood texture, Red color)
+        builder.addBox(0f, 1.45f, 0f, 7.5f, 2.90f, 6.0f, 0.80f, 0.20f, 0.15f)
+        // White Trim Corners
+        builder.addBox(-3.75f, 1.45f, -3.0f, 0.30f, 2.95f, 0.30f, 0.98f, 0.98f, 0.98f)
+        builder.addBox(3.75f, 1.45f, -3.0f, 0.30f, 2.95f, 0.30f, 0.98f, 0.98f, 0.98f)
+        builder.addBox(-3.75f, 1.45f, 3.0f, 0.30f, 2.95f, 0.30f, 0.98f, 0.98f, 0.98f)
+        builder.addBox(3.75f, 1.45f, 3.0f, 0.30f, 2.95f, 0.30f, 0.98f, 0.98f, 0.98f)
+        // Sloped Roof (Gable roof style)
+        builder.addRoofPrism(0f, 2.90f, 0f, 8.0f, 2.00f, 6.5f, 0.30f, 0.15f, 0.10f)
+        // Large Barn Doors (Wood texture)
+        builder.addBox(0f, 1.25f, 3.02f, 3.20f, 2.50f, 0.10f, 0.50f, 0.35f, 0.20f)
+        // Cross trim on doors
+        builder.addBox(0f, 1.25f, 3.08f, 0.15f, 2.50f, 0.05f, 0.98f, 0.98f, 0.98f)
+        builder.addBox(0f, 1.25f, 3.08f, 3.20f, 0.15f, 0.05f, 0.98f, 0.98f, 0.98f)
         barnMesh = builder.build()
 
         // 3. ARTISAN ECO-WORKSHOP (Height = 3.5 units)
@@ -150,10 +158,10 @@ class Building3DModels {
         // 5. SOL CITY MARKET STALL
         builder.reset()
         builder.addBox(0f, 0.55f, 0f, 3.6f, 1.10f, 1.6f, 0.58f, 0.40f, 0.24f)
-        builder.addCylinder(-1.6f, 0f, -0.7f, 0.08f, 2.60f, 6, 0.45f, 0.30f, 0.18f)
-        builder.addCylinder(1.6f, 0f, -0.7f, 0.08f, 2.60f, 6, 0.45f, 0.30f, 0.18f)
-        builder.addCylinder(-1.6f, 0f, 0.7f, 0.08f, 2.60f, 6, 0.45f, 0.30f, 0.18f)
-        builder.addCylinder(1.6f, 0f, 0.7f, 0.08f, 2.60f, 6, 0.45f, 0.30f, 0.18f)
+        builder.addCylinder(-1.6f, 0f, -0.7f, 0.08f, 2.60f, 12, 0.45f, 0.30f, 0.18f)
+        builder.addCylinder(1.6f, 0f, -0.7f, 0.08f, 2.60f, 12, 0.45f, 0.30f, 0.18f)
+        builder.addCylinder(-1.6f, 0f, 0.7f, 0.08f, 2.60f, 12, 0.45f, 0.30f, 0.18f)
+        builder.addCylinder(1.6f, 0f, 0.7f, 0.08f, 2.60f, 12, 0.45f, 0.30f, 0.18f)
         builder.addRoofPrism(0f, 2.50f, 0f, 4.0f, 0.80f, 2.2f, 0.00f, 0.85f, 0.45f)
         marketStallMesh = builder.build()
 
@@ -215,17 +223,41 @@ class Building3DModels {
         builder.addBox(0f, 0.16f, 0.95f, 0.30f, 0.04f, 0.60f, 0.62f, 0.45f, 0.28f)
         chickenCoopMesh = builder.build()
 
+        // 11B. WINDMILL TOWER
+        builder.reset()
+        // Tapered stone base
+        builder.addCylinder(0f, 1.50f, 0f, 1.40f, 3.00f, 8, 0.60f, 0.60f, 0.65f)
+        // Wooden upper body
+        builder.addCylinder(0f, 4.50f, 0f, 1.10f, 3.00f, 8, 0.75f, 0.55f, 0.35f)
+        // Conical roof
+        builder.addCone(0f, 6.00f, 0f, 1.35f, 1.20f, 8, 0.40f, 0.20f, 0.10f)
+        // Balcony
+        builder.addCylinder(0f, 4.50f, 0f, 1.50f, 0.15f, 12, 0.50f, 0.35f, 0.20f)
+        windmillTowerMesh = builder.build()
+
+        // 11C. HAY BALES & BARRELS
+        builder.reset()
+        builder.addBox(0f, 0.40f, 0f, 1.20f, 0.80f, 0.80f, 0.95f, 0.85f, 0.35f)
+        builder.addBox(0f, 0.40f, 0f, 1.22f, 0.10f, 0.82f, 0.98f, 0.90f, 0.50f) // binding
+        hayBaleMesh = builder.build()
+
+        builder.reset()
+        builder.addCylinder(0f, 0.50f, 0f, 0.45f, 1.00f, 12, 0.55f, 0.40f, 0.25f)
+        builder.addCylinder(0f, 0.25f, 0f, 0.46f, 0.05f, 12, 0.20f, 0.20f, 0.22f) // iron ring
+        builder.addCylinder(0f, 0.75f, 0f, 0.46f, 0.05f, 12, 0.20f, 0.20f, 0.22f)
+        barrelMesh = builder.build()
+
         // 12. RAIN BARREL
         builder.reset()
         // Wooden Staves Barrel
-        builder.addCylinder(0f, 0.55f, 0f, 0.52f, 1.10f, 12, 0.48f, 0.32f, 0.18f)
+        builder.addCylinder(0f, 0.55f, 0f, 0.52f, 1.10f, 20, 0.48f, 0.32f, 0.18f)
         // Iron Metal Hoops
-        builder.addCylinder(0f, 0.25f, 0f, 0.54f, 0.05f, 12, 0.22f, 0.24f, 0.26f)
-        builder.addCylinder(0f, 0.85f, 0f, 0.54f, 0.05f, 12, 0.22f, 0.24f, 0.26f)
+        builder.addCylinder(0f, 0.25f, 0f, 0.54f, 0.05f, 20, 0.22f, 0.24f, 0.26f)
+        builder.addCylinder(0f, 0.85f, 0f, 0.54f, 0.05f, 20, 0.22f, 0.24f, 0.26f)
         // Water Basin Surface
-        builder.addCylinder(0f, 1.05f, 0f, 0.48f, 0.04f, 12, 0.12f, 0.65f, 0.88f)
+        builder.addCylinder(0f, 1.05f, 0f, 0.48f, 0.04f, 20, 0.12f, 0.65f, 0.88f)
         // Brass Spigot Tap
-        builder.addCylinder(0f, 0.25f, 0.56f, 0.04f, 0.14f, 6, 0.85f, 0.68f, 0.25f)
+        builder.addCylinder(0f, 0.25f, 0.56f, 0.04f, 0.14f, 12, 0.85f, 0.68f, 0.25f)
         rainBarrelMesh = builder.build()
 
         // 13. WATER FILTER
@@ -271,13 +303,13 @@ class Building3DModels {
         // 17. WATER STORAGE SHED (Large Cistern)
         builder.reset()
         // Large Corrugated Steel Cistern Tank
-        builder.addCylinder(0f, 1.10f, 0f, 1.25f, 2.20f, 14, 0.18f, 0.50f, 0.68f)
+        builder.addCylinder(0f, 1.10f, 0f, 1.25f, 2.20f, 24, 0.18f, 0.50f, 0.68f)
         // Dome Lid
-        builder.addCone(0f, 2.20f, 0f, 1.30f, 0.40f, 14, 0.22f, 0.55f, 0.72f)
+        builder.addCone(0f, 2.20f, 0f, 1.30f, 0.40f, 24, 0.22f, 0.55f, 0.72f)
         // Inspection hatch
-        builder.addCylinder(0.45f, 2.35f, 0f, 0.28f, 0.12f, 8, 0.85f, 0.90f, 0.92f)
+        builder.addCylinder(0.45f, 2.35f, 0f, 0.28f, 0.12f, 16, 0.85f, 0.90f, 0.92f)
         // Water Level Gauge Tube
-        builder.addCylinder(1.26f, 1.10f, 0f, 0.04f, 1.80f, 6, 0.10f, 0.90f, 1.0f)
+        builder.addCylinder(1.26f, 1.10f, 0f, 0.04f, 1.80f, 12, 0.10f, 0.90f, 1.0f)
         waterStorageMesh = builder.build()
 
         // 18. FISHING BOBBER
@@ -515,34 +547,39 @@ class Building3DModels {
         projMatrix: FloatArray,
         energyNodes: List<EnergyNodeEntity>,
         placedBuildings: List<PlacedBuildingEntity>,
-        animTime: Float
+        animTime: Float,
+        texWood: Int = 0,
+        texStone: Int = 0,
+        texLeaves: Int = 0,
+        texDirt: Int = 0,
+        texGrass: Int = 0
     ) {
         // 1. Draw Default Farmhouse at X = 6.0, Z = 0.0 with Ground Shadow
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 6.0f, 0.0f, 0.0f)
         renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
         Matrix.rotateM(modelMatrix, 0, -90.0f, 0f, 1f, 0f)
-        renderMesh(shader, farmhouseMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, farmhouseMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // 2. Draw Rustic Barn at X = -8.0, Z = 6.0 with Ground Shadow
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -8.0f, 0.0f, 6.0f)
         renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
         Matrix.rotateM(modelMatrix, 0, 0.0f, 0f, 1f, 0f)
-        renderMesh(shader, barnMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, barnMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // 3. Draw Artisan Eco-Workshop at X = 0.0, Z = 14.0 with Ground Shadow
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, 0.0f, 0.0f, 14.0f)
         renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
-        renderMesh(shader, workshopMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, workshopMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // 4. Draw Sol City Market Trading Stall at X = -14.0, Z = -14.0 with Ground Shadow
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, -14.0f, 0.0f, -14.0f)
         renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
         Matrix.rotateM(modelMatrix, 0, 45.0f, 0f, 1f, 0f)
-        renderMesh(shader, marketStallMesh, modelMatrix, viewMatrix, projMatrix)
+        renderMesh(shader, marketStallMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
 
         // 5. Draw Clean Energy Nodes with Shadows
         for (node in energyNodes) {
@@ -552,7 +589,7 @@ class Building3DModels {
             when (node.nodeType) {
                 EnergyNodeType.PHOTOVOLTAIC_ARRAY -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
-                    renderMesh(shader, solarArrayMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, solarArrayMesh, modelMatrix, viewMatrix, projMatrix) // solar panels usually glass/silicon
                 }
                 EnergyNodeType.BATTERY_STORAGE_BANK -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
@@ -591,7 +628,7 @@ class Building3DModels {
                 BuildableType.CABIN -> {
                     renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, farmhouseMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, farmhouseMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.GREENHOUSE -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
@@ -609,42 +646,44 @@ class Building3DModels {
                     renderMesh(shader, batteryHubMesh, modelMatrix, viewMatrix, projMatrix)
                 }
                 BuildableType.WINDMILL -> {
-                    renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, batteryHubMesh, modelMatrix, viewMatrix, projMatrix)
-                    val spinAngle = (animTime * 180.0f) % 360.0f
-                    for (i in 0..2) {
+                    renderMesh(shader, windmillTowerMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
+                    
+                    // Spinning Windmill Sails
+                    val spinAngle = (animTime * 120.0f) % 360.0f
+                    for (i in 0..3) {
                         Matrix.setIdentityM(partMatrix, 0)
                         Matrix.multiplyMM(partMatrix, 0, modelMatrix, 0, partMatrix, 0)
-                        Matrix.translateM(partMatrix, 0, 0f, 3.8f, 0f)
-                        Matrix.rotateM(partMatrix, 0, spinAngle + i * 120.0f, 0f, 0f, 1f)
-                        renderMesh(shader, turbineBladeMesh, partMatrix, viewMatrix, projMatrix)
+                        Matrix.translateM(partMatrix, 0, 0f, 6.0f, 1.2f)
+                        Matrix.rotateM(partMatrix, 0, spinAngle + i * 90.0f, 0f, 0f, 1f)
+                        renderMesh(shader, turbineBladeMesh, partMatrix, viewMatrix, projMatrix, textureId = texWood)
                     }
                 }
                 BuildableType.WELL -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, wellMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, wellMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
                 }
                 BuildableType.FENCE -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, fenceSegmentMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, fenceSegmentMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.COMPOST_BIN -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, compostBinMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, compostBinMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.RAIN_BARREL -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, rainBarrelMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, rainBarrelMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.WATER_FILTER -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, waterFilterMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, waterFilterMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
                 }
                 BuildableType.WATER_PURIFIER -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
@@ -667,7 +706,7 @@ class Building3DModels {
                 BuildableType.HYDRO_GENERATOR -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, hydroGeneratorMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, hydroGeneratorMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
 
                     // Spinning Hydro Water Wheel
                     Matrix.setIdentityM(partMatrix, 0)
@@ -675,7 +714,7 @@ class Building3DModels {
                     Matrix.translateM(partMatrix, 0, -0.6f, 0.70f, 0f)
                     val wheelSpin = (animTime * 140.0f) % 360.0f
                     Matrix.rotateM(partMatrix, 0, wheelSpin, 0f, 0f, 1f)
-                    renderMesh(shader, hydroWaterWheelMesh, partMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, hydroWaterWheelMesh, partMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.ADVANCED_SOLAR -> {
                     renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
@@ -692,7 +731,7 @@ class Building3DModels {
                 BuildableType.GEOTHERMAL_VENT -> {
                     renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, geothermalVentMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, geothermalVentMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
                 }
                 BuildableType.BASIC_BATTERY -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
@@ -712,22 +751,22 @@ class Building3DModels {
                 BuildableType.POWER_POLE -> {
                     renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, powerPoleMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, powerPoleMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.NPC_CABIN -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, npcCabinMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, npcCabinMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.BUNKHOUSE -> {
                     renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, bunkhouseMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, bunkhouseMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.KITCHEN -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, kitchenMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, kitchenMesh, modelMatrix, viewMatrix, projMatrix, textureId = texStone)
                 }
                 BuildableType.MEDIC_STATION -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
@@ -737,7 +776,7 @@ class Building3DModels {
                 BuildableType.WORKSHOP -> {
                     renderMesh(shader, shadowMediumMesh, modelMatrix, viewMatrix, projMatrix)
                     Matrix.rotateM(modelMatrix, 0, building.rotationDeg, 0f, 1f, 0f)
-                    renderMesh(shader, workshopMesh, modelMatrix, viewMatrix, projMatrix)
+                    renderMesh(shader, workshopMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
                 }
                 BuildableType.RESEARCH_LAB -> {
                     renderMesh(shader, shadowLargeMesh, modelMatrix, viewMatrix, projMatrix)
@@ -760,6 +799,23 @@ class Building3DModels {
         Matrix.translateM(modelMatrix, 0, 4.5f, 0.0f, 4.0f)
         renderMesh(shader, shadowSmallMesh, modelMatrix, viewMatrix, projMatrix)
         renderMesh(shader, chickenCoopMesh, modelMatrix, viewMatrix, projMatrix)
+
+        // 10. Draw some Props around the farm
+        // Bales near barn
+        val balePos = listOf(Pair(-15.0f, 11.0f), Pair(-15.0f, 13.0f), Pair(-13.5f, 12.0f))
+        for (pos in balePos) {
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, pos.first, 0.0f, pos.second)
+            renderMesh(shader, hayBaleMesh, modelMatrix, viewMatrix, projMatrix, textureId = texGrass) // grass as straw
+        }
+
+        // Barrels near farmhouse and workshop
+        val barrelPos = listOf(Pair(4.0f, -2.0f), Pair(0.5f, 11.5f), Pair(-1.0f, 11.5f))
+        for (pos in barrelPos) {
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, pos.first, 0.0f, pos.second)
+            renderMesh(shader, barrelMesh, modelMatrix, viewMatrix, projMatrix, textureId = texWood)
+        }
     }
 
     fun drawGhostPreview(
@@ -786,7 +842,7 @@ class Building3DModels {
             BuildableType.GREENHOUSE -> greenhouseMesh
             BuildableType.SOLAR_PANEL -> solarArrayMesh
             BuildableType.STORAGE -> batteryHubMesh
-            BuildableType.WINDMILL -> batteryHubMesh
+            BuildableType.WINDMILL -> windmillTowerMesh
             BuildableType.WELL -> wellMesh
             BuildableType.FENCE -> fenceSegmentMesh
             BuildableType.COMPOST_BIN -> compostBinMesh
@@ -972,7 +1028,8 @@ class Building3DModels {
         mesh: GLMesh,
         mMatrix: FloatArray,
         vMatrix: FloatArray,
-        pMatrix: FloatArray
+        pMatrix: FloatArray,
+        textureId: Int = 0
     ) {
         Matrix.multiplyMM(mvMatrix, 0, vMatrix, 0, mMatrix, 0)
         Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
@@ -985,6 +1042,15 @@ class Building3DModels {
         GLES20.glUniformMatrix4fv(shader.uNormalMatrixLoc, 1, false, normalMatrix, 0)
         GLES20.glUniform3f(shader.uEmissionColorLoc, 0f, 0f, 0f)
         GLES20.glUniform1f(shader.uShininessLoc, 8.0f)
+
+        if (textureId != 0 && shader.uTextureLoc >= 0) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+            GLES20.glUniform1i(shader.uTextureLoc, 0)
+            GLES20.glUniform1i(shader.uUseTextureLoc, 1)
+        } else {
+            GLES20.glUniform1i(shader.uUseTextureLoc, 0)
+        }
 
         mesh.draw(shader)
     }

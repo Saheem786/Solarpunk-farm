@@ -10,13 +10,21 @@ class GLModelBuilder {
     private val vertices = mutableListOf<Float>()
     private val normals = mutableListOf<Float>()
     private val colors = mutableListOf<Float>()
+    private val texCoords = mutableListOf<Float>()
     private val indices = mutableListOf<Short>()
+    private var currentTexScale = 1.0f
 
     fun reset() {
         vertices.clear()
         normals.clear()
         colors.clear()
+        texCoords.clear()
         indices.clear()
+        currentTexScale = 1.0f
+    }
+
+    fun setTextureScale(scale: Float) {
+        currentTexScale = scale
     }
 
     fun addBox(
@@ -114,10 +122,10 @@ class GLModelBuilder {
         val clrG = g.coerceIn(0f, 1f)
         val clrB = b.coerceIn(0f, 1f)
 
-        addVertex(x1, y1, z1, nx, ny, nz, clrR, clrG, clrB, a)
-        addVertex(x2, y2, z2, nx, ny, nz, clrR, clrG, clrB, a)
-        addVertex(x3, y3, z3, nx, ny, nz, clrR, clrG, clrB, a)
-        addVertex(x4, y4, z4, nx, ny, nz, clrR, clrG, clrB, a)
+        addVertex(x1, y1, z1, nx, ny, nz, clrR, clrG, clrB, a, 0f, 0f)
+        addVertex(x2, y2, z2, nx, ny, nz, clrR, clrG, clrB, a, 1f, 0f)
+        addVertex(x3, y3, z3, nx, ny, nz, clrR, clrG, clrB, a, 1f, 1f)
+        addVertex(x4, y4, z4, nx, ny, nz, clrR, clrG, clrB, a, 0f, 1f)
 
         // 2 Triangles: (0, 1, 2) and (0, 2, 3)
         indices.add(baseIndex)
@@ -141,9 +149,9 @@ class GLModelBuilder {
         val clrG = g.coerceIn(0f, 1f)
         val clrB = b.coerceIn(0f, 1f)
 
-        addVertex(x1, y1, z1, nx, ny, nz, clrR, clrG, clrB, a)
-        addVertex(x2, y2, z2, nx, ny, nz, clrR, clrG, clrB, a)
-        addVertex(x3, y3, z3, nx, ny, nz, clrR, clrG, clrB, a)
+        addVertex(x1, y1, z1, nx, ny, nz, clrR, clrG, clrB, a, 0f, 0f)
+        addVertex(x2, y2, z2, nx, ny, nz, clrR, clrG, clrB, a, 1f, 0f)
+        addVertex(x3, y3, z3, nx, ny, nz, clrR, clrG, clrB, a, 0.5f, 1f)
 
         indices.add(baseIndex)
         indices.add((baseIndex + 1).toShort())
@@ -214,7 +222,7 @@ class GLModelBuilder {
         centerZ: Float,
         radius: Float,
         height: Float,
-        segments: Int = 8,
+        segments: Int = 12,
         r: Float,
         g: Float,
         b: Float,
@@ -237,20 +245,28 @@ class GLModelBuilder {
             val x2 = centerX + radius * cos2
             val z2 = centerZ + radius * sin2
 
-            val midCos = cos((a1 + a2) / 2f)
-            val midSin = sin((a1 + a2) / 2f)
+            val u1 = i.toFloat() / segments
+            val u2 = (i + 1).toFloat() / segments
 
             // Side Quad
-            addQuad(
-                x1, bottomY, z1,
-                x2, bottomY, z2,
-                x2, topY, z2,
-                x1, topY, z1,
-                midCos, 0f, midSin,
-                r, g, b, a
-            )
+            val baseIndex = (vertices.size / 3).toShort()
+            val clrR = r.coerceIn(0f, 1f)
+            val clrG = g.coerceIn(0f, 1f)
+            val clrB = b.coerceIn(0f, 1f)
 
-            // Top Cap Triangle
+            addVertex(x1, bottomY, z1, cos1, 0f, sin1, clrR, clrG, clrB, a, u1, 0f)
+            addVertex(x2, bottomY, z2, cos2, 0f, sin2, clrR, clrG, clrB, a, u2, 0f)
+            addVertex(x2, topY, z2, cos2, 0f, sin2, clrR, clrG, clrB, a, u2, 1f)
+            addVertex(x1, topY, z1, cos1, 0f, sin1, clrR, clrG, clrB, a, u1, 1f)
+
+            indices.add(baseIndex)
+            indices.add((baseIndex + 1).toShort())
+            indices.add((baseIndex + 2).toShort())
+            indices.add(baseIndex)
+            indices.add((baseIndex + 2).toShort())
+            indices.add((baseIndex + 3).toShort())
+
+            // Top Cap Triangle (circular UV)
             addTriangle(
                 centerX, topY, centerZ,
                 x1, topY, z1,
@@ -259,7 +275,7 @@ class GLModelBuilder {
                 r * 1.1f, g * 1.1f, b * 1.1f, a
             )
 
-            // Bottom Cap Triangle
+            // Bottom Cap Triangle (circular UV)
             addTriangle(
                 centerX, bottomY, centerZ,
                 x2, bottomY, z2,
@@ -276,7 +292,7 @@ class GLModelBuilder {
         centerZ: Float,
         radius: Float,
         height: Float,
-        segments: Int = 7,
+        segments: Int = 12,
         r: Float,
         g: Float,
         b: Float,
@@ -289,10 +305,18 @@ class GLModelBuilder {
             val a1 = i * step
             val a2 = (i + 1) * step
 
-            val x1 = centerX + radius * cos(a1)
-            val z1 = centerZ + radius * sin(a1)
-            val x2 = centerX + radius * cos(a2)
-            val z2 = centerZ + radius * sin(a2)
+            val cos1 = cos(a1)
+            val sin1 = sin(a1)
+            val cos2 = cos(a2)
+            val sin2 = sin(a2)
+
+            val x1 = centerX + radius * cos1
+            val z1 = centerZ + radius * sin1
+            val x2 = centerX + radius * cos2
+            val z2 = centerZ + radius * sin2
+
+            val u1 = i.toFloat() / segments
+            val u2 = (i + 1).toFloat() / segments
 
             val midCos = cos((a1 + a2) / 2f)
             val midSin = sin((a1 + a2) / 2f)
@@ -302,13 +326,18 @@ class GLModelBuilder {
             val len = sqrt(nx * nx + ny * ny + nz * nz)
 
             // Slanted Side Triangle
-            addTriangle(
-                x1, bottomY, z1,
-                x2, bottomY, z2,
-                centerX, topY, centerZ,
-                nx / len, ny / len, nz / len,
-                r, g, b, a
-            )
+            val baseIndex = (vertices.size / 3).toShort()
+            val clrR = r.coerceIn(0f, 1f)
+            val clrG = g.coerceIn(0f, 1f)
+            val clrB = b.coerceIn(0f, 1f)
+
+            addVertex(x1, bottomY, z1, nx / len, ny / len, nz / len, clrR, clrG, clrB, a, u1, 0f)
+            addVertex(x2, bottomY, z2, nx / len, ny / len, nz / len, clrR, clrG, clrB, a, u2, 0f)
+            addVertex(centerX, topY, centerZ, nx / len, ny / len, nz / len, clrR, clrG, clrB, a, (u1 + u2) / 2f, 1f)
+
+            indices.add(baseIndex)
+            indices.add((baseIndex + 1).toShort())
+            indices.add((baseIndex + 2).toShort())
 
             // Bottom Cap Triangle
             addTriangle(
@@ -326,8 +355,8 @@ class GLModelBuilder {
         centerY: Float,
         centerZ: Float,
         radius: Float,
-        rings: Int = 6,
-        sectors: Int = 8,
+        rings: Int = 12,
+        sectors: Int = 16,
         r: Float,
         g: Float,
         b: Float,
@@ -345,6 +374,9 @@ class GLModelBuilder {
             val r1 = sin(phi1)
             val r2 = sin(phi2)
 
+            val v1 = rIdx * R
+            val v2 = (rIdx + 1) * R
+
             for (sIdx in 0 until sectors - 1) {
                 val theta1 = 2f * Math.PI.toFloat() * sIdx * S
                 val theta2 = 2f * Math.PI.toFloat() * (sIdx + 1) * S
@@ -359,14 +391,26 @@ class GLModelBuilder {
                 val x4 = r2 * cos(theta1)
                 val z4 = r2 * sin(theta1)
 
-                addQuad(
-                    centerX + x1 * radius, centerY + y1 * radius, centerZ + z1 * radius,
-                    centerX + x2 * radius, centerY + y1 * radius, centerZ + z2 * radius,
-                    centerX + x3 * radius, centerY + y2 * radius, centerZ + z3 * radius,
-                    centerX + x4 * radius, centerY + y2 * radius, centerZ + z4 * radius,
-                    (x1 + x2 + x3 + x4) / 4f, (y1 + y2) / 2f, (z1 + z2 + z3 + z4) / 4f,
-                    r, g, b, a
-                )
+                val u1 = sIdx * S
+                val u2 = (sIdx + 1) * S
+
+                val baseIndex = (vertices.size / 3).toShort()
+                val clrR = r.coerceIn(0f, 1f)
+                val clrG = g.coerceIn(0f, 1f)
+                val clrB = b.coerceIn(0f, 1f)
+
+                addVertex(centerX + x1 * radius, centerY + y1 * radius, centerZ + z1 * radius, x1, y1, z1, clrR, clrG, clrB, a, u1, v1)
+                addVertex(centerX + x2 * radius, centerY + y1 * radius, centerZ + z2 * radius, x2, y1, z2, clrR, clrG, clrB, a, u2, v1)
+                addVertex(centerX + x3 * radius, centerY + y2 * radius, centerZ + z3 * radius, x3, y2, z3, clrR, clrG, clrB, a, u2, v2)
+                addVertex(centerX + x4 * radius, centerY + y2 * radius, centerZ + z4 * radius, x4, y2, z4, clrR, clrG, clrB, a, u1, v2)
+
+                indices.add(baseIndex)
+                indices.add((baseIndex + 1).toShort())
+                indices.add((baseIndex + 2).toShort())
+
+                indices.add(baseIndex)
+                indices.add((baseIndex + 2).toShort())
+                indices.add((baseIndex + 3).toShort())
             }
         }
     }
@@ -374,7 +418,8 @@ class GLModelBuilder {
     private fun addVertex(
         x: Float, y: Float, z: Float,
         nx: Float, ny: Float, nz: Float,
-        r: Float, g: Float, b: Float, a: Float
+        r: Float, g: Float, b: Float, a: Float,
+        u: Float = 0f, v: Float = 0f
     ) {
         vertices.add(x)
         vertices.add(y)
@@ -388,23 +433,29 @@ class GLModelBuilder {
         colors.add(g)
         colors.add(b)
         colors.add(a)
+
+        texCoords.add(u * currentTexScale)
+        texCoords.add(v * currentTexScale)
     }
 
     fun build(drawMode: Int = GLES20.GL_TRIANGLES): GLMesh {
         val vertexCoords = vertices.toFloatArray()
         val normalCoords = normals.toFloatArray()
         val colorCoords = colors.toFloatArray()
+        val texCoordsArray = texCoords.toFloatArray()
         val indexArray = indices.toShortArray()
 
         val vb = GLMesh.createFloatBuffer(vertexCoords)
         val nb = GLMesh.createFloatBuffer(normalCoords)
         val cb = GLMesh.createFloatBuffer(colorCoords)
+        val tb = GLMesh.createFloatBuffer(texCoordsArray)
         val ib = GLMesh.createShortBuffer(indexArray)
 
         return GLMesh(
             vertexBuffer = vb,
             normalBuffer = nb,
             colorBuffer = cb,
+            texCoordBuffer = tb,
             indexBuffer = ib,
             vertexCount = vertexCoords.size / 3,
             indexCount = indexArray.size,

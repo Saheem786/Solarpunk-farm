@@ -15,6 +15,8 @@ class GLShader {
         private set
     var aColorLoc: Int = -1
         private set
+    var aTexCoordLoc: Int = -1
+        private set
 
     // Uniform Locations
     var uMVPMatrixLoc: Int = -1
@@ -33,6 +35,10 @@ class GLShader {
         private set
     var uUseVertexColorLoc: Int = -1
         private set
+    var uTextureLoc: Int = -1
+        private set
+    var uUseTextureLoc: Int = -1
+        private set
     var uEmissionColorLoc: Int = -1
         private set
     var uShininessLoc: Int = -1
@@ -47,20 +53,22 @@ class GLShader {
             attribute vec3 aPosition;
             attribute vec3 aNormal;
             attribute vec4 aColor;
+            attribute vec2 aTexCoord;
             
             varying vec3 vNormal;
             varying vec3 vPositionEye;
             varying vec4 vVertexColor;
+            varying vec2 vTexCoord;
             
             void main() {
                 vVertexColor = aColor;
+                vTexCoord = aTexCoord;
                 vNormal = normalize(vec3(uNormalMatrix * vec4(aNormal, 0.0)));
                 vec4 eyePos = uMVMatrix * vec4(aPosition, 1.0);
                 vPositionEye = eyePos.xyz;
                 gl_Position = uMVPMatrix * vec4(aPosition, 1.0);
             }
         """.trimIndent()
-
         val fragmentShaderCode = """
             precision mediump float;
             
@@ -69,15 +77,22 @@ class GLShader {
             uniform vec3 uAmbientColor;
             uniform vec4 uObjectColor;
             uniform int uUseVertexColor;
+            uniform int uUseTexture;
+            uniform sampler2D uTexture;
             uniform vec3 uEmissionColor;
             uniform float uShininess;
             
             varying vec3 vNormal;
             varying vec3 vPositionEye;
             varying vec4 vVertexColor;
+            varying vec2 vTexCoord;
             
             void main() {
                 vec4 baseColor = (uUseVertexColor == 1) ? vVertexColor : uObjectColor;
+                
+                if (uUseTexture == 1) {
+                    baseColor *= texture2D(uTexture, vTexCoord);
+                }
                 
                 // Normal & Light Vector
                 vec3 N = normalize(vNormal);
@@ -120,6 +135,7 @@ class GLShader {
         aPositionLoc = GLES20.glGetAttribLocation(programId, "aPosition")
         aNormalLoc = GLES20.glGetAttribLocation(programId, "aNormal")
         aColorLoc = GLES20.glGetAttribLocation(programId, "aColor")
+        aTexCoordLoc = GLES20.glGetAttribLocation(programId, "aTexCoord")
 
         // Query Uniforms
         uMVPMatrixLoc = GLES20.glGetUniformLocation(programId, "uMVPMatrix")
@@ -130,6 +146,8 @@ class GLShader {
         uAmbientColorLoc = GLES20.glGetUniformLocation(programId, "uAmbientColor")
         uObjectColorLoc = GLES20.glGetUniformLocation(programId, "uObjectColor")
         uUseVertexColorLoc = GLES20.glGetUniformLocation(programId, "uUseVertexColor")
+        uTextureLoc = GLES20.glGetUniformLocation(programId, "uTexture")
+        uUseTextureLoc = GLES20.glGetUniformLocation(programId, "uUseTexture")
         uEmissionColorLoc = GLES20.glGetUniformLocation(programId, "uEmissionColor")
         uShininessLoc = GLES20.glGetUniformLocation(programId, "uShininess")
     }

@@ -12,48 +12,48 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = SolarEmerald,
-    onPrimary = SolarpunkDarkBg,
-    primaryContainer = SolarEmeraldDark,
-    onPrimaryContainer = TextWhitePrimary,
-    secondary = SunGold,
-    onSecondary = SolarpunkDarkBg,
-    secondaryContainer = SunGoldDark,
-    onSecondaryContainer = TextWhitePrimary,
-    tertiary = CleanCyan,
-    onTertiary = SolarpunkDarkBg,
-    background = SolarpunkDarkBg,
-    onBackground = TextWhitePrimary,
-    surface = SolarpunkDarkSurface,
-    onSurface = TextWhitePrimary,
-    surfaceVariant = SolarpunkDarkSurfaceVariant,
-    onSurfaceVariant = TextWhiteSecondary,
-    outline = SolarEmerald.copy(alpha = 0.35f)
+    primary = MedievalCrimson,
+    onPrimary = Parchment,
+    primaryContainer = MedievalCrimsonDark,
+    onPrimaryContainer = MedievalTextLight,
+    secondary = AgedGold,
+    onSecondary = MedievalDarkBg,
+    secondaryContainer = AgedGoldDark,
+    onSecondaryContainer = MedievalTextLight,
+    tertiary = ForestMoss,
+    onTertiary = Parchment,
+    background = MedievalDarkBg,
+    onBackground = MedievalTextLight,
+    surface = MedievalDarkSurface,
+    onSurface = MedievalTextLight,
+    surfaceVariant = MedievalDarkSurfaceVariant,
+    onSurfaceVariant = MedievalTextLight.copy(alpha = 0.7f),
+    outline = AgedGold.copy(alpha = 0.5f)
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = SolarEmeraldDark,
-    onPrimary = TextWhitePrimary,
-    primaryContainer = SolarEmeraldLight,
-    onPrimaryContainer = TextDarkPrimary,
-    secondary = SunGoldDark,
-    onSecondary = TextWhitePrimary,
-    secondaryContainer = SunGoldLight,
-    onSecondaryContainer = TextDarkPrimary,
-    tertiary = CleanCyanDark,
-    onTertiary = TextWhitePrimary,
-    background = SolarpunkLightBg,
-    onBackground = TextDarkPrimary,
-    surface = SolarpunkLightSurface,
-    onSurface = TextDarkPrimary,
-    surfaceVariant = SolarpunkLightSurfaceVariant,
-    onSurfaceVariant = TextDarkSecondary,
-    outline = SolarEmeraldDark.copy(alpha = 0.25f)
+    primary = MedievalCrimsonDark,
+    onPrimary = Parchment,
+    primaryContainer = MedievalCrimsonLight,
+    onPrimaryContainer = MedievalTextPrimary,
+    secondary = AgedGoldDark,
+    onSecondary = Parchment,
+    secondaryContainer = AgedGold,
+    onSecondaryContainer = MedievalTextPrimary,
+    tertiary = ForestMoss,
+    onTertiary = Parchment,
+    background = MedievalLightBg,
+    onBackground = MedievalTextPrimary,
+    surface = MedievalLightSurface,
+    onSurface = MedievalTextPrimary,
+    surfaceVariant = MedievalLightSurfaceVariant,
+    onSurfaceVariant = MedievalTextSecondary,
+    outline = AgedGoldDark.copy(alpha = 0.4f)
 )
 
 @Composable
-fun SolarpunkFarmTheme(
-    darkTheme: Boolean = true, // Solarpunk aesthetic shines best in luminous dark theme
+fun MedievalIslandTheme(
+    darkTheme: Boolean = true, // Medieval theme looks best in dark mode for wood/stone textures
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme

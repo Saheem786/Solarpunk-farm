@@ -10,6 +10,7 @@ class GLMesh(
     val vertexBuffer: FloatBuffer,
     val normalBuffer: FloatBuffer,
     val colorBuffer: FloatBuffer?,
+    val texCoordBuffer: FloatBuffer? = null,
     val indexBuffer: ShortBuffer?,
     val vertexCount: Int,
     val indexCount: Int,
@@ -63,6 +64,26 @@ class GLMesh(
             GLES20.glUniform1i(shader.uUseVertexColorLoc, 0)
         }
 
+        // 3.5. Texture Attribute
+        if (texCoordBuffer != null && shader.aTexCoordLoc >= 0) {
+            texCoordBuffer.position(0)
+            GLES20.glEnableVertexAttribArray(shader.aTexCoordLoc)
+            GLES20.glVertexAttribPointer(
+                shader.aTexCoordLoc,
+                2,
+                GLES20.GL_FLOAT,
+                false,
+                0,
+                texCoordBuffer
+            )
+            GLES20.glUniform1i(shader.uUseTextureLoc, 1)
+        } else {
+            if (shader.aTexCoordLoc >= 0) {
+                GLES20.glDisableVertexAttribArray(shader.aTexCoordLoc)
+            }
+            GLES20.glUniform1i(shader.uUseTextureLoc, 0)
+        }
+
         // 4. Draw Call
         if (indexBuffer != null && indexCount > 0) {
             indexBuffer.position(0)
@@ -81,6 +102,9 @@ class GLMesh(
         GLES20.glDisableVertexAttribArray(shader.aNormalLoc)
         if (colorBuffer != null && shader.aColorLoc >= 0) {
             GLES20.glDisableVertexAttribArray(shader.aColorLoc)
+        }
+        if (texCoordBuffer != null && shader.aTexCoordLoc >= 0) {
+            GLES20.glDisableVertexAttribArray(shader.aTexCoordLoc)
         }
     }
 

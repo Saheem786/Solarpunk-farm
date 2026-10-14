@@ -39,6 +39,7 @@ class Crop3DModels {
 
         // 1. Raised Permaculture Soil Bed (Exactly 2.0m x 2.0m x 0.20m low borders)
         builder.reset()
+        builder.setTextureScale(2.0f)
         // Wooden frame borders
         builder.addBox(0f, 0.10f, -0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
         builder.addBox(0f, 0.10f, 0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
@@ -50,6 +51,7 @@ class Crop3DModels {
 
         // Watered Soil Bed (Darker Moist Soil)
         builder.reset()
+        builder.setTextureScale(2.0f)
         builder.addBox(0f, 0.10f, -0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
         builder.addBox(0f, 0.10f, 0.96f, 2.00f, 0.20f, 0.08f, 0.52f, 0.36f, 0.20f)
         builder.addBox(-0.96f, 0.10f, 0f, 0.08f, 0.20f, 1.84f, 0.52f, 0.36f, 0.20f)
@@ -168,7 +170,9 @@ class Crop3DModels {
         viewMatrix: FloatArray,
         projMatrix: FloatArray,
         plots: List<PlotEntity>,
-        animTime: Float
+        animTime: Float,
+        texDirt: Int = 0,
+        texStone: Int = 0
     ) {
         for (plot in plots) {
             Matrix.setIdentityM(modelMatrix, 0)
@@ -176,7 +180,7 @@ class Crop3DModels {
 
             // 1. Draw Raised Soil Bed (Moist or Dry)
             val bed = if (plot.moisture > 0.4f) soilWateredMesh else soilBedMesh
-            renderMesh(shader, bed, modelMatrix, viewMatrix, projMatrix)
+            renderMesh(shader, bed, modelMatrix, viewMatrix, projMatrix, textureId = texDirt)
 
             // 2. Draw Crop Plant if seeded
             if (plot.cropType != null && plot.stage != CropStage.EMPTY) {
@@ -258,8 +262,30 @@ class Crop3DModels {
         mesh: GLMesh,
         mMatrix: FloatArray,
         vMatrix: FloatArray,
-        pMatrix: FloatArray
+        pMatrix: FloatArray,
+        textureId: Int = 0
     ) {
-        renderCropMesh(shader, mesh, mMatrix, vMatrix, pMatrix, false)
+        Matrix.multiplyMM(mvMatrix, 0, vMatrix, 0, mMatrix, 0)
+        Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
+
+        Matrix.invertM(tempMatrix, 0, mvMatrix, 0)
+        Matrix.transposeM(normalMatrix, 0, tempMatrix, 0)
+
+        GLES20.glUniformMatrix4fv(shader.uMVPMatrixLoc, 1, false, mvpMatrix, 0)
+        GLES20.glUniformMatrix4fv(shader.uMVMatrixLoc, 1, false, mvMatrix, 0)
+        GLES20.glUniformMatrix4fv(shader.uNormalMatrixLoc, 1, false, normalMatrix, 0)
+        GLES20.glUniform3f(shader.uEmissionColorLoc, 0f, 0f, 0f)
+        GLES20.glUniform1f(shader.uShininessLoc, 4.0f)
+
+        if (textureId != 0 && shader.uTextureLoc >= 0) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+            GLES20.glUniform1i(shader.uTextureLoc, 0)
+            GLES20.glUniform1i(shader.uUseTextureLoc, 1)
+        } else {
+            GLES20.glUniform1i(shader.uUseTextureLoc, 0)
+        }
+
+        mesh.draw(shader)
     }
 }

@@ -44,7 +44,11 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Phishing
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Construction
 import com.example.data.local.PlotEntity
 import com.example.data.model.CropStage
 import com.example.data.model.EnergyGridSummary
@@ -69,10 +73,7 @@ import com.example.data.local.GameStateEntity
 import com.example.data.model.PlayerTool
 import com.example.data.model.WeatherType
 import com.example.ui.NotificationMessage
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlin.math.roundToInt
 
 @Composable
@@ -115,7 +116,7 @@ fun TopGameStatsBar(
         WeatherType.WIND_GALE -> Color(0xFF80DEEA)
         WeatherType.HEATWAVE -> Color(0xFFFFB300)
         WeatherType.MISTY_NEBULA -> Color(0xFF80CBC4)
-        WeatherType.SUNNY_CLEAR -> SunGold
+        WeatherType.SUNNY_CLEAR -> AgedGold
         WeatherType.STORM -> Color(0xFFFFEB3B)
     }
 
@@ -131,9 +132,9 @@ fun TopGameStatsBar(
 
     val ecoScore = (ecosystemScore ?: state.ecoPrestige).coerceIn(0, 100)
     val ecoColor = when {
-        ecoScore < 50 -> Color(0xFFE57373)
-        ecoScore <= 75 -> Color(0xFFFFD54F)
-        else -> Color(0xFF81C784)
+        ecoScore < 50 -> MedievalCrimson
+        ecoScore <= 75 -> AgedGold
+        else -> ForestMoss
     }
 
     val totalCap = if (state.batteryMaxCapacityKwh > 0f) state.batteryMaxCapacityKwh else 100f
@@ -143,13 +144,13 @@ fun TopGameStatsBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(14.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 16.dp, bottomEnd = 16.dp))
             .testTag("top_game_stats_bar"),
-        color = Color(0xF00A1A1D),
-        shape = RoundedCornerShape(14.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676)),
-        shadowElevation = 4.dp
+        color = Parchment.copy(alpha = 0.95f),
+        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
+        border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold),
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
@@ -169,16 +170,18 @@ fun TopGameStatsBar(
                 horizontalArrangement = Arrangement.spacedBy(3.dp)
             ) {
                 Text(
-                    text = "D${state.gameTimeDay}",
-                    color = SunGold,
-                    fontSize = 9.5.sp,
+                    text = "Day ${state.gameTimeDay}",
+                    color = MedievalCrimson,
+                    fontSize = 11.sp,
+                    fontFamily = MedievalSharpFontFamily,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = timeFormatted,
-                    color = Color.White,
-                    fontSize = 9.5.sp,
-                    fontWeight = FontWeight.SemiBold
+                    color = MedievalTextPrimary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = AlmendraFontFamily
                 )
                 Icon(
                     imageVector = weatherIcon,
@@ -188,7 +191,7 @@ fun TopGameStatsBar(
                 )
             }
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
             // 2. Health
             CompactSurvivalPill(
@@ -199,7 +202,7 @@ fun TopGameStatsBar(
                 testTag = "stat_bar_health"
             )
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
             // 3. Hunger
             CompactSurvivalPill(
@@ -210,7 +213,7 @@ fun TopGameStatsBar(
                 testTag = "stat_bar_hunger"
             )
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
             // 4. Water
             CompactSurvivalPill(
@@ -221,7 +224,7 @@ fun TopGameStatsBar(
                 testTag = "stat_bar_thirst"
             )
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
             // 5. Coins
             Row(
@@ -232,20 +235,21 @@ fun TopGameStatsBar(
                 Icon(
                     imageVector = Icons.Default.MonetizationOn,
                     contentDescription = "Coins",
-                    tint = SunGold,
+                    tint = AgedGoldDark,
                     modifier = Modifier.size(11.dp)
                 )
                 Text(
-                    text = "$${state.solCoins}",
-                    color = SunGold,
-                    fontSize = 9.5.sp,
+                    text = "${state.solCoins} G",
+                    color = MedievalTextPrimary,
+                    fontSize = 11.sp,
+                    fontFamily = MedievalSharpFontFamily,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
-            // 6. Energy kWh
+            // 6. Mana kWh
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
@@ -257,19 +261,20 @@ fun TopGameStatsBar(
             ) {
                 Icon(
                     imageVector = if (isLowEnergy) Icons.Default.BatteryAlert else Icons.Default.BatteryChargingFull,
-                    contentDescription = "Energy",
-                    tint = if (isLowEnergy) Color(0xFFFF5252) else CleanCyan,
+                    contentDescription = "Mana",
+                    tint = if (isLowEnergy) MedievalCrimson else AgedGold,
                     modifier = Modifier.size(11.dp)
                 )
                 Text(
-                    text = "${state.batteryChargeKwh.toInt()}kWh",
-                    color = if (isLowEnergy) Color(0xFFFF8A80) else Color.White,
-                    fontSize = 9.sp,
+                    text = "${state.batteryChargeKwh.toInt()} M",
+                    color = if (isLowEnergy) MedievalCrimson else MedievalTextPrimary,
+                    fontSize = 10.sp,
+                    fontFamily = MedievalSharpFontFamily,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Text(text = "|", color = Color(0x33FFFFFF), fontSize = 9.sp)
+            Text(text = "⚔", color = MedievalCrimson.copy(alpha = 0.4f), fontSize = 12.sp)
 
             // 7. Ecosystem
             Row(
@@ -279,14 +284,15 @@ fun TopGameStatsBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Eco,
-                    contentDescription = "Ecosystem",
+                    contentDescription = "Prestige",
                     tint = ecoColor,
                     modifier = Modifier.size(11.dp)
                 )
                 Text(
                     text = "$ecoScore%",
-                    color = ecoColor,
-                    fontSize = 9.5.sp,
+                    color = MedievalTextPrimary,
+                    fontSize = 10.sp,
+                    fontFamily = MedievalSharpFontFamily,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -318,7 +324,7 @@ private fun CompactSurvivalPill(
                 .width(16.dp)
                 .height(3.dp)
                 .clip(RoundedCornerShape(1.5.dp))
-                .background(Color(0x55FFFFFF))
+                .background(Color(0x442D1B0D)) // Darker inset
         ) {
             Box(
                 modifier = Modifier
@@ -340,11 +346,11 @@ fun StatPill(
 ) {
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(8.dp))
             .testTag(testTag),
-        color = Color(0xCC112224),
-        shape = RoundedCornerShape(20.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x22FFFFFF))
+        color = Color(0xF22D1B0D), // Dark Wood
+        shape = RoundedCornerShape(8.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.6f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
@@ -354,12 +360,13 @@ fun StatPill(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = label,
-                color = Color.White,
+                color = Parchment,
+                fontFamily = AlmendraFontFamily,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold
             )
@@ -368,6 +375,7 @@ fun StatPill(
                 Text(
                     text = secondaryLabel,
                     color = iconTint,
+                    fontFamily = MedievalSharpFontFamily,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -384,10 +392,11 @@ fun ToolSelectorDock(
 ) {
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .border(1.dp, SolarEmerald.copy(alpha = 0.35f), RoundedCornerShape(24.dp)),
-        color = Color(0xEE0B1A1C),
-        shape = RoundedCornerShape(24.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .border(2.dp, Color(0xFFCD7F32), RoundedCornerShape(20.dp)),
+        color = Color(0xF22D1B0D), // Dark Wood
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -397,7 +406,7 @@ fun ToolSelectorDock(
             PlayerTool.values().forEach { tool ->
                 val isSelected = tool == selectedTool
                 val bgBrush = if (isSelected) {
-                    Brush.verticalGradient(listOf(SolarEmerald.copy(alpha = 0.85f), SolarEmerald.copy(alpha = 0.4f)))
+                    Brush.verticalGradient(listOf(MedievalCrimson.copy(alpha = 0.85f), MedievalCrimson.copy(alpha = 0.4f)))
                 } else {
                     Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
                 }
@@ -408,8 +417,8 @@ fun ToolSelectorDock(
                         .clip(CircleShape)
                         .background(bgBrush)
                         .border(
-                            width = if (isSelected) 1.5.dp else 0.dp,
-                            color = if (isSelected) SunGold else Color.Transparent,
+                            width = if (isSelected) 2.dp else 0.dp,
+                            color = if (isSelected) AgedGold else Color.Transparent,
                             shape = CircleShape
                         )
                         .clickable { onSelectTool(tool) }
@@ -418,18 +427,18 @@ fun ToolSelectorDock(
                 ) {
                     val icon = when (tool) {
                         PlayerTool.HAND -> Icons.Default.Pets
-                        PlayerTool.WATER_CAN -> Icons.Default.Cloud
-                        PlayerTool.FERTILIZER -> Icons.Default.Eco
-                        PlayerTool.SOLAR_WRENCH -> Icons.Default.Bolt
-                        PlayerTool.SHEARS -> Icons.Default.Star
-                        PlayerTool.SEED_POUCH -> Icons.Default.MonetizationOn
-                        PlayerTool.FISHING_ROD -> Icons.Default.WaterDrop
+                        PlayerTool.WATER_CAN -> Icons.Default.WaterDrop
+                        PlayerTool.FERTILIZER -> Icons.Default.LocalFlorist
+                        PlayerTool.SOLAR_WRENCH -> Icons.Default.Construction
+                        PlayerTool.SHEARS -> Icons.Default.ContentCut
+                        PlayerTool.SEED_POUCH -> Icons.Default.ShoppingBag
+                        PlayerTool.FISHING_ROD -> Icons.Default.Phishing
                     }
                     Icon(
                         imageVector = icon,
                         contentDescription = tool.displayName,
-                        tint = if (isSelected) Color.White else Color(0xFFB0BEC5),
-                        modifier = Modifier.size(22.dp)
+                        tint = if (isSelected) Parchment else MedievalTextLight.copy(alpha = 0.6f),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -438,7 +447,7 @@ fun ToolSelectorDock(
 }
 
 @Composable
-fun SolarpunkNotificationBanner(
+fun MedievalNotificationBanner(
     notification: NotificationMessage?,
     modifier: Modifier = Modifier
 ) {
@@ -454,9 +463,9 @@ fun SolarpunkNotificationBanner(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .testTag("notification_banner"),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFA122E28)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald.copy(alpha = 0.6f))
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Parchment),
+                border = androidx.compose.foundation.BorderStroke(2.dp, MedievalCrimson.copy(alpha = 0.7f))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -466,13 +475,13 @@ fun SolarpunkNotificationBanner(
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(SolarEmerald.copy(alpha = 0.2f)),
+                            .background(MedievalCrimson.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = null,
-                            tint = SolarEmerald,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -480,13 +489,15 @@ fun SolarpunkNotificationBanner(
                     Column {
                         Text(
                             text = notification.title,
-                            color = Color.White,
+                            color = MedievalCrimson,
+                            fontFamily = MedievalSharpFontFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = notification.description,
-                            color = Color(0xFFB0BEC5),
+                            color = MedievalTextPrimary.copy(alpha = 0.8f),
+                            fontFamily = AlmendraFontFamily,
                             fontSize = 12.sp
                         )
                     }
@@ -497,9 +508,9 @@ fun SolarpunkNotificationBanner(
 }
 
 @Composable
-fun SolarpunkProgressBar(
+fun MedievalProgressBar(
     progress: Float,
-    color: Color = SolarEmerald,
+    color: Color = MedievalCrimson,
     modifier: Modifier = Modifier
 ) {
     val clamped = progress.coerceIn(0.0f, 1.0f)
@@ -507,7 +518,7 @@ fun SolarpunkProgressBar(
         modifier = modifier
             .height(8.dp)
             .clip(RoundedCornerShape(4.dp))
-            .background(Color(0xFF263238))
+            .background(AgedGold.copy(alpha = 0.2f))
     ) {
         Box(
             modifier = Modifier
@@ -547,9 +558,10 @@ fun SurvivalStatsHUD(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .testTag("survival_stats_hud"),
-        color = Color(0xDD0D1B1E),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
+        color = Color(0xF22D1B0D), // Dark Wood
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFFCD7F32)), // Bronze
+        shadowElevation = 8.dp
     ) {
         Row(
             modifier = Modifier
@@ -644,18 +656,18 @@ private fun SurvivalStatItem(
             Spacer(modifier = Modifier.width(3.dp))
             Text(
                 text = valueText,
-                color = if (fraction < 0.25f) Color(0xFFFF5252) else Color.White,
+                color = if (fraction < 0.25f) Color(0xFFFF5252) else Parchment,
+                fontFamily = AlmendraFontFamily,
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold
             )
         }
-        // Micro Progress Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(5.dp)
                 .clip(RoundedCornerShape(3.dp))
-                .background(Color(0xFF1E282D))
+                .background(Color(0xFF3E2723))
         ) {
             Box(
                 modifier = Modifier
@@ -664,7 +676,7 @@ private fun SurvivalStatItem(
                     .clip(RoundedCornerShape(3.dp))
                     .background(
                         Brush.horizontalGradient(
-                            listOf(barColor.copy(alpha = 0.75f), barColor)
+                            listOf(barColor.copy(alpha = 0.85f), barColor)
                         )
                     )
             )

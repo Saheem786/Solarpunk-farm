@@ -247,17 +247,49 @@ class GameRenderer {
         private set
     private var skybox: Skybox3D? = null
     private var lensFlare: GLLensFlareRenderer? = null
+    private var textureManager: com.example.game3d.opengl.TextureManager? = null
 
-    companion object {
-        const val DEBUG_3D = false
-        const val DEBUG_3D_SCENE = false
-    }
+    // Textures
+    var texGrass: Int = 0
+    var texWood: Int = 0
+    var texStone: Int = 0
+    var texLeaves: Int = 0
+    var texDirt: Int = 0
+    var texWater: Int = 0
 
     private var isInitialized: Boolean = false
     private var lastAnimTimeSec: Float = 0.0f
 
-    fun create() {
+    fun create(context: android.content.Context) {
         if (isInitialized) return
+
+        textureManager = com.example.game3d.opengl.TextureManager(context)
+        
+        // Procedural Textures
+        val grassBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("grass")
+        texGrass = textureManager!!.loadTextureFromBitmap(grassBmp)
+        grassBmp.recycle()
+
+        val woodBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("wood")
+        texWood = textureManager!!.loadTextureFromBitmap(woodBmp)
+        woodBmp.recycle()
+
+        val stoneBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("stone")
+        texStone = textureManager!!.loadTextureFromBitmap(stoneBmp)
+        stoneBmp.recycle()
+
+        val leavesBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("leaves")
+        texLeaves = textureManager!!.loadTextureFromBitmap(leavesBmp)
+        leavesBmp.recycle()
+
+        val dirtBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("dirt")
+        texDirt = textureManager!!.loadTextureFromBitmap(dirtBmp)
+        dirtBmp.recycle()
+
+        val waterBmp = com.example.game3d.opengl.TextureUtils.generateProceduralTexture("water")
+        texWater = textureManager!!.loadTextureFromBitmap(waterBmp)
+        waterBmp.recycle()
+
 
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         GLES20.glDepthFunc(GLES20.GL_LEQUAL)
@@ -312,9 +344,7 @@ class GameRenderer {
         actionProgress: Float = 0.0f,
         screenShake: Float = 0.0f
     ) {
-        if (!isInitialized) {
-            create()
-        }
+        if (!isInitialized) return
         val sh = shader ?: return
 
         // 1. Update Environment Lighting
@@ -395,10 +425,35 @@ class GameRenderer {
         modelBatch.begin(camera, environment)
 
         // A. Draw Environment (Terrain, Roads, River, Bridge, Pond, Trees, Grass, Wildlife)
-        environmentModels?.drawEnvironment(sh, camera.viewMatrix, camera.projectionMatrix, animTimeSec, hour, weather)
+        environmentModels?.drawEnvironment(
+            shader = sh,
+            viewMatrix = camera.viewMatrix,
+            projMatrix = camera.projectionMatrix,
+            animTime = animTimeSec,
+            hour = hour,
+            weather = weather,
+            texGrass = texGrass,
+            texWood = texWood,
+            texStone = texStone,
+            texLeaves = texLeaves,
+            texDirt = texDirt,
+            texWater = texWater
+        )
 
         // B. Draw Buildings (Farmhouse, Barn, Workshop, Market, Solar Arrays, Wind Turbine, Placed Buildings, Fences)
-        buildingModels?.drawBuildings(sh, camera.viewMatrix, camera.projectionMatrix, energyNodes, placedBuildings, animTimeSec)
+        buildingModels?.drawBuildings(
+            shader = sh,
+            viewMatrix = camera.viewMatrix,
+            projMatrix = camera.projectionMatrix,
+            energyNodes = energyNodes,
+            placedBuildings = placedBuildings,
+            animTime = animTimeSec,
+            texWood = texWood,
+            texStone = texStone,
+            texLeaves = texLeaves,
+            texDirt = texDirt,
+            texGrass = texGrass
+        )
 
         // B2. Draw Ghost Holographic Preview if in Build Mode
         if (ghostBuilding != null) {
@@ -417,7 +472,15 @@ class GameRenderer {
         }
 
         // C. Draw Plots & 3D Crops across Growth Stages
-        cropModels?.drawPlots(sh, camera.viewMatrix, camera.projectionMatrix, plots, animTimeSec)
+        cropModels?.drawPlots(
+            shader = sh,
+            viewMatrix = camera.viewMatrix,
+            projMatrix = camera.projectionMatrix,
+            plots = plots,
+            animTime = animTimeSec,
+            texDirt = texDirt,
+            texStone = texStone
+        )
 
         // D. Draw 3D Livestock (Cows, Sheep, Chickens, Pigs, Goats, Beehive)
         animalModels?.drawLivestock(sh, camera.viewMatrix, camera.projectionMatrix, livestock, animTimeSec)

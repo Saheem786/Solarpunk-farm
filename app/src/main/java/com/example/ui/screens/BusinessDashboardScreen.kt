@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Eco
@@ -47,11 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.WeatherType
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 data class FarmMilestone(
     val title: String,
@@ -77,35 +75,35 @@ fun BusinessDashboardScreen(
 
     val milestones = listOf(
         FarmMilestone(
-            title = "First Light Harvest",
-            description = "Harvest 5 Solarpunk Permaculture crops",
+            title = "First Bounty",
+            description = "Harvest 5 sacred crops from the land",
             isAchieved = totalHarvests >= 5,
-            reward = "+50 Eco Prestige"
+            reward = "+50 Prestige"
         ),
         FarmMilestone(
-            title = "Clean Energy Independence",
-            description = "Build 4 Clean Energy Generation & Storage nodes",
+            title = "Mana Mastery",
+            description = "Construct 4 ancient mana gathering or storage circles",
             isAchieved = energyNodes.size >= 4,
-            reward = "+80 Eco Prestige"
+            reward = "+80 Prestige"
         ),
         FarmMilestone(
-            title = "Sanctuary Guardian",
-            description = "Care for 4 happy regenerative animals",
+            title = "Beast Master",
+            description = "Care for 4 happy regenerative creatures",
             isAchieved = livestock.size >= 4 && livestock.all { it.happiness >= 80f },
-            reward = "+100 Eco Prestige"
+            reward = "+100 Prestige"
         ),
         FarmMilestone(
-            title = "Net-Zero Carbon Pioneer",
-            description = "Sequester over 200 kg of atmospheric carbon",
+            title = "Nature's Chosen",
+            description = "Restore the balance of nature across the islands",
             isAchieved = carbonOffset >= 200f,
-            reward = "Net-Zero Gold Seal"
+            reward = "Royal Nature Seal"
         )
     )
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF081316))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .padding(16.dp)
             .testTag("business_dashboard_screen"),
         contentPadding = PaddingValues(bottom = 80.dp),
@@ -115,28 +113,29 @@ fun BusinessDashboardScreen(
         item {
             Column {
                 Text(
-                    text = "Sustainability & Eco Ledger",
-                    color = Color.White,
+                    text = "KINGDOM PROSPERITY & TRIBUTES",
+                    color = AgedGold,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Carbon sequestration, clean power metrics & environmental milestones",
-                    color = SolarEmerald,
+                    text = "Resource tracking, royal prestige & environmental milestones of the realm",
+                    color = MedievalTextSecondary,
                     fontSize = 12.sp
                 )
             }
         }
 
-        // Net Zero Hero Rating Card
+        // Reputation Card
         item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("net_zero_card"),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0E2827)),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, SolarEmerald.copy(alpha = 0.6f))
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Parchment),
+                border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -149,43 +148,45 @@ fun BusinessDashboardScreen(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .clip(CircleShape)
-                                    .background(SolarEmerald.copy(alpha = 0.2f)),
+                                    .background(MedievalCrimson.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Park,
                                     contentDescription = null,
-                                    tint = SolarEmerald,
+                                    tint = MedievalCrimson,
                                     modifier = Modifier.size(26.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    text = "Carbon Status: Negative",
-                                    color = Color.White,
+                                    text = "Balance: Restored",
+                                    color = MedievalCrimson,
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = MedievalSharpFontFamily
                                 )
                                 Text(
-                                    text = "Eco Prestige Level: ${ecoPrestige / 50 + 1}",
-                                    color = SunGold,
+                                    text = "Royal Prestige: ${ecoPrestige / 50 + 1}",
+                                    color = Bronze,
                                     fontSize = 12.sp
                                 )
                             }
                         }
 
                         Surface(
-                            color = SolarEmerald.copy(alpha = 0.2f),
+                            color = MedievalCrimson.copy(alpha = 0.1f),
                             shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MedievalCrimson)
                         ) {
                             Text(
-                                text = "A++ Rating",
-                                color = SolarEmerald,
-                                fontSize = 12.sp,
+                                text = "LEGENDARY FAVOR",
+                                color = MedievalCrimson,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                fontFamily = MedievalSharpFontFamily
                             )
                         }
                     }
@@ -197,19 +198,19 @@ fun BusinessDashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         MetricBlock(
-                            label = "CO2 Offset",
-                            value = "${carbonOffset.toInt()} kg",
-                            color = SolarEmerald
+                            label = "Nature Balance",
+                            value = "${carbonOffset.toInt()} units",
+                            color = MedievalCrimson
                         )
                         MetricBlock(
-                            label = "Clean Power",
-                            value = "${(gameState?.batteryChargeKwh ?: 0f).toInt()} kWh",
-                            color = CleanCyan
+                            label = "Ancient Mana",
+                            value = "${(gameState?.batteryChargeKwh ?: 0f).toInt()} units",
+                            color = Bronze
                         )
                         MetricBlock(
-                            label = "Harvests",
+                            label = "Royal Tributes",
                             value = "$totalHarvests units",
-                            color = SunGold
+                            color = AgedGold
                         )
                     }
                 }
@@ -222,20 +223,21 @@ fun BusinessDashboardScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("weather_controller_card"),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF102528)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3380D8FF))
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Parchment),
+                border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.5f))
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(
-                        text = "Atmosphere & Weather Simulation",
-                        color = Color.White,
+                        text = "DIVINE ATMOSPHERE CONTROL",
+                        color = MedievalCrimson,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Text(
-                        text = "Current: ${currentWeather.displayName} (${currentWeather.description})",
-                        color = Color(0xFFB0BEC5),
+                        text = "Current State: ${currentWeather.displayName}",
+                        color = MedievalTextSecondary,
                         fontSize = 11.sp
                     )
 
@@ -254,14 +256,14 @@ fun BusinessDashboardScreen(
                                 WeatherType.RAINY_STORM -> Icons.Default.Cloud
                                 WeatherType.WIND_GALE -> Icons.Default.Air
                                 WeatherType.MISTY_NEBULA -> Icons.Default.AutoAwesome
-                                WeatherType.STORM -> Icons.Default.Bolt
+                                WeatherType.STORM -> Icons.Default.AutoFixHigh
                             }
 
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(if (isSelected) SolarEmerald else Color(0xFF163236))
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (isSelected) MedievalCrimson else Bronze.copy(alpha = 0.2f))
                                     .clickable { viewModel.changeWeather(weather) }
                                     .padding(vertical = 8.dp)
                                     .testTag("weather_btn_${weather.name.lowercase()}"),
@@ -270,7 +272,7 @@ fun BusinessDashboardScreen(
                                 Icon(
                                     imageVector = icon,
                                     contentDescription = weather.displayName,
-                                    tint = if (isSelected) Color(0xFF091215) else Color(0xFFB0BEC5),
+                                    tint = if (isSelected) Parchment else MedievalCrimson,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -283,10 +285,11 @@ fun BusinessDashboardScreen(
         // Milestones
         item {
             Text(
-                text = "Environmental Milestones & Accolades",
-                color = SunGold,
+                text = "LEGENDARY DEEDS & ACCOLADES",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -307,11 +310,12 @@ private fun MetricBlock(
             text = value,
             color = color,
             fontSize = 15.sp,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
+            fontFamily = MedievalSharpFontFamily
         )
         Text(
             text = label,
-            color = Color(0xFFB0BEC5),
+            color = MedievalTextSecondary,
             fontSize = 11.sp
         )
     }
@@ -323,11 +327,11 @@ private fun MilestoneCard(milestone: FarmMilestone) {
         modifier = Modifier
             .fillMaxWidth()
             .testTag("milestone_${milestone.title.lowercase().replace(" ", "_")}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF112427)),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (milestone.isAchieved) SolarEmerald else Color(0x22FFFFFF)
+            if (milestone.isAchieved) AgedGold else Bronze.copy(alpha = 0.3f)
         )
     ) {
         Row(
@@ -339,14 +343,14 @@ private fun MilestoneCard(milestone: FarmMilestone) {
                     .size(38.dp)
                     .clip(CircleShape)
                     .background(
-                        if (milestone.isAchieved) SolarEmerald.copy(alpha = 0.25f) else Color(0x22FFFFFF)
+                        if (milestone.isAchieved) MedievalCrimson.copy(alpha = 0.1f) else Bronze.copy(alpha = 0.1f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.EmojiEvents,
                     contentDescription = null,
-                    tint = if (milestone.isAchieved) SolarEmerald else Color(0xFF78909C),
+                    tint = if (milestone.isAchieved) MedievalCrimson else Bronze,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -356,20 +360,21 @@ private fun MilestoneCard(milestone: FarmMilestone) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = milestone.title,
-                    color = Color.White,
+                    color = if (milestone.isAchieved) MedievalCrimson else MedievalTextPrimary,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
                     text = milestone.description,
-                    color = Color(0xFFB0BEC5),
+                    color = MedievalTextSecondary,
                     fontSize = 11.sp
                 )
             }
 
             Text(
                 text = if (milestone.isAchieved) "Unlocked ✨" else milestone.reward,
-                color = if (milestone.isAchieved) SolarEmerald else SunGold,
+                color = if (milestone.isAchieved) Bronze else MedievalCrimson,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )

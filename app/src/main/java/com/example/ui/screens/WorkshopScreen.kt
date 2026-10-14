@@ -44,9 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.local.InventoryEntity
 import com.example.data.model.ItemCategory
 import com.example.ui.FarmViewModel
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 data class CraftingRecipeItem(
     val id: String,
@@ -70,8 +68,8 @@ fun WorkshopScreen(
     val recipes = listOf(
         CraftingRecipeItem(
             id = "bio_fuel",
-            name = "Purified Bio-Fuel",
-            description = "High-energy clean fuel distilled from golden grains and solar sunflowers.",
+            name = "Essence of Sun",
+            description = "High-energy sacred distillate from golden grains and solar sunflowers.",
             category = ItemCategory.CRAFTED,
             sellValue = 160,
             energyCostKwh = 5.0f,
@@ -82,8 +80,8 @@ fun WorkshopScreen(
         ),
         CraftingRecipeItem(
             id = "solar_fabric",
-            name = "Solar-Weave Fabric",
-            description = "Flexible photovoltaic textile woven with sheared solar wool.",
+            name = "Silk of the Heavens",
+            description = "Luminous photovoltaic textile woven with sheared solar wool.",
             category = ItemCategory.CRAFTED,
             sellValue = 220,
             energyCostKwh = 4.0f,
@@ -93,8 +91,8 @@ fun WorkshopScreen(
         ),
         CraftingRecipeItem(
             id = "fertilizer_bio",
-            name = "Bio-Compost Serum",
-            description = "Nutrient-dense liquid fertilizer for accelerated crop growth.",
+            name = "Alchemical Growth Salve",
+            description = "Concentrated elixir for accelerating the growth of sacred crops.",
             category = ItemCategory.TOOL,
             sellValue = 45,
             energyCostKwh = 3.0f,
@@ -105,26 +103,26 @@ fun WorkshopScreen(
         ),
         CraftingRecipeItem(
             id = "kombucha_elixir",
-            name = "Organic Kombucha Elixir",
-            description = "Fermented probiotic beverage brewed with spirulina and solar honey.",
+            name = "Elixir of Rejuvenation",
+            description = "Probiotic brew crafted with medicinal moss and wild forest honey.",
             category = ItemCategory.CRAFTED,
             sellValue = 180,
             energyCostKwh = 3.5f,
             ingredients = mapOf(
-                "harvest_sky_spirulina" to Pair("Sky Spirulina", 2),
-                "solar_honey" to Pair("Solar Honey", 1)
+                "harvest_sky_spirulina" to Pair("Medicinal Moss", 2),
+                "solar_honey" to Pair("Forest Honey", 1)
             )
         ),
         CraftingRecipeItem(
             id = "power_cell",
-            name = "Solid-State Power Cell",
-            description = "High-density clean storage core crafted from cyber berries and bio-fuel.",
+            name = "Mystic Power Stone",
+            description = "Arcane storage stone infused with cursed berries and pure solar essence.",
             category = ItemCategory.TECH_UPGRADE,
             sellValue = 350,
             energyCostKwh = 10.0f,
             ingredients = mapOf(
-                "harvest_cyber_berries" to Pair("Cyber Berries", 2),
-                "bio_fuel" to Pair("Purified Bio-Fuel", 1)
+                "harvest_cyber_berries" to Pair("Cursed Berries", 2),
+                "bio_fuel" to Pair("Essence of Sun", 1)
             )
         )
     )
@@ -132,7 +130,7 @@ fun WorkshopScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0A1416))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .padding(16.dp)
             .testTag("workshop_screen"),
         contentPadding = PaddingValues(bottom = 80.dp),
@@ -142,14 +140,15 @@ fun WorkshopScreen(
         item {
             Column {
                 Text(
-                    text = "Artisan Eco-Workshop",
-                    color = Color.White,
+                    text = "MASTER'S FORGE & ALCHEMY LAB",
+                    color = AgedGold,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Craft bio-materials, solar fabrics & power cells with clean energy",
-                    color = Color(0xFF80D8FF),
+                    text = "Craft legendary artifacts, sacred fabrics & power stones using ancient mana",
+                    color = MedievalTextSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -159,9 +158,9 @@ fun WorkshopScreen(
         item {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFF10272B),
-                shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan.copy(alpha = 0.4f))
+                color = Parchment,
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold)
             ) {
                 Row(
                     modifier = Modifier.padding(14.dp),
@@ -172,28 +171,29 @@ fun WorkshopScreen(
                         Icon(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = CleanCyan,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
-                                text = "Grid Power Available",
-                                color = Color.White,
+                                text = "Mana & Essence Available",
+                                color = MedievalCrimson,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = MedievalSharpFontFamily
                             )
                             Text(
-                                text = "Each craft cycle consumes battery reserve",
-                                color = Color(0xFFB0BEC5),
+                                text = "Ancient rituals require mana essence to manifest",
+                                color = MedievalTextSecondary,
                                 fontSize = 11.sp
                             )
                         }
                     }
 
                     Text(
-                        text = "${batteryCharge.toInt()} kWh",
-                        color = CleanCyan,
+                        text = "${batteryCharge.toInt()} Mana",
+                        color = MedievalCrimson,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -203,10 +203,11 @@ fun WorkshopScreen(
 
         item {
             Text(
-                text = "Crafting Blueprints (${recipes.size})",
-                color = Color.White,
+                text = "ANCIENT SCHEMATICS (${recipes.size})",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -245,9 +246,9 @@ private fun RecipeCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("recipe_${recipe.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF12272A)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
@@ -260,13 +261,13 @@ private fun RecipeCard(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(SolarEmerald.copy(alpha = 0.2f)),
+                            .background(MedievalCrimson.copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Science,
                             contentDescription = null,
-                            tint = SolarEmerald,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -274,13 +275,14 @@ private fun RecipeCard(
                     Column {
                         Text(
                             text = recipe.name,
-                            color = Color.White,
+                            color = MedievalCrimson,
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Text(
-                            text = "Value: ${recipe.sellValue} 🪙 • Energy: ${recipe.energyCostKwh} kWh",
-                            color = SunGold,
+                            text = "Value: ${recipe.sellValue} 🪙 • Mana: ${recipe.energyCostKwh} units",
+                            color = Bronze,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -292,7 +294,7 @@ private fun RecipeCard(
 
             Text(
                 text = recipe.description,
-                color = Color(0xFFB0BEC5),
+                color = MedievalTextPrimary,
                 fontSize = 12.sp
             )
 
@@ -300,10 +302,11 @@ private fun RecipeCard(
 
             // Ingredients List
             Text(
-                text = "Required Materials:",
-                color = Color(0xFF80CBC4),
+                text = "REQUIRED MATERIALS:",
+                color = Bronze,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
 
@@ -318,12 +321,12 @@ private fun RecipeCard(
                 ) {
                     Text(
                         text = "• ${req.first}",
-                        color = Color.White,
+                        color = MedievalTextPrimary,
                         fontSize = 11.sp
                     )
                     Text(
                         text = "$currentCount / ${req.second}",
-                        color = if (isSufficient) SolarEmerald else Color(0xFFFF8A80),
+                        color = if (isSufficient) Bronze else MedievalCrimson,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -338,10 +341,10 @@ private fun RecipeCard(
                 onClick = onCraft,
                 enabled = canCraft,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = SolarEmerald,
-                    disabledContainerColor = Color(0xFF263238)
+                    containerColor = MedievalCrimson,
+                    disabledContainerColor = Color(0x33000000)
                 ),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("craft_btn_${recipe.id}")
@@ -349,15 +352,15 @@ private fun RecipeCard(
                 Icon(
                     imageVector = Icons.Default.Handyman,
                     contentDescription = null,
-                    tint = if (canCraft) Color(0xFF091215) else Color(0xFF78909C),
+                    tint = if (canCraft) Parchment else MedievalTextSecondary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = if (!hasEnoughEnergy) "Insufficient Power (${recipe.energyCostKwh} kWh)"
-                           else if (!hasAllIngredients) "Missing Ingredients"
-                           else "Craft in Workshop",
-                    color = if (canCraft) Color(0xFF091215) else Color(0xFF90A4AE),
+                    text = if (!hasEnoughEnergy) "Insufficient Mana (${recipe.energyCostKwh} units)"
+                           else if (!hasAllIngredients) "Missing Materials"
+                           else "Commence Ritual",
+                    color = if (canCraft) Parchment else MedievalTextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )

@@ -70,9 +70,7 @@ import com.example.data.local.PlotEntity
 import com.example.data.model.BiomeType
 import com.example.data.model.PointOfInterestType
 import com.example.game3d.renderer.BiomeSystem
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -128,11 +126,11 @@ fun WorldMapModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .testTag("world_map_modal"),
-            color = Color(0xF80A1518),
-            shape = RoundedCornerShape(24.dp),
-            border = androidx.compose.foundation.BorderStroke(2.dp, SolarEmerald.copy(alpha = 0.8f))
+            color = Parchment,
+            shape = RoundedCornerShape(12.dp),
+            border = androidx.compose.foundation.BorderStroke(3.dp, AgedGold)
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val boxWidth = maxWidth
@@ -397,9 +395,9 @@ fun WorldMapModal(
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
                         .padding(12.dp),
-                    color = Color(0xEE08161A),
-                    shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald.copy(alpha = 0.6f))
+                    color = Parchment.copy(alpha = 0.95f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold)
                 ) {
                     Row(
                         modifier = Modifier
@@ -415,22 +413,24 @@ fun WorldMapModal(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Explore,
-                                contentDescription = "World Map",
-                                tint = SolarEmerald,
+                                contentDescription = "Scroll Map",
+                                tint = MedievalCrimson,
                                 modifier = Modifier.size(24.dp)
                             )
                             Column {
                                 Text(
-                                    text = "SOLARPUNK SANCTUARY MAP",
-                                    color = Color.White,
-                                    fontSize = 13.sp,
+                                    text = "MAP OF THE FORGOTTEN REALMS",
+                                    color = MedievalCrimson,
+                                    fontFamily = MedievalSharpFontFamily,
+                                    fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 1.sp
                                 )
                                 Text(
-                                    text = "Current Biome: ${currentBiome.displayName} • Explored: $exploredPercent%",
-                                    color = CleanCyan,
-                                    fontSize = 10.sp,
+                                    text = "Current Realm: ${currentBiome.displayName} • Explored: $exploredPercent%",
+                                    color = MedievalTextSecondary,
+                                    fontFamily = AlmendraFontFamily,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -442,23 +442,25 @@ fun WorldMapModal(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                color = Color(0x6600E676),
-                                shape = RoundedCornerShape(12.dp)
+                                color = MedievalCrimson.copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(8.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold)
                             ) {
                                 Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.LocationOn,
                                         contentDescription = "POIs",
-                                        tint = SunGold,
+                                        tint = MedievalCrimson,
                                         modifier = Modifier.size(13.dp)
                                     )
                                     Text(
-                                        text = "POIs: $poisDiscoveredCount/$totalPoisCount",
-                                        color = SunGold,
+                                        text = "Relics: $poisDiscoveredCount/$totalPoisCount",
+                                        color = MedievalCrimson,
+                                        fontFamily = MedievalSharpFontFamily,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -474,8 +476,7 @@ fun WorldMapModal(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Close Map",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
+                                    tint = MedievalCrimson
                                 )
                             }
                         }
@@ -487,32 +488,33 @@ fun WorldMapModal(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 12.dp, bottom = 12.dp)
-                        .clip(RoundedCornerShape(14.dp)),
-                    color = Color(0xEE09171A),
-                    shape = RoundedCornerShape(14.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x3300E676))
+                        .clip(RoundedCornerShape(12.dp)),
+                    color = Parchment.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, AgedGold.copy(alpha = 0.6f))
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = "3 CONNECTED BIOMES",
-                            color = SunGold,
-                            fontSize = 9.sp,
+                            text = "REALMS OF THE ISLAND",
+                            color = MedievalCrimson,
+                            fontFamily = MedievalSharpFontFamily,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.size(8.dp).background(Color(0xFF1B5E20), CircleShape))
-                            Text("Deep Forest (North)", color = Color.White, fontSize = 8.5.sp)
+                            Text("Deep Forest (North)", color = MedievalTextPrimary, fontFamily = AlmendraFontFamily, fontSize = 10.sp)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.size(8.dp).background(Color(0xFF388E3C), CircleShape))
-                            Text("Green Valley (Center)", color = Color.White, fontSize = 8.5.sp)
+                            Text("Green Valley (Center)", color = MedievalTextPrimary, fontFamily = AlmendraFontFamily, fontSize = 10.sp)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.size(8.dp).background(Color(0xFF00796B), CircleShape))
-                            Text("Wetland & River (South)", color = Color.White, fontSize = 8.5.sp)
+                            Text("Wetland & River (South)", color = MedievalTextPrimary, fontFamily = AlmendraFontFamily, fontSize = 10.sp)
                         }
                     }
                 }

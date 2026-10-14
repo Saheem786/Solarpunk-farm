@@ -13,9 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.HistoryEdu
+import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.Pets
@@ -45,22 +46,19 @@ import com.example.ui.game3d.Game3DScreen
 import com.example.ui.screens.AgricultureScreen
 import com.example.ui.screens.BusinessDashboardScreen
 import com.example.ui.screens.LivestockScreen
+import com.example.ui.screens.ManaEnergyScreen
 import com.example.ui.screens.MarketScreen
-import com.example.ui.screens.SolarEnergyScreen
 import com.example.ui.screens.WorkshopScreen
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SolarpunkFarmTheme
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 enum class FarmScreen(val title: String, val icon: ImageVector) {
-    WORLD_3D("3D Farm", Icons.Default.Public),
-    CROPS("Crops", Icons.Default.LocalFlorist),
-    ENERGY("Energy", Icons.Default.Bolt),
-    LIVESTOCK("Sanctuary", Icons.Default.Pets),
-    WORKSHOP("Workshop", Icons.Default.Build),
-    MARKET("Market", Icons.Default.Store),
-    LEDGER("Eco Ledger", Icons.Default.Park)
+    WORLD_3D("Realm", Icons.Default.Landscape),
+    CROPS("Fields", Icons.Default.LocalFlorist),
+    ENERGY("Mana", Icons.Default.AutoFixHigh),
+    LIVESTOCK("Menagerie", Icons.Default.Pets),
+    WORKSHOP("Forge", Icons.Default.Build),
+    MARKET("Bazaar", Icons.Default.Store),
+    LEDGER("Chronicles", Icons.Default.HistoryEdu)
 }
 
 class MainActivity : ComponentActivity() {
@@ -71,7 +69,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SolarpunkFarmTheme {
+            MedievalIslandTheme {
                 MainAppContent(viewModel = viewModel)
             }
         }
@@ -102,11 +100,11 @@ fun MainAppContent(viewModel: FarmViewModel) {
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFF0A181B),
-                contentColor = Color.White,
-                tonalElevation = 6.dp,
+                containerColor = Color(0xFF1A0F0A), // Deep Wood
+                contentColor = Parchment,
+                tonalElevation = 8.dp,
                 modifier = Modifier
-                    .height(54.dp)
+                    .height(60.dp)
                     .testTag("main_navigation_bar")
             ) {
                 FarmScreen.values().forEach { screen ->
@@ -118,45 +116,46 @@ fun MainAppContent(viewModel: FarmViewModel) {
                             Icon(
                                 imageVector = screen.icon,
                                 contentDescription = screen.title,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         },
                         label = {
                             Text(
                                 text = screen.title,
-                                fontSize = 9.sp,
+                                fontSize = 10.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                fontFamily = MedievalSharpFontFamily,
                                 maxLines = 1
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFF091215),
-                            selectedTextColor = SolarEmerald,
-                            indicatorColor = SolarEmerald,
-                            unselectedIconColor = Color(0xFF90A4AE),
-                            unselectedTextColor = Color(0xFF90A4AE)
+                            selectedIconColor = Parchment,
+                            selectedTextColor = AgedGold,
+                            indicatorColor = MedievalCrimson,
+                            unselectedIconColor = Bronze,
+                            unselectedTextColor = Bronze
                         ),
                         modifier = Modifier.testTag("nav_${screen.name.lowercase()}")
                     )
                 }
             }
         }
-    ) { innerPadding ->
+    )
+ { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFF091215))
+                .background(Color(0xFF1A0F0A))
         ) {
-            // Persistent 3D World layer (prevents SurfaceSyncGroup teardowns during tab navigation)
+            // Persistent 3D World layer
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        alpha = if (currentScreen == FarmScreen.WORLD_3D) 1f else 0f
-                    }
+                modifier = Modifier.fillMaxSize()
             ) {
-                Game3DScreen(viewModel = viewModel)
+                Game3DScreen(
+                    viewModel = viewModel,
+                    isVisible = currentScreen == FarmScreen.WORLD_3D
+                )
             }
 
             // High-performance overlay sub-screens
@@ -164,11 +163,11 @@ fun MainAppContent(viewModel: FarmViewModel) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF091215))
+                        .background(Color(0xFF1A0F0A))
                 ) {
                     when (currentScreen) {
                         FarmScreen.CROPS -> AgricultureScreen(viewModel = viewModel)
-                        FarmScreen.ENERGY -> SolarEnergyScreen(viewModel = viewModel)
+                        FarmScreen.ENERGY -> ManaEnergyScreen(viewModel = viewModel)
                         FarmScreen.LIVESTOCK -> LivestockScreen(viewModel = viewModel)
                         FarmScreen.WORKSHOP -> WorkshopScreen(viewModel = viewModel)
                         FarmScreen.MARKET -> MarketScreen(viewModel = viewModel)

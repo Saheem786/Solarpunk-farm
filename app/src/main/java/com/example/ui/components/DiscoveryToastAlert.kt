@@ -62,9 +62,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 
 /**
@@ -72,23 +70,17 @@ import kotlinx.coroutines.delay
  */
 data class DiscoveryAlertData(
     val id: Long = System.currentTimeMillis(),
-    val title: String, // e.g. "Discovered: Deep Forest" or "Discovered: Abandoned Ranger Tower"
-    val subtitle: String, // e.g. "Towering pine canopy & wildlife haven (+50 🪙, +10 Eco)"
-    val categoryLabel: String = "NEW BIOME DISCOVERED",
+    val title: String, // e.g. "Discovered: Deep Forest"
+    val subtitle: String, // e.g. "Towering pine canopy (+50 🪙, +10 Prestige)"
+    val categoryLabel: String = "NEW REALM DISCOVERED",
     val icon: ImageVector = Icons.Default.Info,
-    val accentColor: Color = Color(0xFFFFD54F),
+    val accentColor: Color = AgedGold,
     val rewardCoins: Int = 0,
     val rewardItemName: String? = null
 )
 
 /**
- * High-Polish Solarpunk HUD Discovery Toast & Alert Notification.
- * Triggered whenever the player enters a new discovery zone (Biome or POI) for the first time.
- * Features:
- * - Smooth entrance spring physics + subtle glow pulse
- * - Ambient animated shimmering gradient border
- * - Glowing discovery category badge with spark icons
- * - Auto-dismiss countdown bar & tap to view on Map
+ * High-Polish Medieval HUD Discovery Toast & Alert Notification.
  */
 @Composable
 fun DiscoveryToastAlert(
@@ -139,22 +131,22 @@ fun DiscoveryToastAlert(
                 modifier = Modifier
                     .widthIn(min = 300.dp, max = 460.dp)
                     .padding(horizontal = 14.dp, vertical = 6.dp)
-                    .shadow(16.dp, RoundedCornerShape(20.dp), spotColor = accent)
-                    .clip(RoundedCornerShape(20.dp))
+                    .shadow(16.dp, RoundedCornerShape(12.dp), spotColor = accent)
+                    .clip(RoundedCornerShape(12.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = androidx.compose.material3.ripple(bounded = true, radius = 240.dp)
                     ) { onViewMap() }
                     .testTag("hud_discovery_toast_alert"),
-                color = Color(0xF608171B),
-                shape = RoundedCornerShape(20.dp),
+                color = Parchment,
+                shape = RoundedCornerShape(12.dp),
                 border = androidx.compose.foundation.BorderStroke(
-                    1.5.dp,
+                    2.dp,
                     Brush.horizontalGradient(
                         colors = listOf(
                             accent.copy(alpha = 0.4f),
                             accent,
-                            CleanCyan,
+                            MedievalCrimson,
                             accent.copy(alpha = 0.4f)
                         ),
                         startX = shimmerOffset * 500f,
@@ -189,7 +181,7 @@ fun DiscoveryToastAlert(
                             Icon(
                                 imageVector = alert.icon,
                                 contentDescription = "Discovery",
-                                tint = accent,
+                                tint = MedievalCrimson,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -208,15 +200,16 @@ fun DiscoveryToastAlert(
                                 Icon(
                                     imageVector = Icons.Default.Star,
                                     contentDescription = null,
-                                    tint = SunGold,
+                                    tint = AgedGoldDark,
                                     modifier = Modifier.size(11.dp)
                                 )
                                 Text(
                                     text = alert.categoryLabel.uppercase(),
-                                    color = SunGold,
+                                    color = AgedGoldDark,
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.2.sp
+                                    letterSpacing = 1.2.sp,
+                                    fontFamily = MedievalSharpFontFamily
                                 )
                             }
 
@@ -225,11 +218,12 @@ fun DiscoveryToastAlert(
                             // Main Title: "Discovered: [Name]"
                             Text(
                                 text = alert.title,
-                                color = Color.White,
+                                color = MedievalCrimson,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 letterSpacing = 0.3.sp,
-                                maxLines = 1
+                                maxLines = 1,
+                                fontFamily = MedievalSharpFontFamily
                             )
 
                             Spacer(modifier = Modifier.height(2.dp))
@@ -237,11 +231,12 @@ fun DiscoveryToastAlert(
                             // Subtitle description & rewards
                             Text(
                                 text = alert.subtitle,
-                                color = CleanCyan,
+                                color = MedievalTextSecondary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 2,
-                                lineHeight = 14.sp
+                                lineHeight = 14.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                         }
 
@@ -261,22 +256,23 @@ fun DiscoveryToastAlert(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Dismiss",
-                                    tint = Color(0xAAFFFFFF),
+                                    tint = MedievalCrimson.copy(alpha = 0.6f),
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
 
                             Surface(
-                                color = Color(0x3300E676),
+                                color = ForestMoss.copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(8.dp),
-                                border = androidx.compose.foundation.BorderStroke(0.8.dp, SolarEmerald.copy(alpha = 0.8f))
+                                border = androidx.compose.foundation.BorderStroke(0.8.dp, ForestMoss.copy(alpha = 0.8f))
                             ) {
                                 Text(
-                                    text = "TAP TO MAP",
-                                    color = SolarEmerald,
+                                    text = "OPEN SCROLL",
+                                    color = ForestMoss,
                                     fontSize = 7.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    fontFamily = MedievalSharpFontFamily
                                 )
                             }
                         }

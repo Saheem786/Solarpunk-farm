@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,9 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.local.InventoryEntity
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 @Composable
 fun QuickInventoryModal(
@@ -63,11 +62,11 @@ fun QuickInventoryModal(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
                 .fillMaxHeight(0.92f)
-                .clip(RoundedCornerShape(24.dp))
-                .border(1.dp, CleanCyan.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("quick_inventory_modal"),
-            color = Color(0xF80B1E22),
-            shape = RoundedCornerShape(24.dp)
+            color = Parchment,
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp)
@@ -82,13 +81,14 @@ fun QuickInventoryModal(
                         Icon(
                             imageVector = Icons.Default.Inventory2,
                             contentDescription = null,
-                            tint = CleanCyan,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(24.dp)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Backpack Inventory",
-                            color = Color.White,
+                            text = "KINGDOM STASH",
+                            color = MedievalCrimson,
+                            fontFamily = MedievalSharpFontFamily,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -99,30 +99,31 @@ fun QuickInventoryModal(
                     ) {
                         Surface(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .clickable {
                                     onDismiss()
                                     onOpenMap()
                                 }
                                 .testTag("btn_bag_open_map"),
-                            color = Color(0x3300E676),
-                            shape = RoundedCornerShape(12.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                            color = ForestMoss.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, ForestMoss)
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Explore,
                                     contentDescription = "Map",
-                                    tint = SolarEmerald,
+                                    tint = ForestMoss,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Text(
-                                    text = "World Map",
-                                    color = Color.White,
+                                    text = "Scroll Map",
+                                    color = MedievalTextPrimary,
+                                    fontFamily = MedievalSharpFontFamily,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -136,7 +137,7 @@ fun QuickInventoryModal(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Close",
-                                tint = Color.White
+                                tint = MedievalCrimson
                             )
                         }
                     }
@@ -152,15 +153,16 @@ fun QuickInventoryModal(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Your inventory is currently empty.\nHarvest crops or craft items!",
-                            color = Color(0xFF90A4AE),
-                            fontSize = 14.sp,
+                            text = "Thy stash is currently empty.\nGather resources or craft items!",
+                            color = MedievalTextSecondary,
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 15.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.height(320.dp),
+                        modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(inventory.filter { it.quantity > 0 }) { item ->
@@ -168,9 +170,9 @@ fun QuickInventoryModal(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("inventory_item_${item.itemId}"),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF132A30)),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x2280D8FF))
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color(0x0A2D1B0D)),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
                             ) {
                                 Row(
                                     modifier = Modifier.padding(12.dp),
@@ -180,28 +182,31 @@ fun QuickInventoryModal(
                                         modifier = Modifier
                                             .size(40.dp)
                                             .clip(CircleShape)
-                                            .background(CleanCyan.copy(alpha = 0.2f)),
+                                            .background(MedievalCrimson.copy(alpha = 0.15f)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Text(
-                                            text = "${item.quantity}x",
-                                            color = CleanCyan,
+                                            text = "${item.quantity}",
+                                            color = MedievalCrimson,
+                                            fontFamily = MedievalSharpFontFamily,
                                             fontWeight = FontWeight.Bold,
-                                            fontSize = 13.sp
+                                            fontSize = 14.sp
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = item.name,
-                                            color = Color.White,
-                                            fontSize = 14.sp,
+                                            color = MedievalCrimson,
+                                            fontFamily = MedievalSharpFontFamily,
+                                            fontSize = 15.sp,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Text(
-                                            text = "Category: ${item.category.name} • Value: ${item.sellValue} 🪙",
-                                            color = Color(0xFFB0BEC5),
-                                            fontSize = 11.sp
+                                            text = "Value: ${item.sellValue} Gold",
+                                            color = MedievalTextPrimary,
+                                            fontFamily = AlmendraFontFamily,
+                                            fontSize = 12.sp
                                         )
                                     }
 
@@ -212,13 +217,15 @@ fun QuickInventoryModal(
                                     if (isEdible) {
                                         Button(
                                             onClick = { onConsumeItem(item.itemId) },
-                                            colors = ButtonDefaults.buttonColors(containerColor = if (isMilk) CleanCyan else SunGold),
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier.padding(end = 6.dp).testTag("consume_${item.itemId}")
+                                            colors = ButtonDefaults.buttonColors(containerColor = if (isMilk) RoyalBlue else MedievalCrimson),
+                                            shape = RoundedCornerShape(8.dp),
+                                            modifier = Modifier.padding(end = 6.dp).testTag("consume_${item.itemId}"),
+                                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                                         ) {
                                             Text(
-                                                text = if (isEgg) "Eat (+15)" else if (isMilk) "Drink (+25)" else "Eat",
-                                                color = Color(0xFF091215),
+                                                text = if (isEgg) "Eat" else if (isMilk) "Drink" else "Eat",
+                                                color = Parchment,
+                                                fontFamily = MedievalSharpFontFamily,
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
@@ -227,20 +234,22 @@ fun QuickInventoryModal(
 
                                     Button(
                                         onClick = { onSellItem(item.itemId, 1) },
-                                        colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                                        shape = RoundedCornerShape(10.dp),
-                                        modifier = Modifier.testTag("sell_${item.itemId}")
+                                        colors = ButtonDefaults.buttonColors(containerColor = AgedGold),
+                                        shape = RoundedCornerShape(8.dp),
+                                        modifier = Modifier.testTag("sell_${item.itemId}"),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Sell,
                                             contentDescription = null,
-                                            tint = Color(0xFF091215),
-                                            modifier = Modifier.size(16.dp)
+                                            tint = MedievalTextPrimary,
+                                            modifier = Modifier.size(14.dp)
                                         )
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text(
                                             text = "Sell",
-                                            color = Color(0xFF091215),
+                                            color = MedievalTextPrimary,
+                                            fontFamily = MedievalSharpFontFamily,
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold
                                         )

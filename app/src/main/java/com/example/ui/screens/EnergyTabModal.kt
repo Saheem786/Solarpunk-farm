@@ -85,11 +85,8 @@ import com.example.data.model.EnergyNodeType
 import com.example.data.model.EnergyResearchTech
 import com.example.data.model.PowerPriority
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 import kotlin.math.roundToInt
 
 @Composable
@@ -105,11 +102,11 @@ fun EnergyTabModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 6.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .border(1.5.dp, CleanCyan.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("energy_tab_modal"),
-            color = Color(0xF2081518),
-            shape = RoundedCornerShape(20.dp)
+            color = Parchment,
+            shape = RoundedCornerShape(12.dp)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Top Modal Bar
@@ -123,30 +120,32 @@ fun EnergyTabModal(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
-                                .background(CleanCyan.copy(alpha = 0.2f)),
+                                .background(MedievalCrimson.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Bolt,
                                 contentDescription = null,
-                                tint = CleanCyan,
-                                modifier = Modifier.size(18.dp)
+                                tint = MedievalCrimson,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Solarpunk Energy Grid & Power Control",
-                                color = Color.White,
-                                fontSize = 14.sp,
+                                text = "ARCANE ESSENCE & POWER WEAVING",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Version 2, Phase 4 • Generation, Storage, Auto-Grid & Priorities",
-                                color = Color(0xFF80D8FF),
-                                fontSize = 10.sp
+                                text = "Generation, Storage, and Master Grid Flow",
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
+                                fontSize = 11.sp
                             )
                         }
                     }
@@ -154,14 +153,14 @@ fun EnergyTabModal(
                     IconButton(
                         onClick = onDismiss,
                         modifier = Modifier
-                            .size(28.dp)
+                            .size(32.dp)
                             .testTag("btn_close_energy_tab")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
+                            tint = MedievalCrimson,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -191,17 +190,17 @@ fun EnergyGridManagementContent(
     var activeSubTab by remember { mutableStateOf("NET_BALANCE") }
 
     val tabs = listOf(
-        Pair("NET_BALANCE", "Net Balance"),
-        Pair("GENERATION", "Generation"),
-        Pair("STORAGE", "Storage"),
-        Pair("PRIORITIES", "Priority & Devices"),
-        Pair("GRID_MAP", "Grid Map"),
-        Pair("RESEARCH", "Smart Research")
+        Pair("NET_BALANCE", "Flow"),
+        Pair("GENERATION", "Creation"),
+        Pair("STORAGE", "Vessels"),
+        Pair("PRIORITIES", "Wards"),
+        Pair("GRID_MAP", "Scroll"),
+        Pair("RESEARCH", "Alchemy")
     )
 
     Column(
         modifier = modifier
-            .background(Color(0xFF071316))
+            .background(Parchment)
             .testTag("energy_grid_management_content")
     ) {
         // Sub-Tab Switcher Row
@@ -216,22 +215,23 @@ fun EnergyGridManagementContent(
                 val isSelected = activeSubTab == key
                 Surface(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable { activeSubTab = key }
                         .testTag("energy_tab_${key.lowercase()}"),
-                    color = if (isSelected) CleanCyan.copy(alpha = 0.25f) else Color(0xFF10262B),
-                    shape = RoundedCornerShape(12.dp),
+                    color = if (isSelected) MedievalCrimson else AgedGold.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(8.dp),
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
-                        if (isSelected) CleanCyan else Color(0x3300E5FF)
+                        if (isSelected) AgedGold else AgedGold.copy(alpha = 0.3f)
                     )
                 ) {
                     Text(
                         text = label,
-                        color = if (isSelected) CleanCyan else Color(0xFFB0BEC5),
-                        fontSize = 11.sp,
+                        color = if (isSelected) Parchment else MedievalTextPrimary,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     )
                 }
             }
@@ -275,11 +275,11 @@ private fun NetBalanceSection(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .testTag("energy_low_banner"),
-                    color = Color(0x33FF5252),
-                    shape = RoundedCornerShape(14.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF5252))
+                    color = MedievalCrimson.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MedievalCrimson)
                 ) {
                     Row(
                         modifier = Modifier.padding(10.dp),
@@ -288,21 +288,23 @@ private fun NetBalanceSection(
                         Icon(
                             imageVector = Icons.Default.Warning,
                             contentDescription = null,
-                            tint = Color(0xFFFF5252),
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
-                                text = "CRITICAL: Battery Below 20%!",
-                                color = Color(0xFFFF8A80),
+                                text = "CRITICAL: Mana Below 20%!",
+                                color = MedievalCrimson,
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = MedievalSharpFontFamily
                             )
                             Text(
-                                text = "Non-essential devices disabled by priority system. Add more power sources or batteries.",
-                                color = Color(0xFFFFCDD2),
-                                fontSize = 10.sp
+                                text = "Non-essential rituals disabled by priority. Gather more mana.",
+                                color = MedievalTextPrimary,
+                                fontSize = 10.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                         }
                     }
@@ -316,9 +318,9 @@ private fun NetBalanceSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("net_balance_card"),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF0E2328)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan.copy(alpha = 0.5f))
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Parchment),
+                border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold.copy(alpha = 0.8f))
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Row(
@@ -332,47 +334,49 @@ private fun NetBalanceSection(
                                     .size(36.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isNetPositive) Color(0x3300E676) else if (isBalanced) Color(0x33FFD54F) else Color(0x33FF5252)
+                                        if (isNetPositive) ForestMoss.copy(alpha = 0.2f) else if (isBalanced) AgedGold.copy(alpha = 0.2f) else MedievalCrimson.copy(alpha = 0.2f)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = if (isNetPositive) Icons.Default.ArrowUpward else if (isBalanced) Icons.Default.Remove else Icons.Default.ArrowDownward,
                                     contentDescription = null,
-                                    tint = if (isNetPositive) SolarEmerald else if (isBalanced) SunGold else Color(0xFFFF5252),
+                                    tint = if (isNetPositive) ForestMoss else if (isBalanced) AgedGoldDark else MedievalCrimson,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = if (isNetPositive) "Net Surplus • Batteries Charging" else if (isBalanced) "Balanced Net Flow" else "Net Deficit • Batteries Draining",
-                                    color = if (isNetPositive) SolarEmerald else if (isBalanced) SunGold else Color(0xFFFF8A80),
+                                    text = if (isNetPositive) "Net Surplus • Mana Gathering" else if (isBalanced) "Balanced Mana Flow" else "Net Deficit • Mana Draining",
+                                    color = if (isNetPositive) ForestMoss else if (isBalanced) AgedGoldDark else MedievalCrimson,
                                     fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = MedievalSharpFontFamily
                                 )
                                 Text(
                                     text = "Net Flow: ${if (summary.netHourlyKwh >= 0) "+" else ""}${String.format("%.1f", summary.netHourlyKwh)} kWh/hr",
-                                    color = Color.White,
-                                    fontSize = 11.sp
+                                    color = MedievalTextPrimary,
+                                    fontSize = 11.sp,
+                                    fontFamily = AlmendraFontFamily
                                 )
                             }
                         }
 
                         Text(
                             text = "$chargePercent%",
-                            color = CleanCyan,
+                            color = MedievalCrimson,
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
+                            fontWeight = FontWeight.ExtraBold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    SolarpunkProgressBar(
+                    MedievalProgressBar(
                         progress = summary.batteryPercent,
-                        color = if (summary.batteryPercent > 0.5f) CleanCyan else if (summary.batteryPercent > 0.2f) SunGold else Color(0xFFFF5252),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(12.dp)
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -383,22 +387,25 @@ private fun NetBalanceSection(
                     ) {
                         Text(
                             text = "Stored: ${summary.currentStoredKwh.toInt()} / ${summary.totalStorageCapacityKwh.toInt()} kWh",
-                            color = Color.White,
+                            color = MedievalTextPrimary,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = AlmendraFontFamily
                         )
                         if (!isNetPositive && !isBalanced && summary.hoursUntilEmpty < 900f) {
                             Text(
                                 text = "Empty in: ${String.format("%.1f", summary.hoursUntilEmpty)} hrs",
-                                color = Color(0xFFFF8A80),
+                                color = MedievalCrimson,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = AlmendraFontFamily
                             )
                         } else if (isNetPositive) {
                             Text(
                                 text = "Status: Healthy Storage",
-                                color = SolarEmerald,
-                                fontSize = 11.sp
+                                color = ForestMoss,
+                                fontSize = 11.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                         }
                     }
@@ -416,14 +423,14 @@ private fun NetBalanceSection(
                     title = "Total Generation",
                     value = "${String.format("%.1f", summary.totalGenerationKwhPerDay)} kWh/day",
                     sub = "Current: ${String.format("%.1f", summary.currentGenerationKwhPerHour)} kW",
-                    color = SunGold,
+                    color = AgedGoldDark,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
                     title = "Total Consumption",
                     value = "${String.format("%.1f", summary.totalHourlyConsumptionKwh * 24f)} kWh/day",
                     sub = "Current: ${String.format("%.1f", summary.totalHourlyConsumptionKwh)} kW",
-                    color = Color(0xFF80D8FF),
+                    color = RoyalBlue,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -438,14 +445,14 @@ private fun NetBalanceSection(
                     title = "Connected Grid",
                     value = "${summary.powerSourcesCount} Sources • ${summary.batteryUnitsCount} Bats",
                     sub = "${summary.powerPolesCount} Power Poles Active",
-                    color = SolarEmerald,
+                    color = ForestMoss,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
                     title = "Devices Powered",
                     value = "${summary.activeDevicesCount} / ${summary.totalDevicesCount} Online",
                     sub = if (summary.unpoweredDevicesCount > 0) "${summary.unpoweredDevicesCount} Low Power Off" else "All Powered",
-                    color = if (summary.unpoweredDevicesCount > 0) Color(0xFFFF8A80) else Color(0xFFB9F6CA),
+                    color = if (summary.unpoweredDevicesCount > 0) MedievalCrimson else ForestMoss,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -463,17 +470,33 @@ private fun MetricCard(
 ) {
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp)),
-        color = Color(0xFF0F2428),
-        shape = RoundedCornerShape(14.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.3f))
+            .clip(RoundedCornerShape(12.dp)),
+        color = Parchment,
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            Text(text = title, color = Color(0xFF90A4AE), fontSize = 10.sp)
+            Text(
+                text = title,
+                color = MedievalTextSecondary,
+                fontSize = 10.sp,
+                fontFamily = AlmendraFontFamily
+            )
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = value, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = value,
+                color = MedievalTextPrimary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
+            )
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = sub, color = color, fontSize = 10.sp)
+            Text(
+                text = sub,
+                color = color,
+                fontSize = 10.sp,
+                fontFamily = AlmendraFontFamily
+            )
         }
     }
 }
@@ -492,39 +515,39 @@ private fun GenerationSection(
             EnergyNodeType.PHOTOVOLTAIC_ARRAY -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Photovoltaic Array (Level ${node.level})",
-                        typeName = "Solar Glass",
+                        name = "Arcane Mirror Array (Level ${node.level})",
+                        typeName = "Sun-Focusing Glass",
                         generationKwhPerDay = 15.0f * node.efficiency,
                         currentGenerationKw = 1.5f * node.efficiency,
-                        status = "Operating • Daylight Only",
+                        status = "Operating • Sunlit Hours Only",
                         isOperating = true,
-                        location = "Sanctuary East"
+                        location = "East Watch"
                     )
                 )
             }
             EnergyNodeType.VERTICAL_WIND_TURBINE -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Aero-Spire Turbine (Level ${node.level})",
-                        typeName = "Helical Wind",
+                        name = "Aero-Spire Wind-Crystal (Level ${node.level})",
+                        typeName = "Gale-Bound Crystal",
                         generationKwhPerDay = 18.0f * node.efficiency,
                         currentGenerationKw = 0.75f * node.efficiency,
                         status = "Operating 24/7",
                         isOperating = true,
-                        location = "Sanctuary Ridge"
+                        location = "Gale Ridge"
                     )
                 )
             }
             EnergyNodeType.BIOGAS_DIGESTER -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Biomass Digester (Level ${node.level})",
-                        typeName = "Organic Compost",
+                        name = "Earthen Mana Vat (Level ${node.level})",
+                        typeName = "Primal Fermentation",
                         generationKwhPerDay = 12.0f * node.efficiency,
                         currentGenerationKw = 0.50f * node.efficiency,
                         status = "Operating 24/7",
                         isOperating = true,
-                        location = "Compost Yard"
+                        location = "The Glade"
                     )
                 )
             }
@@ -538,11 +561,11 @@ private fun GenerationSection(
             BuildableType.SOLAR_PANEL -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Solar Panel #${b.id}",
-                        typeName = "Solar Photovoltaic",
+                        name = "Mystic Stone Circle #${b.id}",
+                        typeName = "Mana Gathering Ritual",
                         generationKwhPerDay = 10.0f,
                         currentGenerationKw = 1.0f,
-                        status = "Generates 7 AM - 5 PM (10 kWh/day)",
+                        status = "Gathers Mana 7 AM - 5 PM (10 Mana/day)",
                         isOperating = true,
                         location = "X: ${b.posX.toInt()}, Z: ${b.posZ.toInt()}"
                     )
@@ -551,11 +574,11 @@ private fun GenerationSection(
             BuildableType.WINDMILL -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Windmill Tower #${b.id}",
-                        typeName = "Kinetic Wind Turbine",
+                        name = "Aeolian Spire #${b.id}",
+                        typeName = "Kinetic Air Essence",
                         generationKwhPerDay = 15.0f,
                         currentGenerationKw = 0.625f,
-                        status = "Operating 24/7 (30% less at night)",
+                        status = "Operating 24/7 (Breezes never cease)",
                         isOperating = true,
                         location = "X: ${b.posX.toInt()}, Z: ${b.posZ.toInt()}"
                     )
@@ -564,8 +587,8 @@ private fun GenerationSection(
             BuildableType.HYDRO_GENERATOR -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Small Hydro Generator #${b.id}",
-                        typeName = "Water Wheel Hydro",
+                        name = "Oak Water Wheel #${b.id}",
+                        typeName = "Hydro Essence Harvest",
                         generationKwhPerDay = 20.0f,
                         currentGenerationKw = 0.833f,
                         status = "Operating 24/7 continuous stream current",
@@ -577,11 +600,11 @@ private fun GenerationSection(
             BuildableType.ADVANCED_SOLAR -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Advanced Solar Array #${b.id}",
-                        typeName = "4x4 Sun-Tracking Photovoltaic",
+                        name = "Crystal Sun Obelisk #${b.id}",
+                        typeName = "Prismatic Sun-Tracking",
                         generationKwhPerDay = 30.0f,
                         currentGenerationKw = 3.6f,
-                        status = "Sun-Tracking Active (+20% efficiency bonus)",
+                        status = "Light-Focusing Active (+20% efficiency bonus)",
                         isOperating = true,
                         location = "X: ${b.posX.toInt()}, Z: ${b.posZ.toInt()}"
                     )
@@ -590,8 +613,8 @@ private fun GenerationSection(
             BuildableType.BIOGAS_GENERATOR -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Biogas Generator #${b.id}",
-                        typeName = "Compost Bio-Dome",
+                        name = "Alchemical Compost Vat #${b.id}",
+                        typeName = "Earth Essence Fermentation",
                         generationKwhPerDay = 12.0f,
                         currentGenerationKw = 0.50f,
                         status = "Operating 24/7 (Consumes 1 compost/day)",
@@ -603,11 +626,11 @@ private fun GenerationSection(
             BuildableType.GEOTHERMAL_VENT -> {
                 sources.add(
                     com.example.data.model.PowerSourceInfo(
-                        name = "Geothermal Vent Turbine #${b.id}",
-                        typeName = "Deep Thermal Steam Turbine",
+                        name = "Volcanic Power Forge #${b.id}",
+                        typeName = "Deep Thermal Earth Core",
                         generationKwhPerDay = 40.0f,
                         currentGenerationKw = 1.667f,
-                        status = "Operating 24/7 continuous industrial base-load",
+                        status = "Operating 24/7 continuous base-load",
                         isOperating = true,
                         location = "Mountain Thermal Hotspot"
                     )
@@ -630,16 +653,18 @@ private fun GenerationSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Power Generation Sources (${sources.size})",
-                    color = Color.White,
+                    text = "Mana Generation Sources (${sources.size})",
+                    color = MedievalCrimson,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Total: ${String.format("%.1f", summary.totalGenerationKwhPerDay)} kWh/day",
-                    color = SunGold,
+                    text = "Total: ${String.format("%.1f", summary.totalGenerationKwhPerDay)} mana/day",
+                    color = AgedGoldDark,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
             }
         }
@@ -647,9 +672,10 @@ private fun GenerationSection(
         if (sources.isEmpty()) {
             item {
                 Text(
-                    text = "No additional power sources placed yet. Build Solar Panels, Windmills, Hydro Generators, or Biogas Generators in Build Mode!",
-                    color = Color(0xFF90A4AE),
+                    text = "No mana sources gathered yet. Build Solar Arrays, Windspires, or Water Wheels in Build Mode!",
+                    color = MedievalTextSecondary,
                     fontSize = 11.sp,
+                    fontFamily = AlmendraFontFamily,
                     modifier = Modifier.padding(vertical = 12.dp)
                 )
             }
@@ -659,10 +685,10 @@ private fun GenerationSection(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp)),
-                color = Color(0xFF0F2428),
-                shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x33FFD54F))
+                    .clip(RoundedCornerShape(12.dp)),
+                color = Parchment,
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
             ) {
                 Row(
                     modifier = Modifier.padding(10.dp),
@@ -672,25 +698,52 @@ private fun GenerationSection(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(SunGold.copy(alpha = 0.2f)),
+                            .background(AgedGold.copy(alpha = 0.2f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.WbSunny,
+                            imageVector = Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = SunGold,
+                            tint = AgedGoldDark,
                             modifier = Modifier.size(18.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(text = src.name, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text(text = "${src.typeName} • ${src.location}", color = Color(0xFF90A4AE), fontSize = 10.sp)
-                        Text(text = src.status, color = SolarEmerald, fontSize = 9.5.sp)
+                        Text(
+                            text = src.name,
+                            color = MedievalCrimson,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
+                        )
+                        Text(
+                            text = "${src.typeName} • ${src.location}",
+                            color = MedievalTextSecondary,
+                            fontSize = 10.sp,
+                            fontFamily = AlmendraFontFamily
+                        )
+                        Text(
+                            text = src.status,
+                            color = ForestMoss,
+                            fontSize = 9.5.sp,
+                            fontFamily = AlmendraFontFamily
+                        )
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text(text = "${String.format("%.1f", src.generationKwhPerDay)} kWh/d", color = SunGold, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        Text(text = "${String.format("%.2f", src.currentGenerationKw)} kW", color = CleanCyan, fontSize = 10.sp)
+                        Text(
+                            text = "${String.format("%.1f", src.generationKwhPerDay)} m/d",
+                            color = AgedGoldDark,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
+                        )
+                        Text(
+                            text = "${String.format("%.2f", src.currentGenerationKw)} m/hr",
+                            color = MedievalCrimson,
+                            fontSize = 10.sp,
+                            fontFamily = AlmendraFontFamily
+                        )
                     }
                 }
             }
@@ -709,11 +762,11 @@ private fun StorageSection(
     // Farmhouse base battery
     batteries.add(
         com.example.data.model.BatteryUnitInfo(
-            name = "Farmhouse Microgrid Battery",
+            name = "Citadel Central Mana Vessel",
             capacityKwh = 50.0f,
             currentChargeKwh = kotlin.math.min(50.0f, summary.currentStoredKwh),
             maxChargeRateKw = 5.0f,
-            status = "Integrated Solid-State Hub"
+            status = "Ancient Runically-Bound Basin"
         )
     )
 
@@ -755,11 +808,11 @@ private fun StorageSection(
             BuildableType.STORAGE -> {
                 batteries.add(
                     com.example.data.model.BatteryUnitInfo(
-                        name = "Storage Shed Storage Unit",
+                        name = "Shed Arcane Storage",
                         capacityKwh = 60.0f,
                         currentChargeKwh = 60.0f * summary.batteryPercent,
                         maxChargeRateKw = 5.0f,
-                        status = "Auxiliary Grid Storage"
+                        status = "Auxiliary Mana Storage"
                     )
                 )
             }
@@ -780,16 +833,18 @@ private fun StorageSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Connected Batteries (${batteries.size})",
-                    color = Color.White,
+                    text = "Mana Storage Vessels (${batteries.size})",
+                    color = MedievalCrimson,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Total: ${summary.currentStoredKwh.toInt()}/${summary.totalStorageCapacityKwh.toInt()} kWh",
-                    color = CleanCyan,
+                    text = "Total: ${summary.currentStoredKwh.toInt()}/${summary.totalStorageCapacityKwh.toInt()} m",
+                    color = AgedGoldDark,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
             }
         }
@@ -799,10 +854,10 @@ private fun StorageSection(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp)),
-                color = Color(0xFF0F2428),
-                shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan.copy(alpha = 0.35f))
+                    .clip(RoundedCornerShape(12.dp)),
+                color = Parchment,
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
                     Row(
@@ -815,36 +870,47 @@ private fun StorageSection(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(CircleShape)
-                                    .background(CleanCyan.copy(alpha = 0.2f)),
+                                    .background(AgedGold.copy(alpha = 0.2f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.BatteryChargingFull,
                                     contentDescription = null,
-                                    tint = CleanCyan,
+                                    tint = AgedGoldDark,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text(text = bat.name, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                                Text(text = bat.status, color = Color(0xFF90A4AE), fontSize = 10.sp)
+                                Text(
+                                    text = bat.name,
+                                    color = MedievalCrimson,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = MedievalSharpFontFamily
+                                )
+                                Text(
+                                    text = bat.status,
+                                    color = MedievalTextSecondary,
+                                    fontSize = 10.sp,
+                                    fontFamily = AlmendraFontFamily
+                                )
                             }
                         }
 
                         Text(
-                            text = "${bat.currentChargeKwh.toInt()}/${bat.capacityKwh.toInt()} kWh",
-                            color = CleanCyan,
+                            text = "${bat.currentChargeKwh.toInt()}/${bat.capacityKwh.toInt()} m",
+                            color = AgedGoldDark,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                     }
 
                     Spacer(modifier = Modifier.height(6.dp))
-                    SolarpunkProgressBar(
+                    MedievalProgressBar(
                         progress = batPct,
-                        color = CleanCyan,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().height(8.dp)
                     )
                 }
             }
@@ -867,15 +933,17 @@ private fun PrioritiesSection(
         item {
             Column {
                 Text(
-                    text = "Device Power Priority Settings",
-                    color = Color.White,
+                    text = "Mystic Wards & Ritual Priorities",
+                    color = MedievalCrimson,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "When battery drops below threshold, lower priority tiers disable automatically to protect critical equipment.",
-                    color = Color(0xFF90A4AE),
-                    fontSize = 10.sp
+                    text = "When mana drops below threshold, lower priority rituals fade automatically to protect sacred vessels.",
+                    color = MedievalTextSecondary,
+                    fontSize = 10.sp,
+                    fontFamily = AlmendraFontFamily
                 )
             }
         }
@@ -935,11 +1003,11 @@ private fun DevicePriorityRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .testTag("device_row_${device.id}"),
-        color = Color(0xFF0F2327),
+        color = Parchment,
         shape = RoundedCornerShape(12.dp),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (isPowered) Color(0x3300E676) else Color(0x44FF5252)
+            if (isPowered) ForestMoss.copy(alpha = 0.4f) else MedievalCrimson.copy(alpha = 0.4f)
         )
     ) {
         Row(
@@ -951,28 +1019,31 @@ private fun DevicePriorityRow(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = device.displayName,
-                        color = Color.White,
+                        color = MedievalCrimson,
                         fontSize = 11.5.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Surface(
-                        color = if (isPowered) Color(0x3300E676) else Color(0x33FF5252),
+                        color = if (isPowered) ForestMoss.copy(alpha = 0.1f) else MedievalCrimson.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = if (isPowered) "POWERED" else "OFF (LOW POWER)",
-                            color = if (isPowered) SolarEmerald else Color(0xFFFF5252),
+                            text = if (isPowered) "ACTIVE" else "FADED (LOW MANA)",
+                            color = if (isPowered) ForestMoss else MedievalCrimson,
                             fontSize = 8.5.sp,
                             fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                         )
                     }
                 }
                 Text(
-                    text = "${device.tierLabel} • ${device.consumptionKwhPerHour} kWh/hr",
-                    color = Color(0xFF80D8FF),
-                    fontSize = 9.5.sp
+                    text = "${device.tierLabel} • ${device.consumptionKwhPerHour} mana/hr",
+                    color = MedievalTextSecondary,
+                    fontSize = 9.5.sp,
+                    fontFamily = AlmendraFontFamily
                 )
             }
 
@@ -1048,15 +1119,17 @@ private fun GridMapSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Auto-Connected Power Grid Topology",
-                color = Color.White,
+                text = "Ancient Ley Line & Mana Map",
+                color = MedievalCrimson,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
             Text(
-                text = "Reach: 15m radius/pole",
-                color = CleanCyan,
-                fontSize = 10.sp
+                text = "Reach: 15 spans/ward",
+                color = AgedGoldDark,
+                fontSize = 10.sp,
+                fontFamily = AlmendraFontFamily
             )
         }
 
@@ -1067,9 +1140,9 @@ private fun GridMapSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, CleanCyan.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
-            color = Color(0xFF061114)
+                .clip(RoundedCornerShape(12.dp))
+                .border(2.dp, AgedGold.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+            color = Color(0xFF1A1A1A) // Deep Night
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val canvasW = size.width
@@ -1119,7 +1192,7 @@ private fun GridMapSection(
                             val c1 = Offset(centerX + p1.x * scale, centerY + p1.z * scale)
                             val c2 = Offset(centerX + p2.x * scale, centerY + p2.z * scale)
                             drawLine(
-                                color = Color(0xFF00E5FF).copy(alpha = 0.65f),
+                                color = AgedGold.copy(alpha = 0.65f),
                                 start = c1,
                                 end = c2,
                                 strokeWidth = 2.0f
@@ -1131,7 +1204,7 @@ private fun GridMapSection(
                 // Draw nodes
                 pts.forEach { p ->
                     val c = Offset(centerX + p.x * scale, centerY + p.z * scale)
-                    val nodeColor = if (p.isSource) SunGold else if (p.isBat) CleanCyan else if (p.isPole) Color(0xFF8D6E63) else SolarEmerald
+                    val nodeColor = if (p.isSource) AgedGold else if (p.isBat) MedievalCrimson else if (p.isPole) Bronze else ForestMoss
                     drawCircle(
                         color = nodeColor,
                         radius = if (p.isPole) 3.5f else 5.5f,
@@ -1148,10 +1221,10 @@ private fun GridMapSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            MapLegendItem(color = SunGold, label = "Power Source")
-            MapLegendItem(color = CleanCyan, label = "Battery Storage")
-            MapLegendItem(color = Color(0xFF8D6E63), label = "Power Pole")
-            MapLegendItem(color = SolarEmerald, label = "Consumer/Homestead")
+            MapLegendItem(color = AgedGold, label = "Mana Well")
+            MapLegendItem(color = MedievalCrimson, label = "Mana Vessel")
+            MapLegendItem(color = Bronze, label = "Mystic Ward")
+            MapLegendItem(color = ForestMoss, label = "Sacred Grove")
         }
     }
 }
@@ -1161,7 +1234,12 @@ private fun MapLegendItem(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(color))
         Spacer(modifier = Modifier.width(4.dp))
-        Text(text = label, color = Color(0xFFB0BEC5), fontSize = 9.sp)
+        Text(
+            text = label,
+            color = MedievalTextSecondary,
+            fontSize = 9.sp,
+            fontFamily = AlmendraFontFamily
+        )
     }
 }
 
@@ -1174,26 +1252,26 @@ private fun ResearchSection(
     val techs = listOf(
         EnergyResearchTech(
             id = "tech_smart_grid",
-            title = "Smart Grid Integration",
+            title = "Ley Line Attunement",
             requiredRp = 200,
-            description = "Intelligent AI-regulated priority load-shedding and multi-battery dynamic balancing.",
+            description = "Master runic stabilization for zero-loss mana routing across the kingdom's conduits.",
             unlockEffect = "Enables automated priority switching & zero-loss grid routing",
             isUnlocked = unlockedTechs.contains("tech_smart_grid")
         ),
         EnergyResearchTech(
             id = "tech_adv_battery",
-            title = "High-Density Solid State Bank",
+            title = "Great Mana Vessel",
             requiredRp = 100,
-            description = "High-voltage lithium-sulfur solid-state cells with integrated liquid cooling manifolds.",
-            unlockEffect = "Unlocks Industrial Battery Bank blueprint (500 kWh, 50 kW)",
+            description = "Construct massive reinforced stone basins infused with crystalline mana-reactive salts.",
+            unlockEffect = "Unlocks Industrial Mana Vessel blueprint (500 Mana, 50 Rate)",
             isUnlocked = unlockedTechs.contains("tech_adv_battery")
         ),
         EnergyResearchTech(
             id = "tech_geothermal",
-            title = "Deep Borehole Geothermal Turbine",
+            title = "Deep Core Magma Tap",
             requiredRp = 250,
-            description = "Harness continuous volcanic subterranean steam currents for uninterrupted heavy industrial base-load.",
-            unlockEffect = "Unlocks Geothermal Vent Generator (40 kWh/day 24/7 continuous)",
+            description = "Harness the eternal heat of the earth's core for uninterrupted arcane power.",
+            unlockEffect = "Unlocks Volcanic Power Forge (40 Mana/day continuous)",
             isUnlocked = unlockedTechs.contains("tech_geothermal")
         )
     )
@@ -1212,27 +1290,30 @@ private fun ResearchSection(
             ) {
                 Column {
                     Text(
-                        text = "Clean Energy R&D Research",
-                        color = Color.White,
+                        text = "Alchemy & Arcane R&D",
+                        color = MedievalCrimson,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily
                     )
                     Text(
-                        text = "Spend Eco Prestige (RP) earned from regenerative farming & trees",
-                        color = Color(0xFF90A4AE),
-                        fontSize = 10.sp
+                        text = "Spend Prestige (RP) earned from sacred groves & beasts",
+                        color = MedievalTextSecondary,
+                        fontSize = 10.sp,
+                        fontFamily = AlmendraFontFamily
                     )
                 }
                 Surface(
-                    color = SolarEmerald.copy(alpha = 0.2f),
+                    color = ForestMoss.copy(alpha = 0.2f),
                     shape = RoundedCornerShape(10.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ForestMoss)
                 ) {
                     Text(
                         text = "RP: $currentEcoRp",
-                        color = SolarEmerald,
+                        color = ForestMoss,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
+                        fontFamily = MedievalSharpFontFamily,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
@@ -1247,11 +1328,11 @@ private fun ResearchSection(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(14.dp))
                     .testTag("research_${tech.id}"),
-                color = Color(0xFF0F2428),
+                color = Parchment,
                 shape = RoundedCornerShape(14.dp),
                 border = androidx.compose.foundation.BorderStroke(
                     1.dp,
-                    if (tech.isUnlocked) SolarEmerald else if (canAfford) CleanCyan else Color(0x33B0BEC5)
+                    if (tech.isUnlocked) ForestMoss else if (canAfford) AgedGoldDark else AgedGold.copy(alpha = 0.2f)
                 )
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
@@ -1260,22 +1341,51 @@ private fun ResearchSection(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = tech.title, color = Color.White, fontSize = 12.5.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = tech.title,
+                            color = MedievalCrimson,
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
+                        )
                         if (tech.isUnlocked) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = SolarEmerald, modifier = Modifier.size(14.dp))
+                                Icon(imageVector = Icons.Default.CheckCircle, contentDescription = null, tint = ForestMoss, modifier = Modifier.size(14.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(text = "UNLOCKED", color = SolarEmerald, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "UNLOCKED",
+                                    color = ForestMoss,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = MedievalSharpFontFamily
+                                )
                             }
                         } else {
-                            Text(text = "${tech.requiredRp} RP", color = if (canAfford) CleanCyan else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = "${tech.requiredRp} RP",
+                                color = if (canAfford) AgedGoldDark else MedievalTextSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = MedievalSharpFontFamily
+                            )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = tech.description, color = Color(0xFFB0BEC5), fontSize = 10.sp)
+                    Text(
+                        text = tech.description,
+                        color = MedievalTextPrimary,
+                        fontSize = 10.sp,
+                        fontFamily = AlmendraFontFamily
+                    )
                     Spacer(modifier = Modifier.height(3.dp))
-                    Text(text = "★ ${tech.unlockEffect}", color = SolarEmerald, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = "★ ${tech.unlockEffect}",
+                        color = ForestMoss,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = AlmendraFontFamily
+                    )
 
                     if (!tech.isUnlocked) {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1287,16 +1397,17 @@ private fun ResearchSection(
                                 .height(32.dp)
                                 .testTag("btn_unlock_${tech.id}"),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (canAfford) CleanCyan else Color(0xFF1B353B),
-                                contentColor = if (canAfford) Color(0xFF091215) else Color(0xFF78909C)
+                                containerColor = if (canAfford) MedievalCrimson else AgedGold.copy(alpha = 0.2f),
+                                contentColor = if (canAfford) Parchment else MedievalTextSecondary
                             ),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(0.dp)
                         ) {
                             Text(
-                                text = if (canAfford) "Research Technology" else "Need ${tech.requiredRp - currentEcoRp} More RP",
+                                text = if (canAfford) "Transmute Knowledge" else "Need ${tech.requiredRp - currentEcoRp} More RP",
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = MedievalSharpFontFamily
                             )
                         }
                     }

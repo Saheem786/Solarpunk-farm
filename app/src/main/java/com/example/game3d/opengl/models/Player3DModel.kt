@@ -14,7 +14,12 @@ enum class PlayerActionAnim {
     WATERING,
     PLANTING,
     FISHING,
-    DRINKING
+    DRINKING,
+    PETTING,
+    FEEDING,
+    COLLECTING,
+    TINKERING,
+    TALKING
 }
 
 class Player3DModel {
@@ -150,6 +155,20 @@ class Player3DModel {
                 PlayerActionAnim.DRINKING -> {
                     armRightAngle = 85.0f * blend
                     torsoPitch = -8.0f * blend
+                }
+                PlayerActionAnim.PETTING, PlayerActionAnim.FEEDING -> {
+                    torsoPitch = 25.0f * blend
+                    armRightAngle = 40.0f * blend
+                    armLeftAngle = 20.0f * blend
+                }
+                PlayerActionAnim.COLLECTING, PlayerActionAnim.TINKERING -> {
+                    torsoPitch = 30.0f * blend
+                    armRightAngle = 50.0f * blend
+                    armLeftAngle = 50.0f * blend
+                }
+                PlayerActionAnim.TALKING -> {
+                    armRightAngle = 25.0f * blend
+                    torsoPitch = 5.0f * blend
                 }
                 PlayerActionAnim.NONE -> {}
             }

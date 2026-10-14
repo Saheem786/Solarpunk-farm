@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Key
-import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -43,9 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.TerminalLogData
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import androidx.compose.material.icons.filled.MenuBook
+import com.example.ui.theme.*
 
 @Composable
 fun TerminalHackModal(
@@ -63,10 +61,10 @@ fun TerminalHackModal(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .clip(RoundedCornerShape(20.dp))
-                .border(2.dp, CleanCyan, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("modal_terminal_hacker"),
-            color = Color(0xFF071215)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -84,30 +82,29 @@ fun TerminalHackModal(
                             modifier = Modifier
                                 .size(38.dp)
                                 .clip(CircleShape)
-                                .background(CleanCyan.copy(alpha = 0.2f)),
+                                .background(MedievalCrimson.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Terminal,
-                                contentDescription = "Terminal",
-                                tint = CleanCyan,
+                                imageVector = Icons.Default.MenuBook,
+                                contentDescription = "Ancient Scroll",
+                                tint = MedievalCrimson,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = terminal.terminalName,
-                                color = CleanCyan,
+                                text = terminal.terminalName.replace("Terminal", "Ancient Cipher"),
+                                color = MedievalCrimson,
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = MedievalSharpFontFamily
                             )
                             Text(
-                                text = "Location: ${terminal.locationName}",
-                                color = Color(0xFF78909C),
-                                fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace
+                                text = "Origin: ${terminal.locationName}",
+                                color = MedievalTextSecondary,
+                                fontSize = 11.sp
                             )
                         }
                     }
@@ -117,46 +114,46 @@ fun TerminalHackModal(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color(0x33FFFFFF))
+                            .background(MedievalCrimson.copy(alpha = 0.1f))
                             .testTag("btn_close_terminal")
                     ) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = MedievalCrimson)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Terminal Display Box
+                // Scroll Display Box
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, Color(0xFF1B5E20), RoundedCornerShape(12.dp)),
-                    color = Color(0xFF030D0A)
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, Bronze, RoundedCornerShape(8.dp)),
+                    color = Color(0xFFF5E6D3) // Aged paper
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         if (terminal.isHacked) {
                             Text(
-                                text = "[DECRYPTED ACCESS GRANTED]",
-                                color = SolarEmerald,
+                                text = "📜 SACRED WISDOM UNVEILED",
+                                color = MedievalCrimsonDark,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = MedievalSharpFontFamily
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = terminal.logText,
-                                color = Color(0xFFE0F2F1),
+                                color = MedievalCrimsonDark,
                                 fontSize = 12.sp,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = AlmendraFontFamily
                             )
                         } else {
                             Text(
-                                text = "[SECURITY ACCESS RESTRICTED]\nPassword Hint: Ancient Project Codename (7 Letters)",
-                                color = SunGold,
+                                text = "🔒 SEALED BY ANCIENT MAGIC\nPassphrase Hint: The name of the forgotten ritual (7 Letters)",
+                                color = MedievalCrimson,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
+                                fontFamily = MedievalSharpFontFamily
                             )
                         }
                     }
@@ -171,13 +168,13 @@ fun TerminalHackModal(
                             passwordInput = it
                             errorMessage = null
                         },
-                        label = { Text("ENTER SECURITY PASSWORD", color = CleanCyan, fontFamily = FontFamily.Monospace) },
+                        label = { Text("UNSEAL WITH PASSPHRASE", color = MedievalCrimson, fontFamily = MedievalSharpFontFamily, fontSize = 10.sp) },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = SunGold,
-                            unfocusedBorderColor = CleanCyan,
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White
+                            focusedBorderColor = AgedGold,
+                            unfocusedBorderColor = Bronze,
+                            focusedTextColor = MedievalCrimson,
+                            unfocusedTextColor = MedievalCrimson
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -188,9 +185,9 @@ fun TerminalHackModal(
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = errorMessage!!,
-                            color = Color(0xFFFF5252),
+                            color = MedievalCrimson,
                             fontSize = 11.5.sp,
-                            fontFamily = FontFamily.Monospace
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
@@ -205,16 +202,16 @@ fun TerminalHackModal(
                                 if (passwordInput.trim().uppercase() == terminal.passwordAnswer.uppercase()) {
                                     onHackSuccess(terminal.id)
                                 } else {
-                                    errorMessage = "ACCESS DENIED: INCORRECT PASSPHRASE"
+                                    errorMessage = "THE SEAL REMAINS: INCORRECT PASSPHRASE"
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                            shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.testTag("btn_submit_terminal_pass")
                         ) {
-                            Icon(imageVector = Icons.Default.Key, contentDescription = "Unlock", tint = Color(0xFF091215), modifier = Modifier.size(16.dp))
+                            Icon(imageVector = Icons.Default.Key, contentDescription = "Unlock", tint = Parchment, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("DECRYPT TERMINAL", color = Color(0xFF091215), fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                            Text("BREAK THE SEAL", color = Parchment, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                         }
                     }
                 }

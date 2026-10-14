@@ -19,7 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.FlightTakeoff
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Button
@@ -45,10 +45,8 @@ import com.example.data.local.InventoryEntity
 import com.example.data.model.CropType
 import androidx.compose.material.icons.filled.LocalFlorist
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun MarketScreen(
@@ -65,7 +63,7 @@ fun MarketScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF0A1315))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .padding(16.dp)
             .testTag("market_screen"),
         contentPadding = PaddingValues(bottom = 80.dp),
@@ -75,14 +73,15 @@ fun MarketScreen(
         item {
             Column {
                 Text(
-                    text = "Solarpunk Eco-Market & Zeppelin Trading",
-                    color = Color.White,
+                    text = "TRADING POST & MERCHANT GUILD",
+                    color = AgedGold,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Fulfill city wholesale contracts and trade organic goods",
-                    color = SunGold,
+                    text = "Fulfill royal commissions and trade exotic goods across the realm",
+                    color = MedievalTextSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -95,24 +94,25 @@ fun MarketScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("market_closed_card"),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF3E1F1F)),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFF5252))
+                    border = androidx.compose.foundation.BorderStroke(2.dp, MedievalCrimson)
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "🚨 MARKET CLOSED",
-                            color = Color(0xFFFF5252),
+                            text = "📜 MARKET CLOSED",
+                            color = MedievalCrimson,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Solar City market hours: 8:00 AM — 6:00 PM.\nPlease return during business hours to fulfill contracts and trade crops.",
-                            color = Color.White,
+                            text = "The Merchant Guild is closed until dawn (8:00 AM — 6:00 PM).\nPlease return during business hours to fulfill commissions.",
+                            color = Parchment,
                             fontSize = 12.sp,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
@@ -124,10 +124,11 @@ fun MarketScreen(
         // Wholesale City Contracts Section
         item {
             Text(
-                text = "City Green Supply Contracts (${contracts.size})",
-                color = Color.White,
+                text = "KING'S COMMISSIONS (${contracts.size})",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -145,10 +146,11 @@ fun MarketScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Buy Organic Seeds",
-                color = CleanCyan,
+                text = "PURCHASE SACRED SEEDS",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -173,10 +175,11 @@ fun MarketScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Sell Goods to Local Eco-Traders",
-                color = SolarEmerald,
+                text = "TRADE WITH TRAVELING MERCHANTS",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -230,11 +233,11 @@ private fun ContractCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("contract_${contract.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF13282C)),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
         border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (contract.isClaimed) Color(0x3300E676) else if (isComplete) SunGold else Color(0x3380D8FF)
+            2.dp,
+            if (contract.isClaimed) Bronze else if (isComplete) AgedGold else Bronze.copy(alpha = 0.5f)
         )
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -249,14 +252,14 @@ private fun ContractCard(
                             .size(40.dp)
                             .clip(CircleShape)
                             .background(
-                                if (contract.isClaimed) SolarEmerald.copy(alpha = 0.2f) else SunGold.copy(alpha = 0.2f)
+                                if (contract.isClaimed) Bronze.copy(alpha = 0.2f) else AgedGold.copy(alpha = 0.2f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (contract.isClaimed) Icons.Default.CheckCircle else Icons.Default.FlightTakeoff,
+                            imageVector = if (contract.isClaimed) Icons.Default.CheckCircle else Icons.Default.LocalShipping,
                             contentDescription = null,
-                            tint = if (contract.isClaimed) SolarEmerald else SunGold,
+                            tint = if (contract.isClaimed) Bronze else MedievalCrimson,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -264,13 +267,14 @@ private fun ContractCard(
                     Column {
                         Text(
                             text = contract.title,
-                            color = Color.White,
+                            color = MedievalCrimson,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Text(
-                            text = "Buyer: ${contract.buyerName}",
-                            color = Color(0xFFB0BEC5),
+                            text = "Commissioned by: ${contract.buyerName}",
+                            color = MedievalTextSecondary,
                             fontSize = 11.sp
                         )
                     }
@@ -278,12 +282,12 @@ private fun ContractCard(
 
                 if (contract.isClaimed) {
                     Surface(
-                        color = SolarEmerald.copy(alpha = 0.2f),
+                        color = Bronze.copy(alpha = 0.2f),
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = "Fulfilled",
-                            color = SolarEmerald,
+                            text = "Delivered",
+                            color = Bronze,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -301,24 +305,23 @@ private fun ContractCard(
             ) {
                 Text(
                     text = "Requires: ${contract.requiredQty}x ${contract.requiredItemName}",
-                    color = Color.White,
+                    color = MedievalTextPrimary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = if (contract.isClaimed) "Delivered" else "$availableCount / ${contract.requiredQty}",
-                    color = if (contract.isClaimed || isComplete) SolarEmerald else Color(0xFFFF8A80),
+                    text = if (contract.isClaimed) "Completed" else "$availableCount / ${contract.requiredQty}",
+                    color = if (contract.isClaimed || isComplete) Bronze else MedievalCrimson,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            SolarpunkProgressBar(
+            MedievalProgressBar(
                 progress = if (contract.isClaimed) 1.0f else progress,
-                color = if (isComplete) SunGold else SolarEmerald,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(12.dp)
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -329,8 +332,8 @@ private fun ContractCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Reward: ${contract.rewardCoins}🪙 + ${contract.rewardEco} Eco Prestige",
-                    color = SunGold,
+                    text = "Reward: ${contract.rewardCoins}🪙 + ${contract.rewardEco} Realm Prestige",
+                    color = Bronze,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -340,15 +343,15 @@ private fun ContractCard(
                         onClick = onClaim,
                         enabled = isComplete && isOpen,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = SunGold,
-                            disabledContainerColor = Color(0xFF263238)
+                            containerColor = MedievalCrimson,
+                            disabledContainerColor = Color(0x33000000)
                         ),
-                        shape = RoundedCornerShape(10.dp),
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.testTag("claim_contract_${contract.id}")
                     ) {
                         Text(
-                            text = if (!isOpen) "Closed" else if (isComplete) "Dispatch Zeppelin" else "Pending Supply",
-                            color = if (isComplete && isOpen) Color(0xFF091215) else Color(0xFF90A4AE),
+                            text = if (!isOpen) "Guild Closed" else if (isComplete) "Dispatch Caravan" else "Gather Goods",
+                            color = if (isComplete && isOpen) Parchment else MedievalTextSecondary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -370,9 +373,9 @@ private fun SellItemCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("market_sell_${item.itemId}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF112529)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x2280CBC4))
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Bronze.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -382,12 +385,12 @@ private fun SellItemCard(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(CircleShape)
-                    .background(SolarEmerald.copy(alpha = 0.2f)),
+                    .background(MedievalCrimson.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "${item.quantity}x",
-                    color = SolarEmerald,
+                    color = MedievalCrimson,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -398,13 +401,14 @@ private fun SellItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.name,
-                    color = Color.White,
+                    color = MedievalCrimson,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
                     text = "Value: ${item.sellValue} 🪙 each (Total: ${item.sellValue * item.quantity} 🪙)",
-                    color = SunGold,
+                    color = Bronze,
                     fontSize = 11.sp
                 )
             }
@@ -414,25 +418,25 @@ private fun SellItemCard(
                     onClick = onSellOne,
                     enabled = isOpen,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1E463E),
-                        disabledContainerColor = Color(0xFF1B2E2A)
+                        containerColor = MedievalCrimson.copy(alpha = 0.1f),
+                        disabledContainerColor = Color(0x11000000)
                     ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("sell_one_${item.itemId}")
                 ) {
-                    Text(text = "1x", color = if (isOpen) Color.White else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "1x", color = if (isOpen) MedievalCrimson else MedievalTextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onSellAll,
                     enabled = isOpen,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SolarEmerald,
-                        disabledContainerColor = Color(0xFF1B2E2A)
+                        containerColor = MedievalCrimson,
+                        disabledContainerColor = Color(0x33000000)
                     ),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.testTag("sell_all_${item.itemId}")
                 ) {
-                    Text(text = "All", color = if (isOpen) Color(0xFF091215) else Color(0xFF90A4AE), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "All", color = if (isOpen) Parchment else MedievalTextSecondary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -451,9 +455,9 @@ private fun BuySeedCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("market_buy_seed_${crop.name.lowercase()}"),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF112529)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x2280D8FF))
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -463,7 +467,7 @@ private fun BuySeedCard(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(CircleShape)
-                    .background(Color(crop.primaryColor).copy(alpha = 0.2f)),
+                    .background(Color(crop.primaryColor).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -479,13 +483,14 @@ private fun BuySeedCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${crop.displayName} Seeds",
-                    color = Color.White,
+                    color = MedievalCrimson,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
                     text = "Cost: ${crop.seedCost} 🪙 • Growth Time: ${crop.growthDays} Days",
-                    color = SunGold,
+                    color = Bronze,
                     fontSize = 11.sp
                 )
             }
@@ -494,15 +499,15 @@ private fun BuySeedCard(
                 onClick = onBuy,
                 enabled = isOpen && canAfford,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CleanCyan,
-                    disabledContainerColor = Color(0xFF1B2E2A)
+                    containerColor = MedievalCrimson,
+                    disabledContainerColor = Color(0x33000000)
                 ),
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.testTag("btn_buy_seed_${crop.name.lowercase()}")
             ) {
                 Text(
-                    text = if (!canAfford) "Poor" else "Buy 1x",
-                    color = if (isOpen && canAfford) Color(0xFF091215) else Color(0xFF90A4AE),
+                    text = if (!canAfford) "Need Gold" else "Buy 1x",
+                    color = if (isOpen && canAfford) Parchment else MedievalTextSecondary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )

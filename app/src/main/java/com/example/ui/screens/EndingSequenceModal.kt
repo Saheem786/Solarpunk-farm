@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,9 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlinx.coroutines.delay
 
 @Composable
@@ -74,7 +73,7 @@ fun EndingSequenceModal(
             modifier = Modifier
                 .fillMaxSize()
                 .testTag("modal_ending_sequence"),
-            color = Color(0xFD050D0E)
+            color = Color(0xFF1A0F0A) // Deep Dark Wood
         ) {
             Box(
                 modifier = Modifier
@@ -89,67 +88,71 @@ fun EndingSequenceModal(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(72.dp)
+                            .size(80.dp)
                             .clip(CircleShape)
-                            .background(Brush.radialGradient(listOf(SunGold, SolarEmerald))),
+                            .background(Brush.radialGradient(listOf(MedievalCrimson, MedievalCrimsonDark))),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Public,
                             contentDescription = "New Dawn",
-                            tint = Color(0xFF091215),
-                            modifier = Modifier.size(42.dp)
+                            tint = Parchment,
+                            modifier = Modifier.size(48.dp)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "NEW DAWN — REBUILDING CIVILIZATION",
-                        color = SunGold,
-                        fontSize = 20.sp,
+                        text = "THE GOLDEN ERA — A KINGDOM REBORN",
+                        color = AgedGold,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 2.sp,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     if (stage >= 1) {
                         Text(
-                            text = "\"The old Sustainable Development Zone was once abandoned to decay... but through clean energy, permaculture, and community, life has returned to the valley.\"",
-                            color = CleanCyan,
-                            fontSize = 14.sp,
+                            text = "\"The forgotten island was once a place of shadows... but through thy wisdom, ancient crafts, and the gathering of noble souls, light has returned to the citadel.\"",
+                            color = Parchment.copy(alpha = 0.8f),
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 16.sp,
                             fontStyle = FontStyle.Italic,
                             textAlign = TextAlign.Center
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     if (stage >= 2) {
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
-                                .border(1.5.dp, SolarEmerald, RoundedCornerShape(16.dp)),
-                            color = Color(0x3300E676)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(2.dp, AgedGold, RoundedCornerShape(12.dp)),
+                            color = MedievalCrimson.copy(alpha = 0.1f)
                         ) {
                             Column(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(20.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = "YOU DIDN'T JUST SURVIVE.",
-                                    color = Color.White,
-                                    fontSize = 18.sp,
+                                    text = "THOU HAST NOT JUST SURVIVED.",
+                                    color = Parchment,
+                                    fontFamily = MedievalSharpFontFamily,
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 1.sp
                                 )
                                 Text(
-                                    text = "YOU REBUILT.",
-                                    color = SolarEmerald,
-                                    fontSize = 22.sp,
+                                    text = "THOU HAST CONQUERED.",
+                                    color = AgedGold,
+                                    fontFamily = MedievalSharpFontFamily,
+                                    fontSize = 24.sp,
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 2.sp
                                 )
@@ -157,36 +160,39 @@ fun EndingSequenceModal(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
                     if (stage >= 3) {
                         Text(
-                            text = "Thank you for playing Eco Farm Simulator!",
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 13.sp,
+                            text = "Thy legend shall be told for generations to come!",
+                            color = MedievalTextLight.copy(alpha = 0.7f),
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 14.sp,
                             textAlign = TextAlign.Center
                         )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         Button(
                             onClick = onContinueFreePlay,
-                            colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.testTag("btn_continue_freeplay")
+                            colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.testTag("btn_continue_freeplay"),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Eco,
+                                imageVector = Icons.Default.AutoAwesome,
                                 contentDescription = "Free Play",
-                                tint = Color(0xFF091215),
-                                modifier = Modifier.size(18.dp)
+                                tint = Parchment,
+                                modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                             Text(
-                                text = "CONTINUE IN FREE PLAY MODE",
-                                color = Color(0xFF091215),
+                                text = "LONG LIVE THE KINGDOM",
+                                color = Parchment,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
+                                fontSize = 14.sp
                             )
                         }
                     }

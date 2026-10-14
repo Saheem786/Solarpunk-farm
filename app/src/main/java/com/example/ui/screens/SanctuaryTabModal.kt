@@ -27,13 +27,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
-import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Restaurant
@@ -72,10 +74,8 @@ import com.example.data.model.NpcActivity
 import com.example.data.model.NpcRole
 import com.example.data.model.SettlementStats
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun SanctuaryTabModal(
@@ -93,10 +93,10 @@ fun SanctuaryTabModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, SolarEmerald.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("modal_sanctuary_settlement"),
-            color = Color(0xFA09181A)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -114,28 +114,30 @@ fun SanctuaryTabModal(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(SolarEmerald.copy(alpha = 0.25f)),
+                                .background(MedievalCrimson.copy(alpha = 0.2f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.People,
-                                contentDescription = "Sanctuary",
-                                tint = SolarEmerald,
+                                contentDescription = "Stronghold",
+                                tint = MedievalCrimson,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Sanctuary Settlement",
-                                color = Color.White,
+                                text = "STRONGHOLD & CITADEL",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
-                                text = "${stats.totalPopulation} Survivors • ${stats.occupiedBeds}/${stats.totalBeds} Housing Beds",
-                                color = CleanCyan,
+                                text = "${stats.totalPopulation} Citizens • ${stats.occupiedBeds}/${stats.totalBeds} Quarters Available",
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
@@ -149,7 +151,7 @@ fun SanctuaryTabModal(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.White
+                            tint = MedievalCrimson
                         )
                     }
                 }
@@ -162,30 +164,30 @@ fun SanctuaryTabModal(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     QuickStatPill(
-                        title = "Morale",
+                        title = "Loyalty",
                         value = "${stats.overallMorale.toInt()}%",
-                        color = if (stats.overallMorale > 60f) SolarEmerald else Color(0xFFFF5252),
+                        color = if (stats.overallMorale > 60f) ForestMoss else MedievalCrimson,
                         icon = Icons.Default.Favorite,
                         modifier = Modifier.weight(1f)
                     )
                     QuickStatPill(
-                        title = "Food Stock",
+                        title = "Provisions",
                         value = "${stats.foodStockUnits} u",
-                        color = if (stats.isStarving) Color(0xFFFF5252) else SunGold,
+                        color = if (stats.isStarving) MedievalCrimson else AgedGoldDark,
                         icon = Icons.Default.Restaurant,
                         modifier = Modifier.weight(1f)
                     )
                     QuickStatPill(
-                        title = "Clean Water",
+                        title = "Well Water",
                         value = "${stats.cleanWaterStockUnits} u",
-                        color = if (stats.isDehydrated) Color(0xFFFF5252) else CleanCyan,
+                        color = if (stats.isDehydrated) MedievalCrimson else RoyalBlue,
                         icon = Icons.Default.WaterDrop,
                         modifier = Modifier.weight(1f)
                     )
                     QuickStatPill(
-                        title = "Beds",
+                        title = "Housing",
                         value = "${stats.occupiedBeds}/${stats.totalBeds}",
-                        color = if (stats.isHousingDeficit) Color(0xFFFF9800) else Color(0xFFBA68C8),
+                        color = if (stats.isHousingDeficit) MedievalCrimsonLight else MedievalCrimsonDark,
                         icon = Icons.Default.Bed,
                         modifier = Modifier.weight(1f)
                     )
@@ -204,21 +206,24 @@ fun SanctuaryTabModal(
                             Icon(
                                 imageVector = Icons.Default.People,
                                 contentDescription = null,
-                                tint = Color(0x66FFFFFF),
+                                tint = MedievalCrimson.copy(alpha = 0.2f),
                                 modifier = Modifier.size(54.dp)
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "No Survivors in Settlement Yet",
-                                color = Color.White,
-                                fontSize = 16.sp,
+                                text = "Thy kingdom is yet empty",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
-                                text = "Grow 3 crops and reach Day 5 for your first survivor arrival (Farmer Arjun)!",
-                                color = Color(0xFFB0BEC5),
-                                fontSize = 13.sp,
+                                text = "Harvest 3 crops and reach Day 5 to attract travelers to your gates.",
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
+                                fontSize = 14.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                                 modifier = Modifier.padding(horizontal = 24.dp)
                             )
                         }
@@ -252,9 +257,9 @@ private fun QuickStatPill(
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier.clip(RoundedCornerShape(12.dp)),
-        color = Color(0x33102A2E),
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.5f))
+        modifier = modifier.clip(RoundedCornerShape(8.dp)),
+        color = AgedGold.copy(alpha = 0.1f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
@@ -270,13 +275,15 @@ private fun QuickStatPill(
             Column {
                 Text(
                     text = title,
-                    color = Color(0xFFB0BEC5),
-                    fontSize = 9.5.sp,
+                    color = MedievalTextSecondary,
+                    fontFamily = AlmendraFontFamily,
+                    fontSize = 9.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = value,
-                    color = Color.White,
+                    color = MedievalTextPrimary,
+                    fontFamily = MedievalSharpFontFamily,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -297,9 +304,9 @@ private fun NpcRosterCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("npc_card_${npc.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xDD11282C)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(npc.appearanceColor).copy(alpha = 0.6f))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x0A2D1B0D)),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, AgedGold.copy(alpha = 0.5f))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
@@ -312,15 +319,15 @@ private fun NpcRosterCard(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Color(npc.appearanceColor).copy(alpha = 0.3f))
-                            .border(1.5.dp, Color(npc.appearanceColor), CircleShape),
+                            .background(Color(npc.appearanceColor).copy(alpha = 0.15f))
+                            .border(1.5.dp, Color(npc.appearanceColor).copy(alpha = 0.6f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         val roleIcon = when (npc.role) {
-                            NpcRole.FARMER -> Icons.Default.Eco
-                            NpcRole.ENGINEER -> Icons.Default.Bolt
+                            NpcRole.FARMER -> Icons.Default.LocalFlorist
+                            NpcRole.ENGINEER -> Icons.Default.AutoFixHigh
                             NpcRole.BUILDER -> Icons.Default.Construction
-                            NpcRole.RESEARCHER -> Icons.Default.Science
+                            NpcRole.RESEARCHER -> Icons.Default.MenuBook
                             NpcRole.MEDIC -> Icons.Default.MedicalServices
                         }
                         Icon(
@@ -337,19 +344,21 @@ private fun NpcRosterCard(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = npc.name,
-                                color = Color.White,
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(
-                                color = Color(npc.appearanceColor).copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(6.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(npc.appearanceColor))
+                                color = Color(npc.appearanceColor).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(4.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(npc.appearanceColor).copy(alpha = 0.4f))
                             ) {
                                 Text(
                                     text = npc.role.displayName,
-                                    color = Color(npc.appearanceColor),
+                                    color = MedievalTextPrimary,
+                                    fontFamily = AlmendraFontFamily,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -358,21 +367,22 @@ private fun NpcRosterCard(
                         }
 
                         Text(
-                            text = "Lvl ${npc.skillLevel} ${npc.role.title} • ${npc.trait.displayName}",
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 11.sp
+                            text = "Level ${npc.skillLevel} ${npc.role.title} • ${npc.trait.displayName}",
+                            color = MedievalTextSecondary,
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 12.sp
                         )
                     }
                 }
 
                 Button(
                     onClick = onTalkClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                    shape = RoundedCornerShape(8.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
                     modifier = Modifier.testTag("btn_talk_npc_${npc.id}")
                 ) {
-                    Text("Talk", color = Color.Black, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    Text("Summon", color = Parchment, fontFamily = MedievalSharpFontFamily, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -385,40 +395,43 @@ private fun NpcRosterCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Activity: ${npc.currentActivity.displayName}",
-                    color = CleanCyan,
-                    fontSize = 11.5.sp,
+                    text = "Duty: ${npc.currentActivity.displayName}",
+                    color = MedievalTextPrimary,
+                    fontFamily = AlmendraFontFamily,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Morale: ${npc.morale.toInt()}%",
-                    color = if (npc.morale > 50f) SolarEmerald else Color(0xFFFF5252),
-                    fontSize = 11.5.sp,
+                    text = "Loyalty: ${npc.morale.toInt()}%",
+                    color = if (npc.morale > 50f) ForestMoss else MedievalCrimson,
+                    fontFamily = MedievalSharpFontFamily,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            SolarpunkProgressBar(
+            MedievalProgressBar(
                 progress = npc.morale / 100f,
-                color = if (npc.morale > 50f) SolarEmerald else Color(0xFFFF5252),
+                color = if (npc.morale > 50f) ForestMoss else MedievalCrimson,
                 modifier = Modifier.fillMaxWidth()
             )
 
             if (!npc.speechBubble.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Surface(
-                    color = Color(0x3300E5FF),
+                    color = AgedGold.copy(alpha = 0.1f),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = "\"${npc.speechBubble}\"",
-                        color = Color.White,
-                        fontSize = 11.sp,
+                        color = MedievalTextSecondary,
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 12.sp,
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                     )
                 }
             }

@@ -2,35 +2,43 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Solarpunk Primary - Bio Luminescent & Regenerative Flora
-val SolarEmerald = Color(0xFF00E676)
-val SolarEmeraldDark = Color(0xFF00B248)
-val SolarEmeraldLight = Color(0xFF69F0AE)
+// Medieval Primary - Royal Crimson & Deep Gold
+val MedievalCrimson = Color(0xFF8B0000)
+val MedievalCrimsonDark = Color(0xFF4B0000)
+val MedievalCrimsonLight = Color(0xFFCD5C5C)
 
-// Solarpunk Secondary - Solar Energy Gold & Amber
-val SunGold = Color(0xFFFFD54F)
-val SunGoldDark = Color(0xFFFFA000)
-val SunGoldLight = Color(0xFFFFF9C4)
+// Medieval Secondary - Parchment & Aged Gold
+val Parchment = Color(0xFFF5E6D3)
+val AgedGold = Color(0xFFCFB53B)
+val AgedGoldDark = Color(0xFF996515)
 
-// Solarpunk Tertiary - Sky & Clean Water Cyan
-val CleanCyan = Color(0xFF00E5FF)
-val CleanCyanDark = Color(0xFF00B0FF)
-val SkyBlue = Color(0xFF80D8FF)
+// Medieval Tertiary - Deep Forest Green & Ocean Blue
+val ForestMoss = Color(0xFF2E4D23)
+val RoyalBlue = Color(0xFF002366)
 
-// Backgrounds & Surfaces
-val SolarpunkDarkBg = Color(0xFF091215)
-val SolarpunkDarkSurface = Color(0xFF112224)
-val SolarpunkDarkSurfaceVariant = Color(0xFF182D30)
+// Backgrounds & Surfaces (Wood and Stone)
+val MedievalDarkBg = Color(0xFF1A1A1A)
+val MedievalDarkSurface = Color(0xFF2A2A2A)
+val MedievalDarkSurfaceVariant = Color(0xFF333333)
 
-val SolarpunkLightBg = Color(0xFFF3F9F6)
-val SolarpunkLightSurface = Color(0xFFFFFFFF)
-val SolarpunkLightSurfaceVariant = Color(0xFFE2F0EA)
+val MedievalLightBg = Color(0xFFFFF9E5)
+val MedievalLightSurface = Color(0xFFF5E6D3)
+val MedievalLightSurfaceVariant = Color(0xFFE6D2B5)
 
 // Text & Accents
-val TextWhitePrimary = Color(0xFFF5FDF8)
-val TextWhiteSecondary = Color(0xFFB0BEC5)
-val TextDarkPrimary = Color(0xFF102A20)
-val TextDarkSecondary = Color(0xFF455A64)
+val MedievalTextPrimary = Color(0xFF2D1B0D)
+val MedievalTextSecondary = Color(0xFF5D4037)
+val MedievalTextLight = Color(0xFFF5E6D3)
 
-val BrassGold = Color(0xFFFFCA28)
-val BioPurple = Color(0xFFBA68C8)
+val IronGrey = Color(0xFF424242)
+val Bronze = Color(0xFFCD7F32)
+
+// Legacy Colors (Mapped to Medieval Theme for compatibility)
+val CleanCyan = AgedGold
+val SolarEmerald = ForestMoss
+val SunGold = AgedGold
+val SunGoldLight = Parchment
+val BrassGold = Bronze
+val SolarpunkGreen = ForestMoss
+val CyberBlue = RoyalBlue
+val SolarpunkCyan = AgedGold

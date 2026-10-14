@@ -24,9 +24,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.ui.theme.MedievalCrimson
+import com.example.ui.theme.Parchment
+import com.example.ui.theme.AgedGold
+import com.example.ui.theme.MedievalSharpFontFamily
+import com.example.ui.theme.AlmendraFontFamily
+import com.example.ui.theme.MedievalTextPrimary
+import com.example.ui.theme.SunGold
 import com.example.ui.theme.CleanCyan
 import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
 
 @Composable
 fun MainMenuOverlay(
@@ -46,26 +52,26 @@ fun MainMenuOverlay(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF07181A),
-                        Color(0xFF0F322B),
-                        Color(0xFF1D523A),
-                        Color(0xFF0A1B1A)
+                        Color(0xFF1A0F0A), // Deep Wood
+                        Color(0xFF2D1B0D),
+                        Color(0xFF422818),
+                        Color(0xFF1A0F0A)
                     )
                 )
             )
             .testTag("main_menu_overlay"),
         contentAlignment = Alignment.Center
     ) {
-        // Solarpunk Sunrise Glow Circle
+        // Medieval Sigil Glow
         Box(
             modifier = Modifier
-                .size(360.dp)
+                .size(400.dp)
                 .clip(CircleShape)
                 .background(
                     Brush.radialGradient(
                         colors = listOf(
-                            SunGold.copy(alpha = 0.25f),
-                            SolarEmerald.copy(alpha = 0.15f),
+                            AgedGold.copy(alpha = 0.2f),
+                            MedievalCrimson.copy(alpha = 0.1f),
                             Color.Transparent
                         )
                     )
@@ -86,14 +92,15 @@ fun MainMenuOverlay(
                     .padding(end = 24.dp)
             ) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0x3300E5FF),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan)
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xF2F5E6D3),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold)
                 ) {
                     Text(
-                        text = "🌱 REGEN AGRICULTURE & POWER SIMULATOR",
-                        color = CleanCyan,
-                        fontSize = 10.sp,
+                        text = "🏰 THE KING'S DECREE: RECLAIM THE ISLE",
+                        color = MedievalTextPrimary,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -103,20 +110,22 @@ fun MainMenuOverlay(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "ECO FARM\nSIMULATOR",
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Black,
-                    lineHeight = 36.sp,
-                    letterSpacing = 1.5.sp
+                    text = "MEDIEVAL\nISLE",
+                    color = Parchment,
+                    fontFamily = MedievalSharpFontFamily,
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.Normal,
+                    lineHeight = 44.sp,
+                    letterSpacing = 2.sp
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "Build. Grow. Restore.",
-                    color = SunGold,
-                    fontSize = 16.sp,
+                    text = "Sow. Reap. Conquer.",
+                    color = AgedGold,
+                    fontFamily = MedievalSharpFontFamily,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
@@ -124,10 +133,11 @@ fun MainMenuOverlay(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Rebuild a fallen eco-city, harvest crops, manage solar & hydro power grids, recruit survivors, and restore nature across 3 biomes.",
-                    color = Color(0xFFB0BEC5),
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp
+                    text = "Restore a forgotten island kingdom. Tend the royal fields, harness the elements, recruit loyal subjects, and defend the crown across three distinct realms.",
+                    color = Parchment.copy(alpha = 0.8f),
+                    fontFamily = AlmendraFontFamily,
+                    fontSize = 14.sp,
+                    lineHeight = 18.sp
                 )
             }
 
@@ -135,10 +145,11 @@ fun MainMenuOverlay(
             Surface(
                 modifier = Modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .border(2.dp, SolarEmerald.copy(alpha = 0.8f), RoundedCornerShape(24.dp)),
-                color = Color(0xF209181A),
-                shape = RoundedCornerShape(24.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(2.dp, AgedGold, RoundedCornerShape(12.dp)),
+                color = Color(0xF22D1B0D), // Dark Wood
+                shape = RoundedCornerShape(12.dp),
+                shadowElevation = 12.dp
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -147,7 +158,8 @@ fun MainMenuOverlay(
                 ) {
                     Text(
                         text = "SELECT MODE",
-                        color = SunGold,
+                        color = AgedGold,
+                        fontFamily = MedievalSharpFontFamily,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
@@ -155,42 +167,42 @@ fun MainMenuOverlay(
 
                     if (hasSaveGame) {
                         MainMenuButton(
-                            text = "CONTINUE FARM",
+                            text = "CONTINUE QUEST",
                             icon = Icons.Default.PlayArrow,
-                            color = SolarEmerald,
+                            color = MedievalCrimson,
                             testTag = "btn_main_continue",
                             onClick = onContinueGame
                         )
                     }
 
                     MainMenuButton(
-                        text = "NEW GAME",
+                        text = "NEW JOURNEY",
                         icon = Icons.Default.AddCircle,
-                        color = CleanCyan,
+                        color = Color(0xFF2E4D23), // Forest Moss
                         testTag = "btn_main_new_game",
                         onClick = onNewGame
                     )
 
                     MainMenuButton(
-                        text = "SAVE SLOTS (3)",
+                        text = "CHRONICLES (3)",
                         icon = Icons.Default.Save,
-                        color = Color(0xFF00E676),
+                        color = Color(0xFF5D4037),
                         testTag = "btn_main_save_slots",
                         onClick = onOpenSaveSlots
                     )
 
                     MainMenuButton(
-                        text = "ACHIEVEMENTS",
+                        text = "TROPHIES",
                         icon = Icons.Default.EmojiEvents,
-                        color = SunGold,
+                        color = AgedGold,
                         testTag = "btn_main_achievements",
                         onClick = onOpenAchievements
                     )
 
                     MainMenuButton(
-                        text = "SETTINGS",
+                        text = "OPTIONS",
                         icon = Icons.Default.Settings,
-                        color = Color(0xFF90A4AE),
+                        color = Color(0xFF424242), // Iron Grey
                         testTag = "btn_main_settings",
                         onClick = onOpenSettings
                     )
@@ -199,7 +211,7 @@ fun MainMenuOverlay(
                         onClick = { showCreditsDialog = true },
                         modifier = Modifier.testTag("btn_main_credits")
                     ) {
-                        Text("Credits & Lore", color = Color(0xFFB0BEC5), fontSize = 12.sp)
+                        Text("Credits & Lore", color = Parchment.copy(alpha = 0.6f), fontFamily = AlmendraFontFamily, fontSize = 13.sp)
                     }
                 }
             }
@@ -207,8 +219,9 @@ fun MainMenuOverlay(
 
         // Bottom Right Version Badge
         Text(
-            text = "v1.0.0 (Build 1) - Play Store Release",
-            color = Color(0x88FFFFFF),
+            text = "v1.1.0 - Medieval Edition",
+            color = AgedGold.copy(alpha = 0.5f),
+            fontFamily = MedievalSharpFontFamily,
             fontSize = 10.sp,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -299,15 +312,16 @@ private fun MainMenuButton(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = Color(0xFF091215),
+                tint = Parchment,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                color = Color(0xFF091215),
+                color = Parchment,
+                fontFamily = MedievalSharpFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
+                fontSize = 13.sp
             )
         }
     }

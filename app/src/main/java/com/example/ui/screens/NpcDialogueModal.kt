@@ -16,12 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
-import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.material.icons.filled.Science
@@ -52,10 +53,8 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.data.local.NpcEntity
 import com.example.data.model.NpcRole
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun NpcDialogueModal(
@@ -65,7 +64,7 @@ fun NpcDialogueModal(
 ) {
     if (npc == null) return
 
-    var currentSpeech by remember { mutableStateOf(npc.speechBubble ?: "Hello there! How can I help our settlement today?") }
+    var currentSpeech by remember { mutableStateOf(npc.speechBubble ?: "Greeting, Lord of the Island! How may I serve the kingdom this day?") }
     var showRolePicker by remember { mutableStateOf(false) }
 
     Dialog(
@@ -75,10 +74,10 @@ fun NpcDialogueModal(
         Surface(
             modifier = Modifier
                 .fillMaxWidth(0.92f)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, Color(npc.appearanceColor), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("modal_npc_dialogue"),
-            color = Color(0xFC0B1B1E)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -96,15 +95,15 @@ fun NpcDialogueModal(
                             modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
-                                .background(Color(npc.appearanceColor).copy(alpha = 0.3f))
-                                .border(2.dp, Color(npc.appearanceColor), CircleShape),
+                                .background(Color(npc.appearanceColor).copy(alpha = 0.15f))
+                                .border(2.dp, Color(npc.appearanceColor).copy(alpha = 0.6f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             val icon = when (npc.role) {
-                                NpcRole.FARMER -> Icons.Default.Eco
-                                NpcRole.ENGINEER -> Icons.Default.Bolt
+                                NpcRole.FARMER -> Icons.Default.LocalFlorist
+                                NpcRole.ENGINEER -> Icons.Default.AutoFixHigh
                                 NpcRole.BUILDER -> Icons.Default.Construction
-                                NpcRole.RESEARCHER -> Icons.Default.Science
+                                NpcRole.RESEARCHER -> Icons.Default.MenuBook
                                 NpcRole.MEDIC -> Icons.Default.MedicalServices
                             }
                             Icon(
@@ -118,14 +117,16 @@ fun NpcDialogueModal(
                         Column {
                             Text(
                                 text = npc.name,
-                                color = Color.White,
-                                fontSize = 18.sp,
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "${npc.role.title} • Age ${npc.age}",
-                                color = Color(npc.appearanceColor),
-                                fontSize = 12.sp,
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -138,7 +139,7 @@ fun NpcDialogueModal(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.White
+                            tint = MedievalCrimson
                         )
                     }
                 }
@@ -148,8 +149,9 @@ fun NpcDialogueModal(
                 // Morale & Activity Bar
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0x33102A2E)),
-                    shape = RoundedCornerShape(12.dp)
+                    colors = CardDefaults.cardColors(containerColor = Color(0x0A2D1B0D)),
+                    shape = RoundedCornerShape(8.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
                 ) {
                     Column(modifier = Modifier.padding(10.dp)) {
                         Row(
@@ -157,22 +159,24 @@ fun NpcDialogueModal(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Current Activity: ${npc.currentActivity.displayName}",
-                                color = CleanCyan,
-                                fontSize = 11.5.sp,
+                                text = "Current Duty: ${npc.currentActivity.displayName}",
+                                color = MedievalTextPrimary,
+                                fontFamily = AlmendraFontFamily,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "Morale: ${npc.morale.toInt()}%",
-                                color = if (npc.morale > 50f) SolarEmerald else Color(0xFFFF5252),
-                                fontSize = 11.5.sp,
+                                text = "Loyalty: ${npc.morale.toInt()}%",
+                                color = if (npc.morale > 50f) ForestMoss else MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
-                        SolarpunkProgressBar(
+                        MedievalProgressBar(
                             progress = npc.morale / 100f,
-                            color = if (npc.morale > 50f) SolarEmerald else Color(0xFFFF5252),
+                            color = if (npc.morale > 50f) ForestMoss else MedievalCrimson,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -183,16 +187,17 @@ fun NpcDialogueModal(
                 // Dialogue Speech Box
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    color = Color(0x4400E5FF),
-                    shape = RoundedCornerShape(14.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan.copy(alpha = 0.5f))
+                    color = AgedGold.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.5.dp, AgedGold.copy(alpha = 0.5f))
                 ) {
                     Text(
                         text = "\"$currentSpeech\"",
-                        color = Color.White,
-                        fontSize = 13.5.sp,
+                        color = MedievalTextPrimary,
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 15.sp,
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier.padding(14.dp)
                     )
                 }
 
@@ -200,9 +205,10 @@ fun NpcDialogueModal(
 
                 if (showRolePicker) {
                     Text(
-                        text = "Assign New Role:",
-                        color = SunGold,
-                        fontSize = 13.sp,
+                        text = "Assign New Duty:",
+                        color = MedievalCrimson,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -220,13 +226,14 @@ fun NpcDialogueModal(
                                         showRolePicker = false
                                         onDismiss()
                                     },
-                                color = Color(role.primaryColorHex).copy(alpha = 0.25f),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(role.primaryColorHex))
+                                color = Color(role.primaryColorHex).copy(alpha = 0.15f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(role.primaryColorHex).copy(alpha = 0.6f))
                             ) {
                                 Text(
                                     text = role.displayName,
-                                    color = Color.White,
-                                    fontSize = 10.sp,
+                                    color = MedievalTextPrimary,
+                                    fontFamily = AlmendraFontFamily,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(vertical = 8.dp),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -238,36 +245,36 @@ fun NpcDialogueModal(
                     // Response Options List
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         DialogueOptionRow(
-                            text = "\"How are you doing today?\"",
+                            text = "\"How farest thou this day?\"",
                             testTag = "btn_dialogue_how_are_you",
                             onClick = {
                                 viewModel.interactWithNpc(npc.id, "HOW_ARE_YOU")
-                                currentSpeech = "Feeling great! Thanks for checking in, friend."
+                                currentSpeech = "My heart is light! I am honored to serve our realm."
                             }
                         )
                         DialogueOptionRow(
-                            text = "\"Do you need anything for your work?\"",
+                            text = "\"Hast thou need of anything?\"",
                             testTag = "btn_dialogue_need_anything",
                             onClick = {
                                 viewModel.interactWithNpc(npc.id, "NEED_ANYTHING")
-                                currentSpeech = if (npc.hunger > 50f) "We could use more food harvest in storage." else "Everything is running smoothly!"
+                                currentSpeech = if (npc.hunger > 50f) "Our stores are low. We require a bountiful harvest." else "All is well in the citadel!"
                             }
                         )
                         DialogueOptionRow(
-                            text = "\"Tell me about your background & skills.\"",
+                            text = "\"Speak of thy past and skills.\"",
                             testTag = "btn_dialogue_tell_me",
                             onClick = {
                                 viewModel.interactWithNpc(npc.id, "TELL_ME_ABOUT_YOURSELF")
-                                currentSpeech = "${npc.role.description}. I have the ${npc.trait.displayName} trait."
+                                currentSpeech = "I was trained as a ${npc.role.title}. ${npc.role.description}. I am known to be ${npc.trait.displayName}."
                             }
                         )
                         DialogueOptionRow(
-                            text = "\"Assign a new role / duty\"",
+                            text = "\"Assign a new duty\"",
                             testTag = "btn_dialogue_assign_role",
                             onClick = { showRolePicker = true }
                         )
                         DialogueOptionRow(
-                            text = "\"Dismiss from settlement\"",
+                            text = "\"Banish from the kingdom\"",
                             testTag = "btn_dialogue_dismiss",
                             isDestructive = true,
                             onClick = {
@@ -292,11 +299,11 @@ private fun DialogueOptionRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(8.dp))
             .clickable { onClick() }
             .testTag(testTag),
-        color = if (isDestructive) Color(0x33FF5252) else Color(0x33102A2E),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (isDestructive) Color(0xFFFF5252) else CleanCyan.copy(alpha = 0.5f))
+        color = if (isDestructive) MedievalCrimson.copy(alpha = 0.1f) else AgedGold.copy(alpha = 0.1f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (isDestructive) MedievalCrimson.copy(alpha = 0.5f) else AgedGold.copy(alpha = 0.4f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -305,14 +312,15 @@ private fun DialogueOptionRow(
             Icon(
                 imageVector = Icons.Default.Chat,
                 contentDescription = null,
-                tint = if (isDestructive) Color(0xFFFF5252) else CleanCyan,
+                tint = if (isDestructive) MedievalCrimson else AgedGoldDark,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = text,
-                color = if (isDestructive) Color(0xFFFF8A80) else Color.White,
-                fontSize = 12.5.sp,
+                color = if (isDestructive) MedievalCrimson else MedievalTextPrimary,
+                fontFamily = AlmendraFontFamily,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Medium
             )
         }

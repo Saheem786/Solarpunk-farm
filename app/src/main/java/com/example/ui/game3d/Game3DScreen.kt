@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Restaurant
@@ -78,7 +79,7 @@ import com.example.game3d.opengl.GLWorldRenderer
 import com.example.ui.FarmViewModel
 import com.example.ui.components.DiscoveryToastAlert
 import com.example.ui.components.FloatingTextOverlay
-import com.example.ui.components.SolarpunkNotificationBanner
+import com.example.ui.components.MedievalNotificationBanner
 import com.example.ui.components.SurvivalStatsHUD
 import com.example.ui.components.ToolSelectorDock
 import com.example.ui.components.TopGameStatsBar
@@ -93,14 +94,13 @@ import com.example.ui.screens.NpcDialogueModal
 import com.example.ui.screens.ResearchTabModal
 import com.example.ui.screens.SanctuaryTabModal
 import com.example.ui.screens.TerminalHackModal
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 import kotlinx.coroutines.launch
 
 @Composable
 fun Game3DScreen(
     viewModel: FarmViewModel,
+    isVisible: Boolean,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -168,11 +168,16 @@ fun Game3DScreen(
     var showActionsMenu by remember { mutableStateOf(false) }
     val showBottomNavMenu = viewModel.hudManager.isNavMenuVisible.collectAsStateWithLifecycle().value
 
-    val glRenderer = remember { GLWorldRenderer() }
+    val glRenderer = remember { GLWorldRenderer(context) }
     var glView by remember { mutableStateOf<GLSurfaceView?>(null) }
 
+    // Synchronize visibility
+    androidx.compose.runtime.LaunchedEffect(isVisible, glView) {
+        glView?.visibility = if (isVisible) android.view.View.VISIBLE else android.view.View.GONE
+    }
+
     DisposableEffect(glView) {
-        glView?.onResume()
+        if (isVisible) glView?.onResume()
         onDispose {
             try {
                 glView?.onPause()
@@ -255,7 +260,7 @@ fun Game3DScreen(
                         onResearchClick = { viewModel.openModal("research") },
                         onJournalClick = { viewModel.openModal("journal") }
                     )
-                    SolarpunkNotificationBanner(
+                    MedievalNotificationBanner(
                         notification = bannerNotification
                     )
                 }
@@ -292,8 +297,8 @@ fun Game3DScreen(
                         // 1. Build Button (Hammer Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Construction,
-                        label = if (isBuildMode) "Exit" else "Build",
-                        color = if (isBuildMode) SunGold else SolarEmerald,
+                        label = if (isBuildMode) "Exit" else "Forge",
+                        color = if (isBuildMode) AgedGold else ForestMoss,
                         active = isBuildMode,
                         testTag = "btn_build_mode",
                         onClick = { viewModel.toggleBuildMode() }
@@ -302,44 +307,44 @@ fun Game3DScreen(
                     // 2. Bag Button (Backpack Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Inventory2,
-                        label = "Bag",
-                        color = CleanCyan,
+                        label = "Stash",
+                        color = AgedGold,
                         testTag = "btn_inventory",
                         onClick = { viewModel.openModal("inventory") }
                     )
 
-                    // 3. Energy Grid Button (Bolt Icon)
+                    // 3. Mana Grid Button (Bolt Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Bolt,
-                        label = "Grid",
-                        color = CleanCyan,
+                        label = "Mana",
+                        color = AgedGold,
                         testTag = "btn_energy_grid",
                         onClick = { viewModel.openModal("energy_grid") }
                     )
 
-                    // 4. Sanctuary Button (People Icon)
+                    // 4. Stronghold Button (People Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.People,
-                        label = "Sanctuary",
-                        color = SunGold,
+                        label = "Realm",
+                        color = AgedGoldDark,
                         testTag = "btn_sanctuary",
                         onClick = { viewModel.openModal("sanctuary") }
                     )
 
-                    // 4. Save Button (Disk Icon)
+                    // 5. Save Button (Disk Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Save,
-                        label = "Save",
-                        color = SolarEmerald,
+                        label = "Record",
+                        color = ForestMoss,
                         testTag = "btn_manual_save",
                         onClick = { viewModel.executeFullSaveFlow() }
                     )
 
-                    // 5. Navigation Hub Button (Dashboard Icon)
+                    // 6. Navigation Hub Button (Dashboard Icon)
                     QuickActionCircleButton(
                         icon = Icons.Default.Dashboard,
                         label = "Nav",
-                        color = CleanCyan,
+                        color = AgedGold,
                         active = showBottomNavMenu,
                         testTag = "btn_toggle_bottom_nav",
                         onClick = {
@@ -348,11 +353,11 @@ fun Game3DScreen(
                         }
                     )
 
-                    // 6. Menu Button (Hamburger / Three Dots)
+                    // 7. Menu Button (Hamburger / Three Dots)
                     QuickActionCircleButton(
                         icon = if (showActionsMenu) Icons.Default.Close else Icons.Default.Menu,
                         label = if (showActionsMenu) "Close" else "Menu",
-                        color = if (showActionsMenu) SunGold else Color.White,
+                        color = if (showActionsMenu) AgedGold else Color.White,
                         active = showActionsMenu,
                         testTag = "btn_expand_menu",
                         onClick = {
@@ -430,7 +435,7 @@ fun Game3DScreen(
                         enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
                         exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
                     ) {
-                        SolarpunkBottomNavBar(
+                        MedievalBottomNavBar(
                             activeModal = activeModal,
                             onOpenResearch = { viewModel.openModal("research"); viewModel.hudManager.hideNavMenu() },
                             onOpenJournal = { viewModel.openModal("journal"); viewModel.hudManager.hideNavMenu() },
@@ -689,10 +694,10 @@ fun Game3DScreen(
                     modifier = Modifier
                         .fillMaxWidth(0.92f)
                         .padding(16.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .border(2.dp, SunGold, RoundedCornerShape(24.dp))
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(2.dp, AgedGold, RoundedCornerShape(12.dp))
                         .testTag("dialog_npc_arrival"),
-                    color = Color(0xFD09181A)
+                    color = Parchment
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
@@ -705,14 +710,15 @@ fun Game3DScreen(
                             Icon(
                                 imageVector = Icons.Default.PersonAdd,
                                 contentDescription = "NPC Arrival",
-                                tint = SunGold,
+                                tint = MedievalCrimson,
                                 modifier = Modifier.size(28.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Someone is approaching your farm!",
-                                color = SunGold,
-                                fontSize = 16.sp,
+                                text = "A traveler arrives!",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
+                                fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -720,17 +726,26 @@ fun Game3DScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "${candidate.name} (${candidate.role.title})",
-                            color = Color.White,
-                            fontSize = 18.sp,
+                            text = "${candidate.name}",
+                            color = MedievalTextPrimary,
+                            fontFamily = MedievalSharpFontFamily,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            text = "(${candidate.role.title})",
+                            color = MedievalTextSecondary,
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
                             text = "\"${candidate.greetingQuote}\"",
-                            color = CleanCyan,
+                            color = MedievalCrimsonLight,
+                            fontFamily = AlmendraFontFamily,
                             fontSize = 13.sp,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                         )
@@ -739,15 +754,17 @@ fun Game3DScreen(
 
                         Text(
                             text = candidate.backgroundStory,
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 12.sp
+                            color = MedievalTextPrimary,
+                            fontFamily = AlmendraFontFamily,
+                            fontSize = 13.sp
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Accept ${candidate.name} into your settlement?",
-                            color = SolarEmerald,
+                            text = "Offer ${candidate.name} refuge in your kingdom?",
+                            color = MedievalCrimson,
+                            fontFamily = MedievalSharpFontFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -760,20 +777,20 @@ fun Game3DScreen(
                         ) {
                             Button(
                                 onClick = { viewModel.rejectNpcArrival() },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF37474F)),
-                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF424242)), // IronGrey
+                                shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.testTag("btn_reject_npc")
                             ) {
-                                Text("Not Now", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("Turn Away", color = Color.White, fontFamily = MedievalSharpFontFamily, fontWeight = FontWeight.Bold)
                             }
 
                             Button(
                                 onClick = { viewModel.acceptNpcArrival() },
-                                colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                                shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.testTag("btn_welcome_npc")
                             ) {
-                                Text("Welcome!", color = Color(0xFF091215), fontWeight = FontWeight.Bold)
+                                Text("Welcome!", color = Parchment, fontFamily = MedievalSharpFontFamily, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -813,18 +830,18 @@ fun Game3DScreen(
 
         // 11. Initial & Reload Loading Screen Overlay
         if (isInitialLoading || isLoading) {
-            LoadingScreenOverlay(title = if (isInitialLoading) "ECO FARM SIMULATOR" else "SOLARPUNK FARM")
+            LoadingScreenOverlay(title = if (isInitialLoading) "ROYAL REALM" else "MEDIEVAL ISLAND")
         }
     }
 }
 }
 
 @Composable
-fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
+fun LoadingScreenOverlay(title: String = "ROYAL REALM SIMULATOR") {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF091215))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .clickable(enabled = false) {},
         contentAlignment = Alignment.Center
     ) {
@@ -834,29 +851,32 @@ fun LoadingScreenOverlay(title: String = "ECO FARM SIMULATOR") {
         ) {
             Text(
                 text = title,
-                color = SolarEmerald,
-                fontSize = 24.sp,
+                color = Parchment,
+                fontFamily = MedievalSharpFontFamily,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 2.sp
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Regenerative 3D Agriculture & Clean Power",
-                color = SunGold,
-                fontSize = 12.sp,
+                text = "Royal Realms & Ancient Essence",
+                color = AgedGold,
+                fontFamily = AlmendraFontFamily,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
             Spacer(modifier = Modifier.height(28.dp))
             CircularProgressIndicator(
-                color = CleanCyan,
+                color = MedievalCrimson,
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(42.dp)
             )
             Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Loading world...",
-                color = Color.White.copy(alpha = 0.7f),
-                fontSize = 13.sp
+                text = "Preparing the Kingdom...",
+                color = Parchment.copy(alpha = 0.7f),
+                fontFamily = AlmendraFontFamily,
+                fontSize = 14.sp
             )
         }
     }
@@ -884,18 +904,18 @@ fun QuickActionCircleButton(
 
     Surface(
         modifier = Modifier
-            .size(48.dp)
+            .size(52.dp)
             .scale(scale)
             .clip(CircleShape)
             .clickable(
                 interactionSource = interactionSource,
-                indication = androidx.compose.material3.ripple(bounded = true, radius = 24.dp)
+                indication = androidx.compose.material3.ripple(bounded = true, radius = 26.dp)
             ) { onClick() }
             .testTag(testTag),
-        color = if (active) Color(0xEE1A3D34) else Color(0xD90A1A1D),
+        color = if (active) MedievalCrimson.copy(alpha = 0.9f) else Color(0xF22D1B0D), // Dark Wood
         shape = CircleShape,
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.7f)),
-        shadowElevation = 6.dp
+        border = androidx.compose.foundation.BorderStroke(2.dp, AgedGold.copy(alpha = 0.8f)),
+        shadowElevation = 8.dp
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -904,15 +924,15 @@ fun QuickActionCircleButton(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = color,
-                modifier = Modifier.size(24.dp)
+                tint = if (active) Parchment else AgedGold,
+                modifier = Modifier.size(26.dp)
             )
         }
     }
 }
 
 @Composable
-fun SolarpunkBottomNavBar(
+fun MedievalBottomNavBar(
     activeModal: String?,
     onOpenResearch: () -> Unit,
     onOpenJournal: () -> Unit,
@@ -923,23 +943,23 @@ fun SolarpunkBottomNavBar(
 ) {
     Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, SolarEmerald.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
-            .testTag("solarpunk_bottom_nav_bar"),
-        color = Color(0xE6081518),
-        shape = RoundedCornerShape(18.dp),
-        shadowElevation = 6.dp
+            .clip(RoundedCornerShape(12.dp))
+            .border(2.dp, AgedGold.copy(alpha = 0.8f), RoundedCornerShape(12.dp))
+            .testTag("medieval_bottom_nav_bar"),
+        color = Color(0xF22D1B0D), // Dark Wood
+        shape = RoundedCornerShape(12.dp),
+        shadowElevation = 10.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 1. Research Tab
             BottomNavItemPill(
-                icon = Icons.Default.Science,
-                label = "Research",
-                color = CleanCyan,
+                icon = Icons.Default.MenuBook,
+                label = "Alchemy",
+                color = AgedGold,
                 isActive = activeModal == "research",
                 testTag = "nav_tab_research",
                 onClick = onOpenResearch
@@ -948,8 +968,8 @@ fun SolarpunkBottomNavBar(
             // 2. Journal Tab
             BottomNavItemPill(
                 icon = Icons.Default.Book,
-                label = "Journal",
-                color = SunGold,
+                label = "Chronicle",
+                color = AgedGold,
                 isActive = activeModal == "journal",
                 testTag = "nav_tab_journal",
                 onClick = onOpenJournal
@@ -958,8 +978,8 @@ fun SolarpunkBottomNavBar(
             // 3. Sanctuary Tab
             BottomNavItemPill(
                 icon = Icons.Default.People,
-                label = "Sanctuary",
-                color = SunGold,
+                label = "Stronghold",
+                color = AgedGold,
                 isActive = activeModal == "sanctuary",
                 testTag = "nav_tab_sanctuary",
                 onClick = onOpenSanctuary
@@ -968,8 +988,8 @@ fun SolarpunkBottomNavBar(
             // 4. Energy Grid Tab
             BottomNavItemPill(
                 icon = Icons.Default.Bolt,
-                label = "Grid",
-                color = CleanCyan,
+                label = "Essence",
+                color = AgedGold,
                 isActive = activeModal == "energy_grid",
                 testTag = "nav_tab_grid",
                 onClick = onOpenEnergyGrid
@@ -978,8 +998,8 @@ fun SolarpunkBottomNavBar(
             // 5. Inventory Bag Tab
             BottomNavItemPill(
                 icon = Icons.Default.Inventory2,
-                label = "Bag",
-                color = SolarEmerald,
+                label = "Stash",
+                color = AgedGold,
                 isActive = activeModal == "inventory",
                 testTag = "nav_tab_bag",
                 onClick = onOpenInventory

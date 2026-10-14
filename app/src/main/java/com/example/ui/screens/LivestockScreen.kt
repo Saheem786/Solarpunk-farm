@@ -45,11 +45,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.local.LivestockEntity
 import com.example.data.model.LivestockType
 import com.example.ui.FarmViewModel
-import com.example.ui.components.SolarpunkProgressBar
-import com.example.ui.theme.BrassGold
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.components.MedievalProgressBar
+import com.example.ui.theme.*
 
 @Composable
 fun LivestockScreen(
@@ -61,7 +58,7 @@ fun LivestockScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF091415))
+            .background(Color(0xFF1A0F0A)) // Deep Wood
             .padding(16.dp)
             .testTag("livestock_screen"),
         contentPadding = PaddingValues(bottom = 80.dp),
@@ -71,14 +68,15 @@ fun LivestockScreen(
         item {
             Column {
                 Text(
-                    text = "Regenerative Eco-Sanctuary",
-                    color = Color.White,
+                    text = "ROYAL MENAGERIE & STABLES",
+                    color = AgedGold,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
-                    text = "Pasture grazers & bio-pollinators living in balance",
-                    color = Color(0xFF80CBC4),
+                    text = "Sacred beasts & noble companions living in harmony with the land",
+                    color = MedievalTextSecondary,
                     fontSize = 12.sp
                 )
             }
@@ -87,10 +85,11 @@ fun LivestockScreen(
         // Sanctuary Animals List
         item {
             Text(
-                text = "Sanctuary Animals (${livestock.size})",
-                color = Color.White,
+                text = "BEASTS OF THE REALM (${livestock.size})",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -107,10 +106,11 @@ fun LivestockScreen(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Adopt Regenerative Companions",
-                color = SunGold,
+                text = "ACQUIRE NOBLE BEASTS",
+                color = AgedGold,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
 
@@ -134,11 +134,11 @@ private fun AnimalCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("animal_card_${animal.id}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF122629)),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
         border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            if (animal.readyToHarvest) SunGold else Color(0x3300E676)
+            2.dp,
+            if (animal.readyToHarvest) AgedGold else Bronze.copy(alpha = 0.5f)
         )
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -152,7 +152,7 @@ private fun AnimalCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(CircleShape)
-                            .background(Color(animal.type.tintColor).copy(alpha = 0.3f)),
+                            .background(Color(animal.type.tintColor).copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -166,13 +166,14 @@ private fun AnimalCard(
                     Column {
                         Text(
                             text = animal.name,
-                            color = Color.White,
+                            color = MedievalCrimson,
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Text(
-                            text = "Produces: ${animal.type.productProduced} (${animal.type.productSellPrice} 🪙)",
-                            color = Color(0xFFB0BEC5),
+                            text = "Yields: ${animal.type.productProduced} (${animal.type.productSellPrice} 🪙)",
+                            color = MedievalTextSecondary,
                             fontSize = 11.sp
                         )
                     }
@@ -180,13 +181,13 @@ private fun AnimalCard(
 
                 if (animal.readyToHarvest) {
                     Surface(
-                        color = SunGold.copy(alpha = 0.2f),
+                        color = AgedGold.copy(alpha = 0.2f),
                         shape = RoundedCornerShape(6.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, SunGold)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold)
                     ) {
                         Text(
-                            text = "Ready to Collect",
-                            color = SunGold,
+                            text = "Ready to Gather",
+                            color = MedievalCrimsonDark,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -203,21 +204,20 @@ private fun AnimalCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Happiness",
-                    color = SolarEmerald,
+                    text = "Nurture Level",
+                    color = Bronze,
                     fontSize = 11.sp
                 )
                 Text(
                     text = "${animal.happiness.toInt()}%",
-                    color = SolarEmerald,
+                    color = Bronze,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-            SolarpunkProgressBar(
+            MedievalProgressBar(
                 progress = animal.happiness / 100f,
-                color = SolarEmerald,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(10.dp)
             )
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -229,20 +229,19 @@ private fun AnimalCard(
             ) {
                 Text(
                     text = "${animal.type.productProduced} Progress",
-                    color = CleanCyan,
+                    color = MedievalCrimson,
                     fontSize = 11.sp
                 )
                 Text(
                     text = "${(animal.produceProgress * 100).toInt()}%",
-                    color = CleanCyan,
+                    color = MedievalCrimson,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-            SolarpunkProgressBar(
+            MedievalProgressBar(
                 progress = animal.produceProgress,
-                color = CleanCyan,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(10.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -252,9 +251,10 @@ private fun AnimalCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onPet,
-                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
@@ -263,16 +263,17 @@ private fun AnimalCard(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = null,
-                        tint = Color(0xFFFF80AB),
+                        tint = MedievalCrimson,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Pet", fontSize = 11.sp, color = Color.White)
+                    Text(text = "Nurture", fontSize = 11.sp, color = MedievalCrimson, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                 }
 
-                OutlinedButton(
+                Button(
                     onClick = onFeed,
-                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
@@ -281,18 +282,18 @@ private fun AnimalCard(
                     Icon(
                         imageVector = Icons.Default.Restaurant,
                         contentDescription = null,
-                        tint = SunGold,
+                        tint = MedievalCrimson,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Feed", fontSize = 11.sp, color = Color.White)
+                    Text(text = "Nourish", fontSize = 11.sp, color = MedievalCrimson, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                 }
 
                 if (animal.readyToHarvest) {
                     Button(
                         onClick = onCollect,
-                        colors = ButtonDefaults.buttonColors(containerColor = SunGold),
-                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AgedGold),
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .weight(1.3f)
                             .height(36.dp)
@@ -301,15 +302,16 @@ private fun AnimalCard(
                         Icon(
                             imageVector = Icons.Default.ShoppingBag,
                             contentDescription = null,
-                            tint = Color(0xFF091215),
+                            tint = MedievalCrimsonDark,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "Collect",
-                            color = Color(0xFF091215),
+                            text = "Gather",
+                            color = MedievalCrimsonDark,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                     }
                 }
@@ -327,9 +329,9 @@ private fun AdoptAnimalCard(
         modifier = Modifier
             .fillMaxWidth()
             .testTag("adopt_animal_${type.name.lowercase()}"),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF112528)),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x33FFD54F))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -339,7 +341,7 @@ private fun AdoptAnimalCard(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(Color(type.tintColor).copy(alpha = 0.2f)),
+                    .background(Color(type.tintColor).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -355,18 +357,19 @@ private fun AdoptAnimalCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = type.displayName,
-                    color = Color.White,
+                    color = MedievalCrimson,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
                 Text(
                     text = type.description,
-                    color = Color(0xFFB0BEC5),
+                    color = MedievalTextSecondary,
                     fontSize = 11.sp
                 )
                 Text(
                     text = "Produces ${type.productProduced} (${type.productSellPrice} 🪙)",
-                    color = SolarEmerald,
+                    color = Bronze,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -374,15 +377,16 @@ private fun AdoptAnimalCard(
 
             Button(
                 onClick = onAdopt,
-                colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier.testTag("adopt_btn_${type.name.lowercase()}")
             ) {
                 Text(
                     text = "${type.purchaseCostCoins}🪙",
-                    color = Color(0xFF091215),
+                    color = Parchment,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = MedievalSharpFontFamily
                 )
             }
         }

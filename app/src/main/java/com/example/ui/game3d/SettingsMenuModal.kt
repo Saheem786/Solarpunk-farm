@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,9 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.repository.SaveLoadSystem
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 @Composable
 fun SettingsMenuModal(
@@ -94,10 +93,10 @@ fun SettingsMenuModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, SolarEmerald.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("settings_menu_modal"),
-            color = Color(0xFD09181A)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -114,15 +113,16 @@ fun SettingsMenuModal(
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = SunGold,
+                            tint = MedievalCrimson,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "SYSTEM & GAME SETTINGS",
-                            color = Color.White,
+                            text = "KINGDOM SETTINGS",
+                            color = MedievalCrimson,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily,
                             letterSpacing = 1.sp
                         )
                     }
@@ -131,14 +131,14 @@ fun SettingsMenuModal(
                         onClick = onDismiss,
                         modifier = Modifier
                             .size(32.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0x33FFFFFF))
+                            .clip(CircleShape)
+                            .background(MedievalCrimson.copy(alpha = 0.1f))
                             .testTag("btn_close_settings")
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            tint = Color.White
+                            tint = MedievalCrimson
                         )
                     }
                 }
@@ -152,26 +152,27 @@ fun SettingsMenuModal(
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    val tabs = listOf("Audio", "Graphics", "Controls", "Gameplay", "Accessibility", "Language", "Save Slots")
+                    val tabs = listOf("Audio", "Scrolls", "Hands", "Realm", "Oracle", "Tongue", "Saves")
                     tabs.forEachIndexed { index, title ->
                         val isSelected = selectedTab == index
                         Surface(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .clickable { selectedTab = index }
                                 .testTag("btn_settings_tab_$index"),
-                            color = if (isSelected) CleanCyan else Color(0x221E3A3A),
-                            shape = RoundedCornerShape(10.dp),
+                            color = if (isSelected) MedievalCrimson else AgedGold.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(8.dp),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isSelected) SunGold else Color(0x3300E5FF)
+                                if (isSelected) AgedGold else AgedGold.copy(alpha = 0.3f)
                             )
                         ) {
                             Text(
                                 text = title,
-                                color = if (isSelected) Color(0xFF091215) else Color.White,
+                                color = if (isSelected) Parchment else MedievalTextPrimary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
+                                fontFamily = MedievalSharpFontFamily,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                             )
                         }
@@ -292,8 +293,9 @@ private fun AudioSettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             VolumeSliderRow("Master Volume", masterVol, Icons.Default.VolumeUp, onMasterChange)
@@ -317,7 +319,7 @@ private fun AudioSettingsTab(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Subtitle Size", color = Color.White, fontSize = 12.sp)
+                    Text("Dialogue Scrolls", color = MedievalTextPrimary, fontSize = 12.sp, fontFamily = AlmendraFontFamily)
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         listOf("Small", "Medium", "Large").forEach { sz ->
                             ChoiceChip(sz, subtitleSize == sz) { onSubtitleSizeChange(sz) }
@@ -344,8 +346,9 @@ private fun GraphicsSettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text("Graphics Quality Preset", color = SunGold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -378,13 +381,13 @@ private fun GraphicsSettingsTab(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text("HUD Opacity (${(hudOpacity * 100).toInt()}%)", color = SunGold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("Mana Opacity (${(hudOpacity * 100).toInt()}%)", color = MedievalCrimson, fontSize = 13.sp, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
             Spacer(modifier = Modifier.height(4.dp))
             Slider(
                 value = hudOpacity,
                 onValueChange = onHudOpacityChange,
                 valueRange = 0.3f..1f,
-                colors = SliderDefaults.colors(thumbColor = SunGold, activeTrackColor = SolarEmerald)
+                colors = SliderDefaults.colors(thumbColor = MedievalCrimson, activeTrackColor = AgedGold)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -407,8 +410,9 @@ private fun ControlsSettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             VolumeSliderRow("Camera Touch Sensitivity", sensitivity, Icons.Default.TouchApp, onSensitivityChange)
@@ -447,8 +451,9 @@ private fun GameplaySettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             ToggleRow("Show Tutorial Hints", showTutorials, Icons.Default.Help, onTutorialsChange)
@@ -503,8 +508,9 @@ private fun AccessibilitySettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text("Colorblind Mode Filter", color = SunGold, fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -551,8 +557,9 @@ private fun LanguageSettingsTab(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D))
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Parchment),
+        border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold.copy(alpha = 0.4f))
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text("Select Preferred Language", color = SunGold, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -572,21 +579,23 @@ private fun LanguageSettingsTab(
                         .padding(vertical = 4.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .clickable { onLangChange(lang.split(" ")[0]) },
-                    color = if (isSel) SolarEmerald else Color(0x331E3A3A),
+                    color = if (isSel) MedievalCrimson else Color(0x1A8B0000),
                     shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isSel) SunGold else Color(0x33FFFFFF))
+                    border = androidx.compose.foundation.BorderStroke(1.dp, if (isSel) AgedGold else AgedGold.copy(alpha = 0.2f))
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(
                             text = lang,
-                            color = if (isSel) Color(0xFF091215) else Color.White,
+                            color = if (isSel) Parchment else MedievalTextPrimary,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         Text(
                             text = desc,
-                            color = if (isSel) Color(0xFF091215).copy(alpha = 0.8f) else Color(0xFFB0BEC5),
-                            fontSize = 11.sp
+                            color = if (isSel) Parchment.copy(alpha = 0.8f) else MedievalTextSecondary,
+                            fontSize = 11.sp,
+                            fontFamily = AlmendraFontFamily
                         )
                     }
                 }
@@ -607,9 +616,9 @@ private fun SaveSlotsTab(
         slots.forEach { slot ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF132A2D)),
-                border = androidx.compose.foundation.BorderStroke(1.dp, if (slot.exists) CleanCyan else Color(0x33FFFFFF))
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = if (slot.exists) MedievalCrimson.copy(alpha = 0.05f) else Color.Transparent),
+                border = androidx.compose.foundation.BorderStroke(1.dp, if (slot.exists) AgedGold else AgedGold.copy(alpha = 0.2f))
             ) {
                 Row(
                     modifier = Modifier
@@ -621,26 +630,30 @@ private fun SaveSlotsTab(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "Save Slot ${slot.slotId}",
-                            color = SunGold,
+                            color = MedievalCrimson,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = MedievalSharpFontFamily
                         )
                         if (slot.exists) {
                             Text(
-                                text = "Day ${slot.day} • $${slot.coins} SolCoins",
-                                color = Color.White,
-                                fontSize = 12.sp
+                                text = "Day ${slot.day} • ${slot.coins}🪙",
+                                color = MedievalTextPrimary,
+                                fontSize = 12.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                             Text(
-                                text = "Saved: ${slot.formattedDate}",
-                                color = Color(0xFF90A4AE),
-                                fontSize = 10.sp
+                                text = "Chronicled: ${slot.formattedDate}",
+                                color = MedievalTextSecondary,
+                                fontSize = 10.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                         } else {
                             Text(
-                                text = "Empty Slot (Ready to save)",
-                                color = Color(0xFF90A4AE),
-                                fontSize = 12.sp
+                                text = "Empty Scroll (Ready to scribe)",
+                                color = MedievalTextSecondary,
+                                fontSize = 12.sp,
+                                fontFamily = AlmendraFontFamily
                             )
                         }
                     }
@@ -648,21 +661,21 @@ private fun SaveSlotsTab(
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Button(
                             onClick = { onSaveSlot(slot.slotId) },
-                            colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                            shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.height(34.dp)
                         ) {
-                            Text("Save", color = Color(0xFF091215), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("Scribe", color = Parchment, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                         }
 
                         if (slot.exists) {
                             Button(
                                 onClick = { onLoadSlot(slot.slotId) },
-                                colors = ButtonDefaults.buttonColors(containerColor = CleanCyan),
-                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = AgedGold),
+                                shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.height(34.dp)
                             ) {
-                                Text("Load", color = Color(0xFF091215), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text("Recall", color = MedievalTextPrimary, fontSize = 11.sp, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
                             }
 
                             IconButton(
@@ -693,19 +706,19 @@ private fun VolumeSliderRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = icon, contentDescription = null, tint = CleanCyan, modifier = Modifier.size(16.dp))
+                Icon(imageVector = icon, contentDescription = null, tint = MedievalCrimson, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(text = title, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text(text = title, color = MedievalTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Medium, fontFamily = AlmendraFontFamily)
             }
-            Text(text = "${(value * 100).toInt()}%", color = CleanCyan, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(text = "${(value * 100).toInt()}%", color = MedievalCrimson, fontSize = 12.sp, fontWeight = FontWeight.Bold, fontFamily = MedievalSharpFontFamily)
         }
         Slider(
             value = value,
             onValueChange = onValueChange,
             colors = SliderDefaults.colors(
-                thumbColor = CleanCyan,
-                activeTrackColor = CleanCyan,
-                inactiveTrackColor = Color(0xFF1E3C40)
+                thumbColor = MedievalCrimson,
+                activeTrackColor = AgedGold,
+                inactiveTrackColor = AgedGold.copy(alpha = 0.2f)
             ),
             modifier = Modifier.height(28.dp)
         )
@@ -727,14 +740,14 @@ private fun ToggleRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = icon, contentDescription = null, tint = SunGold, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(6.dp))
-            Text(text = title, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+            Text(text = title, color = MedievalTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Medium, fontFamily = AlmendraFontFamily)
         }
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color(0xFF091215),
-                checkedTrackColor = SolarEmerald
+                checkedThumbColor = Parchment,
+                checkedTrackColor = MedievalCrimson
             )
         )
     }
@@ -746,9 +759,9 @@ private fun ChoiceChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick),
-        color = if (isSelected) SolarEmerald else Color(0x331E3A3A),
+        color = if (isSelected) MedievalCrimson else AgedGold.copy(alpha = 0.1f),
         shape = RoundedCornerShape(8.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) SunGold else Color(0x22FFFFFF))
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (isSelected) AgedGold else AgedGold.copy(alpha = 0.2f))
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -756,9 +769,10 @@ private fun ChoiceChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
         ) {
             Text(
                 text = text,
-                color = if (isSelected) Color(0xFF091215) else Color.White,
+                color = if (isSelected) Parchment else MedievalTextPrimary,
                 fontSize = 10.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = MedievalSharpFontFamily
             )
         }
     }

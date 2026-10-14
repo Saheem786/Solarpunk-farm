@@ -27,13 +27,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Construction
-import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Button
@@ -61,9 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.ResearchTreeNode
-import com.example.ui.theme.CleanCyan
-import com.example.ui.theme.SolarEmerald
-import com.example.ui.theme.SunGold
+import com.example.ui.theme.*
 
 @Composable
 fun ResearchTabModal(
@@ -87,10 +84,10 @@ fun ResearchTabModal(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .border(2.dp, CleanCyan.copy(alpha = 0.8f), RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(3.dp, AgedGold, RoundedCornerShape(12.dp))
                 .testTag("modal_research_tree"),
-            color = Color(0xFD09181A)
+            color = Parchment
         ) {
             Column(
                 modifier = Modifier
@@ -108,28 +105,30 @@ fun ResearchTabModal(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Brush.radialGradient(listOf(CleanCyan, SolarEmerald))),
+                                .background(Brush.radialGradient(listOf(MedievalCrimson, MedievalCrimsonDark))),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Science,
-                                contentDescription = "Research Tree",
-                                tint = Color(0xFF091215),
+                                contentDescription = "Alchemy",
+                                tint = Parchment,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "RESEARCH & TECHNOLOGY TREE",
-                                color = CleanCyan,
+                                text = "ALCHEMY & ANCIENT WISDOM",
+                                color = MedievalCrimson,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp
                             )
                             Text(
-                                text = "Unlock closed-loop technology & eco-infrastructure",
-                                color = Color(0xFF90A4AE),
+                                text = "Master the secrets of the elements and ancient crafts",
+                                color = MedievalTextSecondary,
+                                fontFamily = AlmendraFontFamily,
                                 fontSize = 11.sp
                             )
                         }
@@ -139,8 +138,8 @@ fun ResearchTabModal(
                         // RP Counter Badge
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = Color(0x3300E5FF),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, CleanCyan)
+                            color = Color(0x33CD7F32), // Bronze-ish
+                            border = androidx.compose.foundation.BorderStroke(1.dp, AgedGold)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -148,15 +147,16 @@ fun ResearchTabModal(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Science,
-                                    contentDescription = "RP",
-                                    tint = CleanCyan,
+                                    contentDescription = "Essence",
+                                    tint = MedievalCrimson,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "$researchPoints RP",
-                                    color = SunGold,
-                                    fontSize = 14.sp,
+                                    text = "$researchPoints Essence",
+                                    color = MedievalCrimson,
+                                    fontFamily = MedievalSharpFontFamily,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -169,13 +169,13 @@ fun ResearchTabModal(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(CircleShape)
-                                .background(Color(0x33FFFFFF))
+                                .background(MedievalCrimson.copy(alpha = 0.15f))
                                 .testTag("btn_close_research_modal")
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Close",
-                                tint = Color.White
+                                tint = MedievalCrimson
                             )
                         }
                     }
@@ -193,27 +193,28 @@ fun ResearchTabModal(
                     for (t in 1..5) {
                         val isSelected = selectedTier == t
                         val tierName = when (t) {
-                            1 -> "Tier 1: Foundation"
-                            2 -> "Tier 2: Intermediate"
-                            3 -> "Tier 3: Advanced"
-                            4 -> "Tier 4: Eco Civilization"
-                            else -> "Tier 5: Mastery"
+                            1 -> "I: Basic Crafts"
+                            2 -> "II: Advanced Alchemy"
+                            3 -> "III: Masterwork"
+                            4 -> "IV: Grand Enchanter"
+                            else -> "V: Ancient Legacy"
                         }
                         Surface(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(8.dp))
                                 .clickable { selectedTier = t }
                                 .testTag("btn_research_tier_$t"),
-                            color = if (isSelected) CleanCyan else Color(0x221E3A3A),
-                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) MedievalCrimson else Color(0x222D1B0D),
+                            shape = RoundedCornerShape(8.dp),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isSelected) SunGold else Color(0x4400E5FF)
+                                if (isSelected) AgedGold else AgedGold.copy(alpha = 0.4f)
                             )
                         ) {
                             Text(
                                 text = tierName,
-                                color = if (isSelected) Color(0xFF091215) else Color.White,
+                                color = if (isSelected) Parchment else MedievalTextPrimary,
+                                fontFamily = MedievalSharpFontFamily,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -255,34 +256,38 @@ fun ResearchTabModal(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .clip(RoundedCornerShape(20.dp))
-                    .border(2.dp, SunGold, RoundedCornerShape(20.dp)),
-                color = Color(0xFD0B1B1E)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(2.dp, AgedGold, RoundedCornerShape(12.dp)),
+                color = Parchment
             ) {
                 Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = node.title,
-                        color = SunGold,
-                        fontSize = 18.sp,
+                        color = MedievalCrimson,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Cost: ${node.rpCost} Research Points",
-                        color = CleanCyan,
-                        fontSize = 13.sp,
+                        text = "Essence Required: ${node.rpCost}",
+                        color = MedievalTextSecondary,
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = node.description,
-                        color = Color(0xFFCFD8DC),
-                        fontSize = 13.sp
+                        color = MedievalTextPrimary,
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Unlocks: ${node.unlockFeature}",
-                        color = SolarEmerald,
+                        color = ForestMoss,
+                        fontFamily = AlmendraFontFamily,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -294,10 +299,10 @@ fun ResearchTabModal(
                     ) {
                         Button(
                             onClick = { selectedNodeForDetails = null },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF37474F)),
-                            shape = RoundedCornerShape(10.dp)
+                            colors = ButtonDefaults.buttonColors(containerColor = IronGrey),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Close", color = Color.White)
+                            Text("Dismiss", color = Color.White, fontFamily = MedievalSharpFontFamily)
                         }
                         if (!node.isUnlocked && node.isAvailable) {
                             Spacer(modifier = Modifier.width(8.dp))
@@ -309,12 +314,13 @@ fun ResearchTabModal(
                                     }
                                 },
                                 enabled = canAfford,
-                                colors = ButtonDefaults.buttonColors(containerColor = SolarEmerald),
-                                shape = RoundedCornerShape(10.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = MedievalCrimson),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    text = if (canAfford) "Unlock Now" else "Need More RP",
-                                    color = Color(0xFF091215),
+                                    text = if (canAfford) "Master This Wisdom" else "Insufficient Essence",
+                                    color = Parchment,
+                                    fontFamily = MedievalSharpFontFamily,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -335,21 +341,21 @@ private fun ResearchNodeCard(
 ) {
     val canAfford = userRp >= node.rpCost
     val cardBorder = when {
-        node.isUnlocked -> SolarEmerald
-        node.isAvailable -> SunGold
-        else -> Color(0xFF546E7A)
+        node.isUnlocked -> ForestMoss
+        node.isAvailable -> AgedGold
+        else -> IronGrey.copy(alpha = 0.5f)
     }
 
     val cardBg = when {
-        node.isUnlocked -> Color(0x1F00E676)
-        node.isAvailable -> Color(0x1FFFFD54)
-        else -> Color(0x1A263238)
+        node.isUnlocked -> ForestMoss.copy(alpha = 0.08f)
+        node.isAvailable -> Color(0x0A2D1B0D)
+        else -> Color(0x052D1B0D)
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onSelectNode() }
             .testTag("node_card_${node.id}"),
         colors = CardDefaults.cardColors(containerColor = cardBg),
@@ -372,9 +378,9 @@ private fun ResearchNodeCard(
                         .clip(CircleShape)
                         .background(
                             when {
-                                node.isUnlocked -> SolarEmerald.copy(alpha = 0.3f)
-                                node.isAvailable -> SunGold.copy(alpha = 0.3f)
-                                else -> Color(0x3337474F)
+                                node.isUnlocked -> ForestMoss.copy(alpha = 0.2f)
+                                node.isAvailable -> AgedGold.copy(alpha = 0.2f)
+                                else -> IronGrey.copy(alpha = 0.15f)
                             }
                         ),
                     contentAlignment = Alignment.Center
@@ -383,9 +389,9 @@ private fun ResearchNodeCard(
                         imageVector = if (node.isUnlocked) Icons.Default.CheckCircle else if (node.isAvailable) Icons.Default.Science else Icons.Default.Lock,
                         contentDescription = node.title,
                         tint = when {
-                            node.isUnlocked -> SolarEmerald
-                            node.isAvailable -> SunGold
-                            else -> Color(0xFF90A4AE)
+                            node.isUnlocked -> ForestMoss
+                            node.isAvailable -> AgedGoldDark
+                            else -> IronGrey
                         },
                         modifier = Modifier.size(22.dp)
                     )
@@ -396,21 +402,24 @@ private fun ResearchNodeCard(
                 Column {
                     Text(
                         text = node.title,
-                        color = Color.White,
-                        fontSize = 14.sp,
+                        color = MedievalCrimson,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = node.description,
-                        color = Color(0xFFB0BEC5),
-                        fontSize = 11.sp,
+                        color = MedievalTextPrimary.copy(alpha = 0.8f),
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 12.sp,
                         maxLines = 2
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Unlocks: ${node.unlockFeature}",
-                        color = CleanCyan,
-                        fontSize = 10.5.sp,
+                        color = MedievalCrimsonLight,
+                        fontFamily = AlmendraFontFamily,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -421,15 +430,16 @@ private fun ResearchNodeCard(
             if (node.isUnlocked) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = SolarEmerald.copy(alpha = 0.2f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SolarEmerald)
+                    color = ForestMoss.copy(alpha = 0.15f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ForestMoss)
                 ) {
                     Text(
-                        text = "UNLOCKED",
-                        color = SolarEmerald,
-                        fontSize = 11.sp,
+                        text = "MASTERED",
+                        color = ForestMoss,
+                        fontFamily = MedievalSharpFontFamily,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
             } else {
@@ -437,15 +447,16 @@ private fun ResearchNodeCard(
                     onClick = onUnlock,
                     enabled = node.isAvailable && canAfford,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SunGold,
-                        disabledContainerColor = Color(0xFF37474F)
+                        containerColor = MedievalCrimson,
+                        disabledContainerColor = IronGrey.copy(alpha = 0.3f)
                     ),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "${node.rpCost} RP",
-                        color = if (node.isAvailable && canAfford) Color(0xFF091215) else Color(0xFFB0BEC5),
+                        text = "${node.rpCost}",
+                        color = if (node.isAvailable && canAfford) Parchment else MedievalTextPrimary.copy(alpha = 0.5f),
+                        fontFamily = MedievalSharpFontFamily,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -461,29 +472,29 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_water_purification",
             tier = 1,
-            title = "Water Purification",
+            title = "Sacred Water Filter",
             rpCost = 10,
-            description = "Construct sand & charcoal water filters to eliminate bacteria and raw water pathogens.",
-            unlockFeature = "Water Filter Structure",
+            description = "Construct sand & charcoal filters blessed with ancient salts to purify the island's springs.",
+            unlockFeature = "Holy Water Filter",
             isUnlocked = unlockedTechs.contains("tech_water_purification"),
             isAvailable = true
         ),
         ResearchTreeNode(
             id = "tech_better_tools",
             tier = 1,
-            title = "Better Tools",
+            title = "Mastercraft Forging",
             rpCost = 15,
-            description = "Forge reinforced iron axes and pickaxes for 2x faster resource gathering.",
-            unlockFeature = "Iron Axe & Iron Pickaxe",
+            description = "Forge reinforced steel axes and pickaxes for 2x faster resource gathering.",
+            unlockFeature = "Steel Axe & Steel Pickaxe",
             isUnlocked = unlockedTechs.contains("tech_better_tools"),
             isAvailable = true
         ),
         ResearchTreeNode(
             id = "tech_crop_rotation",
             tier = 1,
-            title = "Crop Rotation",
+            title = "Druidic Permaculture",
             rpCost = 20,
-            description = "Optimize nitrogen fixing across permaculture plots. Crops grow +10% faster.",
+            description = "Observe lunar cycles across your fields. Crops grow +10% faster through moon-blessed soil.",
             unlockFeature = "+10% Crop Growth Speed",
             isUnlocked = unlockedTechs.contains("tech_crop_rotation"),
             isAvailable = true
@@ -491,10 +502,10 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_basic_cooking",
             tier = 1,
-            title = "Basic Cooking",
+            title = "Artisan Hearth",
             rpCost = 15,
-            description = "Craft electric cooktops and artisan culinary recipes.",
-            unlockFeature = "Cooking Station & 5 Recipes",
+            description = "Build grand stone ovens and discover legendary medieval culinary recipes.",
+            unlockFeature = "Grand Hearth & 5 Recipes",
             isUnlocked = unlockedTechs.contains("tech_basic_cooking"),
             isAvailable = true
         ),
@@ -503,40 +514,40 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_advanced_solar",
             tier = 2,
-            title = "Advanced Solar",
+            title = "Mystic Mana Circles",
             rpCost = 30,
-            description = "Dual-axis tracking photovoltaic glass arrays generating 25 kWh/day.",
-            unlockFeature = "Advanced Solar Array",
+            description = "Construct ancient stone circles that gather mana from the ley lines, generating 25 Mana/day.",
+            unlockFeature = "Ancient Mana Circle",
             isUnlocked = unlockedTechs.contains("tech_advanced_solar"),
             isAvailable = unlockedTechs.contains("tech_water_purification")
         ),
         ResearchTreeNode(
             id = "tech_irrigation_systems",
             tier = 2,
-            title = "Irrigation Systems",
+            title = "Aqueduct Engineering",
             rpCost = 35,
-            description = "Lay subsurface drip irrigation pipes and automated water distribution nodes.",
-            unlockFeature = "Irrigation Pipes & Nodes",
+            description = "Carve stone aqueducts and clay pipes for automated water distribution across your realm.",
+            unlockFeature = "Stone Aqueducts",
             isUnlocked = unlockedTechs.contains("tech_irrigation_systems"),
             isAvailable = unlockedTechs.contains("tech_crop_rotation")
         ),
         ResearchTreeNode(
             id = "tech_animal_breeding",
             tier = 2,
-            title = "Animal Breeding",
+            title = "Beast Mastery",
             rpCost = 40,
-            description = "Nutritional sanctuary breeding programs. Animals reproduce every 5 days.",
-            unlockFeature = "Livestock Breeding Program",
+            description = "Establish noble breeding lineages for your livestock. Animals reproduce every 5 days.",
+            unlockFeature = "Noble Breeding Program",
             isUnlocked = unlockedTechs.contains("tech_animal_breeding"),
             isAvailable = unlockedTechs.contains("tech_basic_cooking")
         ),
         ResearchTreeNode(
             id = "tech_herbal_medicine",
             tier = 2,
-            title = "Herbal Medicine",
+            title = "Apothecary Arts",
             rpCost = 30,
-            description = "Brew botanical teas and establish an infirmary medical station.",
-            unlockFeature = "Medical Station Structure",
+            description = "Brew botanical elixirs and establish a healer's sanctum for your people.",
+            unlockFeature = "Healer's Sanctum",
             isUnlocked = unlockedTechs.contains("tech_herbal_medicine"),
             isAvailable = unlockedTechs.contains("tech_water_purification")
         ),
@@ -545,40 +556,40 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_hydro_power",
             tier = 3,
-            title = "Hydro Power",
+            title = "Grand Water Wheels",
             rpCost = 60,
-            description = "Harvest kinetic stream energy with micro-hydro water wheels generating 35 kWh/day.",
-            unlockFeature = "Small Hydro Generator",
+            description = "Harvest the spirit of the streams with massive oak water wheels generating 35 Mana/day.",
+            unlockFeature = "Great Water Wheel",
             isUnlocked = unlockedTechs.contains("tech_hydro_power"),
             isAvailable = unlockedTechs.contains("tech_advanced_solar")
         ),
         ResearchTreeNode(
             id = "tech_electric_vehicles",
             tier = 3,
-            title = "Electric Vehicles",
+            title = "Noble Steeds & Carriages",
             rpCost = 80,
-            description = "Assemble electric utility carts and cargo e-bikes for fast transit.",
-            unlockFeature = "Electric Utility Cart",
+            description = "Breed faster warhorses and craft sturdy royal carriages for rapid island transit.",
+            unlockFeature = "Royal Carriage",
             isUnlocked = unlockedTechs.contains("tech_electric_vehicles"),
             isAvailable = unlockedTechs.contains("tech_advanced_solar")
         ),
         ResearchTreeNode(
             id = "tech_automation",
             tier = 3,
-            title = "Automation",
+            title = "Golem Labor",
             rpCost = 100,
-            description = "Automate crop seeding and harvesting through cybernetic farm machinery.",
-            unlockFeature = "Auto-Harvesters & Auto-Planters",
+            description = "Animate clay golems to automate crop seeding and harvesting through ancient runes.",
+            unlockFeature = "Seeding & Harvesting Golems",
             isUnlocked = unlockedTechs.contains("tech_automation"),
             isAvailable = unlockedTechs.contains("tech_irrigation_systems")
         ),
         ResearchTreeNode(
             id = "tech_advanced_greenhouse",
             tier = 3,
-            title = "Advanced Greenhouse",
+            title = "Crystal Conservatory",
             rpCost = 70,
-            description = "Climate-controlled glass bio-dome boosting crop yield by 2x.",
-            unlockFeature = "Climate Greenhouse",
+            description = "Enchanted glass glasshouse using captured sunbeams to boost crop yield by 2x.",
+            unlockFeature = "Crystal Conservatory",
             isUnlocked = unlockedTechs.contains("tech_advanced_greenhouse"),
             isAvailable = unlockedTechs.contains("tech_irrigation_systems")
         ),
@@ -587,40 +598,40 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_smart_grid",
             tier = 4,
-            title = "Smart Grid",
+            title = "Ley Line Resonance",
             rpCost = 150,
-            description = "Micro-inverter power balancing reduces line loss and energy waste by 20%.",
-            unlockFeature = "Smart Power Management (-20% Loss)",
+            description = "Harmonize the island's mana flow to reduce energy leakage by 20% through runic stabilization.",
+            unlockFeature = "Ley Line Stabilization (-20% Loss)",
             isUnlocked = unlockedTechs.contains("tech_smart_grid"),
             isAvailable = unlockedTechs.contains("tech_hydro_power")
         ),
         ResearchTreeNode(
             id = "tech_drone_network",
             tier = 4,
-            title = "Drone Network",
+            title = "Falconer's Watch",
             rpCost = 200,
-            description = "Autonomous scout drones conduct aerial mapping and wildlife tracking.",
-            unlockFeature = "Scout Drone Aerial Tracking",
+            description = "Train a network of swift falcons to conduct aerial mapping and track island wildlife.",
+            unlockFeature = "Royal Falcon Mapping",
             isUnlocked = unlockedTechs.contains("tech_drone_network"),
             isAvailable = unlockedTechs.contains("tech_automation")
         ),
         ResearchTreeNode(
             id = "tech_full_automation",
             tier = 4,
-            title = "Full Automation",
+            title = "Clockwork Perfection",
             rpCost = 300,
-            description = "Closed-loop farm systems allow NPCs to work 20% faster.",
-            unlockFeature = "+20% NPC Work Efficiency",
+            description = "Master intricate clockwork systems, allowing your islanders to work 20% faster.",
+            unlockFeature = "+20% Islander Efficiency",
             isUnlocked = unlockedTechs.contains("tech_full_automation"),
             isAvailable = unlockedTechs.contains("tech_automation")
         ),
         ResearchTreeNode(
             id = "tech_ecological_mastery",
             tier = 4,
-            title = "Ecological Mastery",
+            title = "Realm Sovereignty",
             rpCost = 400,
-            description = "Regenerative soil microbial inoculants double ecosystem health recovery speed.",
-            unlockFeature = "2x Ecosystem Health Recovery",
+            description = "Perform grand rituals of restoration to double the island's natural health recovery speed.",
+            unlockFeature = "2x Realm Health Recovery",
             isUnlocked = unlockedTechs.contains("tech_ecological_mastery"),
             isAvailable = unlockedTechs.contains("tech_advanced_greenhouse")
         ),
@@ -629,40 +640,40 @@ fun getResearchTreeCatalog(unlockedTechs: Set<String>): List<ResearchTreeNode> {
         ResearchTreeNode(
             id = "tech_geothermal_power",
             tier = 5,
-            title = "Geothermal Power",
+            title = "Forge of the Core",
             rpCost = 250,
-            description = "Tap deep subterranean thermal vents for constant 80 kWh/day zero-emission baseload power.",
-            unlockFeature = "Geothermal Power Vent Structure",
+            description = "Tap deep volcanic vents to harness the earth's fury for constant 80 Mana/day baseload power.",
+            unlockFeature = "Volcanic Power Forge",
             isUnlocked = unlockedTechs.contains("tech_geothermal_power"),
             isAvailable = unlockedTechs.contains("tech_smart_grid")
         ),
         ResearchTreeNode(
             id = "tech_vertical_farming",
             tier = 5,
-            title = "Vertical Farming",
+            title = "Hanging Gardens",
             rpCost = 300,
-            description = "Aeroponic vertical nutrient towers yielding 10x crop output in compact footprints.",
-            unlockFeature = "Vertical Aeroponic Tower",
+            description = "Construct mystical hanging gardens yielding 10x crop output in divine tiered footprints.",
+            unlockFeature = "Grand Hanging Gardens",
             isUnlocked = unlockedTechs.contains("tech_vertical_farming"),
             isAvailable = unlockedTechs.contains("tech_full_automation")
         ),
         ResearchTreeNode(
             id = "tech_fusion_research",
             tier = 5,
-            title = "Fusion Research",
+            title = "Aetheric Core",
             rpCost = 500,
-            description = "Compact aneutronic micro-fusion reactor producing 200 kWh/day unlimited power.",
-            unlockFeature = "Endgame Micro-Fusion Reactor",
+            description = "Bind a shard of pure Aether into a compact containment field producing 200 Mana/day unlimited power.",
+            unlockFeature = "Endgame Aetheric Reactor",
             isUnlocked = unlockedTechs.contains("tech_fusion_research"),
             isAvailable = unlockedTechs.contains("tech_smart_grid")
         ),
         ResearchTreeNode(
             id = "tech_new_dawn",
             tier = 5,
-            title = "New Dawn",
+            title = "The Eternal Kingdom",
             rpCost = 600,
-            description = "Rebuild human eco-civilization and trigger the cinematic story ending.",
-            unlockFeature = "Civilization Rebuilt (Ending Sequence)",
+            description = "Establish the Eternal Kingdom and trigger the coronation story ending.",
+            unlockFeature = "Kingdom Rebuilt (Coronation)",
             isUnlocked = unlockedTechs.contains("tech_new_dawn"),
             isAvailable = unlockedTechs.contains("tech_ecological_mastery") && unlockedTechs.contains("tech_fusion_research")
         )
