@@ -17,6 +17,7 @@ interface WorldCanvasProps {
 
 export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
     gameState,
     plots,
@@ -27,7 +28,9 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
     selectedSeedForPouch,
     isBuildMode,
     selectedBuildType,
+    setSelectedBuildType,
     buildRotationDeg,
+    setBuildRotationDeg,
     waterPlot,
     harvestPlot,
     fertilizePlot,
@@ -60,6 +63,7 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
   const ghostGroupRef = useRef<THREE.Group | null>(null);
   const dirLightRef = useRef<THREE.DirectionalLight | null>(null);
   const ambientLightRef = useRef<THREE.AmbientLight | null>(null);
+  const hemiLightRef = useRef<THREE.HemisphereLight | null>(null);
   const skyMeshRef = useRef<THREE.Mesh | null>(null);
   const starsRef = useRef<THREE.Points | null>(null);
   const windmillBladesRef = useRef<THREE.Group[]>([]);
@@ -67,6 +71,27 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
   const animalMeshesRef = useRef<Map<number, THREE.Group>>(new Map());
   const plotMeshesRef = useRef<Map<number, THREE.Group>>(new Map());
   const buildingMeshesRef = useRef<Map<number, THREE.Group>>(new Map());
+
+  // Solarpunk Kinetic & Animation Refs
+  const dronesRef = useRef<
+    {
+      group: THREE.Group;
+      rotors: THREE.Mesh[];
+      speed: number;
+      phase: number;
+      radiusX: number;
+      radiusZ: number;
+      height: number;
+      centerX: number;
+      centerZ: number;
+    }[]
+  >([]);
+  const companionDroneRef = useRef<{ group: THREE.Group; rotors: THREE.Mesh[] } | null>(null);
+  const swayingFloraRef = useRef<{ group: THREE.Group; origRotZ: number; phase: number }[]>([]);
+  const riverMeshRef = useRef<THREE.Mesh | null>(null);
+  const riverPosOrigRef = useRef<Float32Array | null>(null);
+  const solarTreesRef = useRef<THREE.Group[]>([]);
+  const bioluminescentElementsRef = useRef<THREE.MeshStandardMaterial[]>([]);
 
   // Input states
   const keysRef = useRef<{ [key: string]: boolean }>({});
@@ -90,10 +115,10 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
 
   // Initialize Three.js scene
   useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const width = canvas.clientWidth || window.innerWidth;
+    const height = canvas.clientHeight || window.innerHeight;
 
     // 1. Scene
     const scene = new THREE.Scene();
@@ -105,22 +130,29 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 500);
     cameraRef.current = camera;
 
-    // 3. Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(width, height);
+    // 3. Renderer directly on React-managed canvas
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setSize(width, height, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    container.innerHTML = '';
-    container.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // 4. Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    // 4. Lights & Realistic Atmosphere
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
-    const dirLight = new THREE.DirectionalLight(0xfffaed, 1.2);
+    // Hemisphere light: gentle sky blue dome with warm emerald grass bounce
+    const hemiLight = new THREE.HemisphereLight(0xb2ebf2, 0x33691e, 0.55);
+    scene.add(hemiLight);
+    hemiLightRef.current = hemiLight;
+
+    const dirLight = new THREE.DirectionalLight(0xfffaed, 1.35);
     dirLight.position.set(30, 60, 40);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 2048;
@@ -131,8 +163,12 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
     dirLight.shadow.camera.right = 60;
     dirLight.shadow.camera.top = 60;
     dirLight.shadow.camera.bottom = -60;
+    dirLight.shadow.bias = -0.0005;
     scene.add(dirLight);
     dirLightRef.current = dirLight;
+
+    // Atmospheric Solarpunk Fog
+    scene.fog = new THREE.FogExp2(0xd6f5ea, 0.005);
 
     // 5. Sky Dome & Stars
     const skyGeo = new THREE.SphereGeometry(300, 32, 16);
@@ -161,11 +197,9 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
     scene.add(stars);
     starsRef.current = stars;
 
-    // 6. Terrain: Green Valley, Deep Forest, Wetland
-    // Main terrain plane
+    // 6. Terrain: Green Valley, Forest, & Wetland
     const terrainGeo = new THREE.PlaneGeometry(350, 350, 48, 48);
     terrainGeo.rotateX(-Math.PI / 2);
-    // Vertex displacement for gentle medieval hills
     const posAttr = terrainGeo.attributes.position;
     for (let i = 0; i < posAttr.count; i++) {
       const x = posAttr.getX(i);
@@ -184,62 +218,91 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
     terrainGeo.computeVertexNormals();
 
     const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x4caf50,
-      roughness: 0.85,
-      metalness: 0.1,
+      color: 0x43a047,
+      roughness: 0.8,
+      metalness: 0.05,
     });
     const terrainMesh = new THREE.Mesh(terrainGeo, terrainMat);
     terrainMesh.receiveShadow = true;
     scene.add(terrainMesh);
 
-    // River Water Plane
-    const riverGeo = new THREE.PlaneGeometry(35, 160);
+    // River Water Plane with fine resolution for animated surface waves
+    const riverGeo = new THREE.PlaneGeometry(38, 170, 24, 48);
     riverGeo.rotateX(-Math.PI / 2);
+    // Cache initial Y positions for ripple animation
+    const riverPos = riverGeo.attributes.position;
+    riverPosOrigRef.current = new Float32Array(riverPos.array);
+
     const riverMat = new THREE.MeshStandardMaterial({
       color: 0x00897b,
-      roughness: 0.1,
-      metalness: 0.8,
+      roughness: 0.08,
+      metalness: 0.85,
       transparent: true,
       opacity: 0.88,
     });
     const riverMesh = new THREE.Mesh(riverGeo, riverMat);
-    riverMesh.position.set(-5, -0.6, -90);
+    riverMesh.position.set(-5, -0.55, -90);
     scene.add(riverMesh);
+    riverMeshRef.current = riverMesh;
 
-    // Farm Dirt Paths
+    // Solarpunk Porous Eco-Paths with glowing borders
+    const pathMat = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, roughness: 0.65, metalness: 0.1 });
+    const pathGlowMat = new THREE.MeshStandardMaterial({
+      color: 0x00e5ff,
+      emissive: 0x00e5ff,
+      emissiveIntensity: 0.35,
+      roughness: 0.2,
+    });
+    bioluminescentElementsRef.current.push(pathGlowMat);
+
+    // Main North-South Path
     const pathGeo = new THREE.PlaneGeometry(6, 40);
     pathGeo.rotateX(-Math.PI / 2);
-    const pathMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.9 });
     const pathMesh = new THREE.Mesh(pathGeo, pathMat);
     pathMesh.position.set(0, 0.03, 0);
     pathMesh.receiveShadow = true;
     scene.add(pathMesh);
 
-    const crossPathGeo = new THREE.PlaneGeometry(36, 5);
+    // Luminous borders for path
+    const borderGeo = new THREE.PlaneGeometry(0.2, 40);
+    borderGeo.rotateX(-Math.PI / 2);
+    const leftBorder = new THREE.Mesh(borderGeo, pathGlowMat);
+    leftBorder.position.set(-3.0, 0.035, 0);
+    scene.add(leftBorder);
+    const rightBorder = new THREE.Mesh(borderGeo, pathGlowMat);
+    rightBorder.position.set(3.0, 0.035, 0);
+    scene.add(rightBorder);
+
+    // Cross East-West Path
+    const crossPathGeo = new THREE.PlaneGeometry(38, 5);
     crossPathGeo.rotateX(-Math.PI / 2);
     const crossPath = new THREE.Mesh(crossPathGeo, pathMat);
-    crossPath.position.set(0, 0.02, 0);
+    crossPath.position.set(0, 0.025, 0);
     crossPath.receiveShadow = true;
     scene.add(crossPath);
 
-    // 7. Static Medieval Buildings
-    createStaticCitadel(scene);
-    createStaticBarn(scene);
-    createStaticWorkshop(scene);
-    createStaticMarket(scene);
-    createStaticWell(scene);
+    // 7. Solarpunk Static Architecture & Eco-Sanctuary Elements
+    createStaticCitadel(scene, bioluminescentElementsRef);
+    createStaticBarn(scene, bioluminescentElementsRef);
+    createStaticWorkshop(scene, bioluminescentElementsRef);
+    createStaticMarket(scene, bioluminescentElementsRef);
+    createStaticWell(scene, bioluminescentElementsRef);
     createCampfire(scene);
-    createTreesAndFlora(scene);
+    createTreesAndFlora(scene, swayingFloraRef, bioluminescentElementsRef);
     createPoiLandmarks(scene);
 
-    // 8. Player Character Group
+    // 8. Autonomous Flying Eco-Drones & Companion Drone
+    createAutonomousDrones(scene, dronesRef, bioluminescentElementsRef);
+    createCompanionDrone(scene, companionDroneRef);
+
+    // 9. Player Character Group
     const playerGroup = new THREE.Group();
     playerGroupRef.current = playerGroup;
     createPlayerCharacter(playerGroup);
     playerGroup.position.copy(playerPosRef.current);
     scene.add(playerGroup);
 
-    // 9. Ghost Building for Build Mode
+    // 10. Ghost Building for Build Mode
     const ghostGroup = new THREE.Group();
     ghostGroupRef.current = ghostGroup;
     ghostGroup.visible = false;
@@ -247,12 +310,12 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
 
     // Window Resize
     const handleResize = () => {
-      if (!containerRef.current || !rendererRef.current || !cameraRef.current) return;
-      const w = containerRef.current.clientWidth;
-      const h = containerRef.current.clientHeight;
+      if (!canvasRef.current || !rendererRef.current || !cameraRef.current) return;
+      const w = canvasRef.current.clientWidth || window.innerWidth;
+      const h = canvasRef.current.clientHeight || window.innerHeight;
       cameraRef.current.aspect = w / h;
       cameraRef.current.updateProjectionMatrix();
-      rendererRef.current.setSize(w, h);
+      rendererRef.current.setSize(w, h, false);
     };
     window.addEventListener('resize', handleResize);
 
@@ -276,6 +339,7 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
 
     ghost.visible = true;
     const def = BUILDABLE_CATALOG[selectedBuildType];
+    if (!def) return;
     const ghostMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color(def.previewColor),
       transparent: true,
@@ -455,37 +519,103 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
           dirLightRef.current.intensity = 1.3;
         } else if (hour >= 17 && hour < 20) {
           // Golden hour / Sunset
-          dirLightRef.current.color.setHex(0xff7043);
-          dirLightRef.current.intensity = 0.85;
+          dirLightRef.current.color.setHex(0xff8a65);
+          dirLightRef.current.intensity = 1.05;
         } else {
-          // Night
+          // Night - cool moonlight
           dirLightRef.current.color.setHex(0x5c6bc0);
-          dirLightRef.current.intensity = 0.25;
+          dirLightRef.current.intensity = 0.35;
         }
       }
 
       if (skyMeshRef.current && ambientLightRef.current) {
+        const skyMat = skyMeshRef.current.material as THREE.MeshBasicMaterial;
         if (hour >= 6 && hour < 18) {
-          skyMeshRef.current.material = new THREE.MeshBasicMaterial({ color: 0x81d4fa, side: THREE.BackSide });
+          skyMat.color.setHex(0x81d4fa);
           ambientLightRef.current.intensity = 0.65;
+          if (hemiLightRef.current) hemiLightRef.current.intensity = 0.6;
+          if (sceneRef.current?.fog) (sceneRef.current.fog as THREE.FogExp2).color.setHex(0xd6f5ea);
           if (starsRef.current) (starsRef.current.material as THREE.PointsMaterial).opacity = 0;
         } else if (hour >= 18 && hour < 20.5) {
-          skyMeshRef.current.material = new THREE.MeshBasicMaterial({ color: 0x4a148c, side: THREE.BackSide });
+          skyMat.color.setHex(0x311b92);
           ambientLightRef.current.intensity = 0.45;
-          if (starsRef.current) (starsRef.current.material as THREE.PointsMaterial).opacity = 0.4;
+          if (hemiLightRef.current) hemiLightRef.current.intensity = 0.35;
+          if (sceneRef.current?.fog) (sceneRef.current.fog as THREE.FogExp2).color.setHex(0x281944);
+          if (starsRef.current) (starsRef.current.material as THREE.PointsMaterial).opacity = 0.45;
         } else {
-          skyMeshRef.current.material = new THREE.MeshBasicMaterial({ color: 0x080d1a, side: THREE.BackSide });
+          skyMat.color.setHex(0x060914);
           ambientLightRef.current.intensity = 0.25;
+          if (hemiLightRef.current) hemiLightRef.current.intensity = 0.2;
+          if (sceneRef.current?.fog) (sceneRef.current.fog as THREE.FogExp2).color.setHex(0x0a1020);
           if (starsRef.current) (starsRef.current.material as THREE.PointsMaterial).opacity = 0.95;
         }
       }
 
-      // Rotate windmill blades
-      windmillBladesRef.current.forEach((blades) => {
-        blades.rotation.z += 0.035;
+      // Dynamic Bioluminescent Night Glow
+      const isNightTime = hour >= 18.5 || hour < 6.0;
+      const targetGlow = isNightTime ? 0.8 : 0.25;
+      bioluminescentElementsRef.current.forEach((mat) => {
+        mat.emissiveIntensity = THREE.MathUtils.lerp(mat.emissiveIntensity, targetGlow, 0.05);
       });
 
-      // Hovering bees bobbing
+      // Flowing Water Waves on River Mesh
+      if (riverMeshRef.current && riverPosOrigRef.current) {
+        const geo = riverMeshRef.current.geometry;
+        const pos = geo.attributes.position;
+        const orig = riverPosOrigRef.current;
+        const tWave = performance.now() * 0.0025;
+        for (let i = 0; i < pos.count; i++) {
+          const x = orig[i * 3];
+          const z = orig[i * 3 + 2];
+          const wave = Math.sin(z * 0.18 + tWave * 3.5) * 0.12 + Math.cos(x * 0.35 + tWave * 2.0) * 0.05;
+          pos.setY(i, orig[i * 3 + 1] + wave);
+        }
+        pos.needsUpdate = true;
+      }
+
+      // Swaying Flora (bamboo, willow trees, sunflowers in wind)
+      const tFlora = performance.now() * 0.0018;
+      swayingFloraRef.current.forEach((item) => {
+        item.group.rotation.z = item.origRotZ + Math.sin(tFlora * 2.2 + item.phase) * 0.045;
+        item.group.rotation.x = Math.cos(tFlora * 1.6 + item.phase) * 0.025;
+      });
+
+      // Autonomous Flying Eco-Drones Animation
+      dronesRef.current.forEach((drone) => {
+        drone.phase += drone.speed;
+        const px = drone.centerX + Math.sin(drone.phase) * drone.radiusX;
+        const pz = drone.centerZ + Math.cos(drone.phase * 0.7) * drone.radiusZ;
+        drone.group.position.x = px;
+        drone.group.position.z = pz;
+        drone.group.position.y = drone.height + Math.sin(drone.phase * 2.5) * 0.45;
+        const dirX = Math.cos(drone.phase) * drone.radiusX;
+        const dirZ = -Math.sin(drone.phase * 0.7) * drone.radiusZ * 0.7;
+        drone.group.rotation.y = Math.atan2(dirX, dirZ);
+        drone.rotors.forEach((r) => {
+          r.rotation.y += 0.45;
+        });
+      });
+
+      // Companion Eco-Drone hovering near player
+      if (companionDroneRef.current) {
+        const comp = companionDroneRef.current;
+        const tComp = performance.now() * 0.002;
+        const targetX = playerPosRef.current.x + Math.sin(playerAngleRef.current + 1.2) * 1.4;
+        const targetZ = playerPosRef.current.z + Math.cos(playerAngleRef.current + 1.2) * 1.4;
+        const targetY = 2.1 + Math.sin(tComp * 3.0) * 0.15;
+        comp.group.position.lerp(new THREE.Vector3(targetX, targetY, targetZ), 0.08);
+        comp.group.rotation.y = playerAngleRef.current;
+        comp.rotors.forEach((r) => {
+          r.rotation.y += 0.5;
+        });
+      }
+
+      // Rotate windmill & aeroturbine blades
+      windmillBladesRef.current.forEach((blades) => {
+        blades.rotation.z += 0.045;
+      });
+
+      // Hovering robo-bees bobbing
       const time = performance.now() * 0.003;
       beeGroupsRef.current.forEach((bee, i) => {
         bee.position.y = 1.5 + Math.sin(time + i) * 0.3;
@@ -700,7 +830,21 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
         }
       });
 
-      setActivePrompt(closestPrompt);
+      setActivePrompt((prev) => {
+        if (!closestPrompt && !prev) return null;
+        if (!closestPrompt && prev) return null;
+        if (closestPrompt && !prev) return closestPrompt;
+        if (
+          closestPrompt &&
+          prev &&
+          closestPrompt.type === prev.type &&
+          closestPrompt.targetId === prev.targetId &&
+          closestPrompt.text === prev.text
+        ) {
+          return prev;
+        }
+        return closestPrompt;
+      });
 
       // Render Scene
       if (rendererRef.current && sceneRef.current && cameraRef.current) {
@@ -862,6 +1006,9 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
       onPointerUp={handlePointerUp}
       onWheel={handleWheel}
     >
+      {/* Dedicated Three.js canvas element */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block pointer-events-none" />
+
       {/* Dynamic Interaction Prompt Badge */}
       {activePrompt && (
         <div className="hud-overlay absolute bottom-28 left-1/2 -translate-x-1/2 z-20 pointer-events-auto">
@@ -888,17 +1035,93 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
 
       {/* Build Mode Action Controls */}
       {isBuildMode && (
-        <div className="hud-overlay absolute top-20 right-4 z-20 flex flex-col gap-2">
-          <div className="bg-[#1A0F0A]/90 border border-[#D4AF37] p-3 rounded-xl text-xs text-amber-200">
-            <span className="font-bold text-[#D4AF37]">Build Mode</span>: {BUILDABLE_CATALOG[selectedBuildType].displayName}
-            <div className="text-[10px] text-amber-400/80">Cost: {BUILDABLE_CATALOG[selectedBuildType].costCoins} Coins</div>
+        <div className="hud-overlay absolute top-20 right-4 z-20 flex flex-col gap-2 max-w-xs">
+          <div className="bg-[#1A0F0A]/95 border-2 border-emerald-400 p-3.5 rounded-2xl text-xs text-emerald-100 shadow-[0_0_20px_rgba(0,230,118,0.3)] backdrop-blur-md">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="font-bold text-emerald-300 text-sm">Solarpunk Architect</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-[10px] text-emerald-300 border border-emerald-400/40">
+                Eco-Grid
+              </span>
+            </div>
+
+            {/* Structure Switcher Carousel */}
+            <div className="flex items-center justify-between gap-1 bg-black/40 p-1.5 rounded-xl border border-emerald-500/30 mb-2">
+              <button
+                onClick={() => {
+                  const keys: (typeof selectedBuildType)[] = [
+                    'HYDRO_DOME',
+                    'SOLAR_TREE',
+                    'BIOREACTOR',
+                    'DRONE_DEPOT',
+                    'WINDMILL',
+                    'SOLAR_PANEL',
+                    'ADVANCED_SOLAR',
+                    'GREENHOUSE',
+                    'WELL',
+                    'WATER_PURIFIER',
+                    'COMPOST_BIN',
+                    'CABIN',
+                    'STORAGE',
+                  ];
+                  const currentIdx = keys.indexOf(selectedBuildType);
+                  const prevIdx = (currentIdx - 1 + keys.length) % keys.length;
+                  setSelectedBuildType(keys[prevIdx]);
+                }}
+                className="w-7 h-7 rounded-lg bg-emerald-900/60 hover:bg-emerald-700/80 text-emerald-200 font-bold flex items-center justify-center cursor-pointer transition-colors"
+                title="Previous Structure"
+              >
+                ◀
+              </button>
+              <div className="text-center flex-1 px-1">
+                <div className="font-bold text-emerald-200 text-xs truncate">
+                  {BUILDABLE_CATALOG[selectedBuildType]?.displayName || selectedBuildType}
+                </div>
+                <div className="text-[10px] text-amber-300 font-semibold">
+                  {BUILDABLE_CATALOG[selectedBuildType]?.costCoins || 0} Sol Coins
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const keys: (typeof selectedBuildType)[] = [
+                    'HYDRO_DOME',
+                    'SOLAR_TREE',
+                    'BIOREACTOR',
+                    'DRONE_DEPOT',
+                    'WINDMILL',
+                    'SOLAR_PANEL',
+                    'ADVANCED_SOLAR',
+                    'GREENHOUSE',
+                    'WELL',
+                    'WATER_PURIFIER',
+                    'COMPOST_BIN',
+                    'CABIN',
+                    'STORAGE',
+                  ];
+                  const currentIdx = keys.indexOf(selectedBuildType);
+                  const nextIdx = (currentIdx + 1) % keys.length;
+                  setSelectedBuildType(keys[nextIdx]);
+                }}
+                className="w-7 h-7 rounded-lg bg-emerald-900/60 hover:bg-emerald-700/80 text-emerald-200 font-bold flex items-center justify-center cursor-pointer transition-colors"
+                title="Next Structure"
+              >
+                ▶
+              </button>
+            </div>
+
+            <div className="text-[10px] text-emerald-200/80 mb-2 leading-tight">
+              {BUILDABLE_CATALOG[selectedBuildType]?.gameplayEffect}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setBuildRotationDeg((r) => (r + 45) % 360)}
+                className="flex-1 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-200 rounded-lg text-xs font-medium border border-emerald-500/30 cursor-pointer"
+              >
+                Rotate ({buildRotationDeg}°)
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => setBuildRotationDeg((r) => (r + 45) % 360)}
-            className="px-4 py-2 bg-[#8D6E63] hover:bg-[#A1887F] text-amber-100 rounded-lg text-xs font-bold border border-amber-300/40 cursor-pointer"
-          >
-            Rotate (45°)
-          </button>
+
           <button
             onClick={() => {
               const offsetDist = 5.0;
@@ -909,13 +1132,13 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
                 setIsBuildMode(false);
               }
             }}
-            className="px-4 py-2 bg-[#00E676] hover:bg-emerald-400 text-slate-900 rounded-lg text-xs font-bold border border-white cursor-pointer shadow-lg"
+            className="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 rounded-xl text-xs font-bold border border-emerald-200 cursor-pointer shadow-[0_0_15px_rgba(0,230,118,0.4)] active:scale-95 transition-all text-center"
           >
-            Place Structure
+            Deploy Structure
           </button>
           <button
             onClick={() => setIsBuildMode(false)}
-            className="px-4 py-2 bg-[#800020] hover:bg-red-800 text-amber-100 rounded-lg text-xs font-bold border border-red-400 cursor-pointer"
+            className="px-4 py-2 bg-red-950/80 hover:bg-red-900/90 text-red-200 rounded-xl text-xs font-bold border border-red-500/40 cursor-pointer text-center"
           >
             Cancel
           </button>
@@ -942,311 +1165,814 @@ export const WorldCanvas: React.FC<WorldCanvasProps> = ({ onPromptInteract }) =>
 };
 
 // ==========================================
-// 3D MODEL BUILDERS (Procedural Medieval Low-Poly)
+// 3D MODEL BUILDERS (Realistic Solarpunk Eco-Futuristic)
 // ==========================================
 
 function createPlayerCharacter(group: THREE.Group) {
-  // Torso / Tunic
-  const torsoGeo = new THREE.BoxGeometry(0.7, 0.9, 0.45);
-  const torsoMat = new THREE.MeshStandardMaterial({ color: 0x800020, roughness: 0.7 }); // Crimson Tunic
+  // Solarpunk Eco-Suit / Cyber-Linen Tunic
+  const torsoGeo = new THREE.BoxGeometry(0.72, 0.95, 0.46);
+  const torsoMat = new THREE.MeshStandardMaterial({
+    color: 0x004d40, // Deep bio-teal
+    roughness: 0.6,
+    metalness: 0.2,
+  });
   const torso = new THREE.Mesh(torsoGeo, torsoMat);
-  torso.position.y = 1.35;
+  torso.position.y = 1.38;
   torso.castShadow = true;
   group.add(torso);
 
-  // Leather Belt & Buckle
-  const beltGeo = new THREE.BoxGeometry(0.72, 0.14, 0.47);
-  const beltMat = new THREE.MeshStandardMaterial({ color: 0x4e342e });
+  // Solar Thread Filigree on Chest
+  const vestGeo = new THREE.BoxGeometry(0.74, 0.45, 0.48);
+  const vestMat = new THREE.MeshStandardMaterial({
+    color: 0xffd54f,
+    roughness: 0.3,
+    metalness: 0.8,
+  });
+  const vest = new THREE.Mesh(vestGeo, vestMat);
+  vest.position.set(0, 1.55, 0);
+  group.add(vest);
+
+  // Tech Utility Belt with Solar Power Cell
+  const beltGeo = new THREE.BoxGeometry(0.76, 0.14, 0.5);
+  const beltMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.7 });
   const belt = new THREE.Mesh(beltGeo, beltMat);
   belt.position.y = 1.05;
   group.add(belt);
 
+  // Glowing Holo-Communicator buckle
+  const buckleGeo = new THREE.BoxGeometry(0.18, 0.12, 0.54);
+  const buckleMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.6,
+  });
+  const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+  buckle.position.y = 1.05;
+  group.add(buckle);
+
   // Head
-  const headGeo = new THREE.BoxGeometry(0.45, 0.45, 0.45);
+  const headGeo = new THREE.BoxGeometry(0.44, 0.44, 0.44);
   const headMat = new THREE.MeshStandardMaterial({ color: 0xffcc80, roughness: 0.8 });
   const head = new THREE.Mesh(headGeo, headMat);
   head.position.y = 2.05;
   head.castShadow = true;
   group.add(head);
 
-  // Medieval Hat with Feather
-  const hatGeo = new THREE.ConeGeometry(0.38, 0.35, 6);
-  const hatMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32 });
-  const hat = new THREE.Mesh(hatGeo, hatMat);
-  hat.position.y = 2.38;
-  group.add(hat);
+  // Lightweight AR Sun-Visor
+  const visorGeo = new THREE.BoxGeometry(0.48, 0.12, 0.32);
+  const visorMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    transparent: true,
+    opacity: 0.75,
+    roughness: 0.1,
+    metalness: 0.9,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.4,
+  });
+  const visor = new THREE.Mesh(visorGeo, visorMat);
+  visor.position.set(0, 2.08, 0.15);
+  group.add(visor);
 
-  // Backpack
-  const packGeo = new THREE.BoxGeometry(0.5, 0.6, 0.28);
-  const packMat = new THREE.MeshStandardMaterial({ color: 0x5d4037 });
+  // Ergonomic Solar Backpack
+  const packGeo = new THREE.BoxGeometry(0.5, 0.65, 0.28);
+  const packMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.5, metalness: 0.3 });
   const pack = new THREE.Mesh(packGeo, packMat);
-  pack.position.set(0, 1.35, -0.32);
+  pack.position.set(0, 1.4, -0.32);
   pack.castShadow = true;
   group.add(pack);
 
-  // Left Leg
-  const legGeo = new THREE.BoxGeometry(0.24, 0.85, 0.24);
-  legGeo.translate(0, -0.42, 0);
-  const legMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
+  // Miniature curved solar panel on top of pack
+  const packSolarGeo = new THREE.BoxGeometry(0.46, 0.04, 0.26);
+  const packSolarMat = new THREE.MeshStandardMaterial({
+    color: 0x00bcd4,
+    roughness: 0.2,
+    metalness: 0.85,
+  });
+  const packSolar = new THREE.Mesh(packSolarGeo, packSolarMat);
+  packSolar.position.set(0, 1.74, -0.32);
+  group.add(packSolar);
+
+  // Legs with lightweight composite exoskeleton
+  const legGeo = new THREE.BoxGeometry(0.22, 0.88, 0.22);
+  legGeo.translate(0, -0.44, 0);
+  const legMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.7 });
   const leftLeg = new THREE.Mesh(legGeo, legMat);
   leftLeg.name = 'leftLeg';
   leftLeg.position.set(-0.2, 0.9, 0);
   leftLeg.castShadow = true;
   group.add(leftLeg);
 
-  // Right Leg
   const rightLeg = new THREE.Mesh(legGeo, legMat);
   rightLeg.name = 'rightLeg';
   rightLeg.position.set(0.2, 0.9, 0);
   rightLeg.castShadow = true;
   group.add(rightLeg);
 
-  // Arms
-  const armGeo = new THREE.BoxGeometry(0.2, 0.75, 0.2);
-  armGeo.translate(0, -0.37, 0);
-  const armMat = new THREE.MeshStandardMaterial({ color: 0x800020 });
+  // Arms with bio-cuffs
+  const armGeo = new THREE.BoxGeometry(0.2, 0.78, 0.2);
+  armGeo.translate(0, -0.39, 0);
+  const armMat = new THREE.MeshStandardMaterial({ color: 0x004d40, roughness: 0.6 });
   const leftArm = new THREE.Mesh(armGeo, armMat);
   leftArm.name = 'leftArm';
-  leftArm.position.set(-0.46, 1.7, 0);
+  leftArm.position.set(-0.46, 1.72, 0);
   leftArm.castShadow = true;
   group.add(leftArm);
 
   const rightArm = new THREE.Mesh(armGeo, armMat);
   rightArm.name = 'rightArm';
-  rightArm.position.set(0.46, 1.7, 0);
+  rightArm.position.set(0.46, 1.72, 0);
   rightArm.castShadow = true;
   group.add(rightArm);
 }
 
-function createStaticCitadel(scene: THREE.Scene) {
+// 1. Solarpunk Central Eco-Spire (Curved biophilic architecture, geodesic solar dome, vertical terrace gardens)
+function createStaticCitadel(scene: THREE.Scene, bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>) {
   const citadel = new THREE.Group();
   citadel.position.set(6.0, 0, 0.0);
 
-  // Stone Base
-  const baseGeo = new THREE.BoxGeometry(7.0, 3.5, 5.0);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x78909c, roughness: 0.9 });
-  const base = new THREE.Mesh(baseGeo, baseMat);
-  base.position.y = 1.75;
-  base.castShadow = true;
-  base.receiveShadow = true;
-  citadel.add(base);
+  // Curved biophilic white composite podium
+  const podiumGeo = new THREE.CylinderGeometry(5.2, 6.2, 2.8, 16);
+  const whiteMat = new THREE.MeshStandardMaterial({
+    color: 0xf5f5f0,
+    roughness: 0.25,
+    metalness: 0.1,
+  });
+  const podium = new THREE.Mesh(podiumGeo, whiteMat);
+  podium.position.y = 1.4;
+  podium.castShadow = true;
+  podium.receiveShadow = true;
+  citadel.add(podium);
 
-  // Timber Upper Frame & Gable Roof
-  const roofGeo = new THREE.ConeGeometry(5.2, 2.5, 4);
-  roofGeo.rotateY(Math.PI / 4);
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.8 });
-  const roof = new THREE.Mesh(roofGeo, roofMat);
-  roof.position.y = 4.6;
-  roof.castShadow = true;
-  citadel.add(roof);
+  // Circular Tiered Garden Ring (Cascading Greenery)
+  const gardenRingGeo = new THREE.TorusGeometry(5.4, 0.45, 8, 24);
+  gardenRingGeo.rotateX(Math.PI / 2);
+  const gardenMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.75 });
+  const gardenRing = new THREE.Mesh(gardenRingGeo, gardenMat);
+  gardenRing.position.y = 2.6;
+  citadel.add(gardenRing);
 
-  // Chimney
-  const chimGeo = new THREE.BoxGeometry(0.8, 2.8, 0.8);
-  const chimMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.95 });
-  const chim = new THREE.Mesh(chimGeo, chimMat);
-  chim.position.set(2.2, 4.2, 1.2);
-  chim.castShadow = true;
-  citadel.add(chim);
+  // Middle Glass Atrium with Spiral Vines
+  const atriumGeo = new THREE.CylinderGeometry(3.6, 4.4, 3.8, 16);
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x80deea,
+    roughness: 0.1,
+    metalness: 0.4,
+    transparent: true,
+    opacity: 0.65,
+  });
+  const atrium = new THREE.Mesh(atriumGeo, glassMat);
+  atrium.position.y = 4.7;
+  atrium.castShadow = true;
+  citadel.add(atrium);
+
+  // Geodesic Photovoltaic Crown Dome
+  const domeGeo = new THREE.SphereGeometry(3.8, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+  const domeMat = new THREE.MeshStandardMaterial({
+    color: 0x00bcd4,
+    roughness: 0.15,
+    metalness: 0.7,
+    transparent: true,
+    opacity: 0.75,
+  });
+  const dome = new THREE.Mesh(domeGeo, domeMat);
+  dome.position.y = 6.6;
+  citadel.add(dome);
+
+  // Solarpunk Crown Spire & Energy Ring
+  const spireGeo = new THREE.CylinderGeometry(0.12, 0.35, 4.5, 8);
+  const spireMat = new THREE.MeshStandardMaterial({ color: 0xffd54f, roughness: 0.3, metalness: 0.85 });
+  const spire = new THREE.Mesh(spireGeo, spireMat);
+  spire.position.y = 10.5;
+  citadel.add(spire);
+
+  // Glowing Cyan Bioluminescent Ring
+  const haloGeo = new THREE.TorusGeometry(1.4, 0.12, 8, 24);
+  haloGeo.rotateX(Math.PI / 2);
+  const haloMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.6,
+    roughness: 0.2,
+  });
+  bioluminescentRef.current.push(haloMat);
+  const halo = new THREE.Mesh(haloGeo, haloMat);
+  halo.position.y = 10.2;
+  citadel.add(halo);
 
   scene.add(citadel);
 }
 
-function createStaticBarn(scene: THREE.Scene) {
+// 2. Solarpunk Bio-Barn & Agritech Hub (Curved aeroponic greenhouse, solar glass panels, dual vertical spirals)
+function createStaticBarn(scene: THREE.Scene, bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>) {
   const barn = new THREE.Group();
   barn.position.set(-12.0, 0, 10.0);
 
-  // Red Timber Body
-  const bodyGeo = new THREE.BoxGeometry(7.2, 3.8, 5.6);
-  const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8b0000, roughness: 0.8 });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  body.position.y = 1.9;
-  body.castShadow = true;
-  barn.add(body);
+  // Curved Aerodynamic Shell
+  const hullGeo = new THREE.CylinderGeometry(3.6, 4.2, 5.8, 16, 1, false, 0, Math.PI);
+  hullGeo.rotateZ(Math.PI / 2);
+  const hullMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.3, metalness: 0.15 });
+  const hull = new THREE.Mesh(hullGeo, hullMat);
+  hull.position.set(0, 2.6, 0);
+  hull.castShadow = true;
+  barn.add(hull);
 
-  // Barn Gambrel Roof
-  const roofGeo = new THREE.ConeGeometry(5.4, 2.2, 4);
-  roofGeo.rotateY(Math.PI / 4);
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, roughness: 0.6 });
-  const roof = new THREE.Mesh(roofGeo, roofMat);
-  roof.position.y = 4.8;
-  roof.castShadow = true;
-  barn.add(roof);
+  // Translucent Solar Glass Skylight Arches
+  const glassGeo = new THREE.CylinderGeometry(3.65, 4.25, 4.2, 12, 1, false, 0.2, Math.PI - 0.4);
+  glassGeo.rotateZ(Math.PI / 2);
+  const glassMat = new THREE.MeshStandardMaterial({
+    color: 0x80cbc4,
+    roughness: 0.1,
+    metalness: 0.6,
+    transparent: true,
+    opacity: 0.7,
+  });
+  const glass = new THREE.Mesh(glassGeo, glassMat);
+  glass.position.set(0, 2.65, 0);
+  barn.add(glass);
+
+  // Vertical Aeroponic Spiral Towers on Left & Right
+  [-3.8, 3.8].forEach((xOffset) => {
+    const spiralGeo = new THREE.CylinderGeometry(0.65, 0.75, 4.8, 10);
+    const spiralMat = new THREE.MeshStandardMaterial({ color: 0x43a047, roughness: 0.7 });
+    const tower = new THREE.Mesh(spiralGeo, spiralMat);
+    tower.position.set(xOffset, 2.4, 2.0);
+    tower.castShadow = true;
+    barn.add(tower);
+
+    // Bamboo framing rings
+    const ringGeo = new THREE.TorusGeometry(0.8, 0.08, 6, 16);
+    ringGeo.rotateX(Math.PI / 2);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63 });
+    [1.2, 2.4, 3.6].forEach((y) => {
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.set(xOffset, y, 2.0);
+      barn.add(ring);
+    });
+  });
+
+  // Glowing status band
+  const bandGeo = new THREE.BoxGeometry(6.0, 0.1, 0.1);
+  const bandMat = new THREE.MeshStandardMaterial({
+    color: 0x00e676,
+    emissive: 0x00e676,
+    emissiveIntensity: 0.5,
+  });
+  bioluminescentRef.current.push(bandMat);
+  const band = new THREE.Mesh(bandGeo, bandMat);
+  band.position.set(0, 1.2, 2.85);
+  barn.add(band);
 
   scene.add(barn);
 }
 
-function createStaticWorkshop(scene: THREE.Scene) {
+// 3. Solarpunk Clean Fab-Lab & Workshop (Circular open pavilion with 3D printer hologram pedestal)
+function createStaticWorkshop(scene: THREE.Scene, bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>) {
   const forge = new THREE.Group();
   forge.position.set(0.0, 0, 14.0);
 
-  const baseGeo = new THREE.BoxGeometry(5.8, 3.5, 4.6);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.9 });
+  // Circular white composite platform
+  const baseGeo = new THREE.CylinderGeometry(4.0, 4.4, 0.8, 16);
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.4 });
   const base = new THREE.Mesh(baseGeo, baseMat);
-  base.position.y = 1.75;
+  base.position.y = 0.4;
   base.castShadow = true;
   forge.add(base);
 
-  const roofGeo = new THREE.ConeGeometry(4.4, 2.0, 4);
-  roofGeo.rotateY(Math.PI / 4);
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.85 });
-  const roof = new THREE.Mesh(roofGeo, roofMat);
-  roof.position.y = 4.4;
-  roof.castShadow = true;
-  forge.add(roof);
+  // 4 Curved Bamboo/Alloy Support Columns
+  const colGeo = new THREE.CylinderGeometry(0.18, 0.22, 3.6, 8);
+  const colMat = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, roughness: 0.5, metalness: 0.3 });
+  for (let i = 0; i < 4; i++) {
+    const angle = (i * Math.PI) / 2 + Math.PI / 4;
+    const col = new THREE.Mesh(colGeo, colMat);
+    col.position.set(Math.cos(angle) * 3.2, 2.2, Math.sin(angle) * 3.2);
+    col.castShadow = true;
+    forge.add(col);
+  }
+
+  // Hexagonal Photovoltaic Canopy
+  const canopyGeo = new THREE.CylinderGeometry(3.8, 4.2, 0.3, 6);
+  const canopyMat = new THREE.MeshStandardMaterial({
+    color: 0x0288d1,
+    roughness: 0.2,
+    metalness: 0.8,
+  });
+  const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+  canopy.position.y = 4.1;
+  canopy.castShadow = true;
+  forge.add(canopy);
+
+  // Central Hologram Fabricator Pedestal
+  const pedGeo = new THREE.CylinderGeometry(0.8, 0.9, 1.2, 10);
+  const pedMat = new THREE.MeshStandardMaterial({ color: 0x455a64, roughness: 0.3, metalness: 0.6 });
+  const ped = new THREE.Mesh(pedGeo, pedMat);
+  ped.position.y = 1.0;
+  forge.add(ped);
+
+  // Glowing Holographic Energy Ring
+  const holoGeo = new THREE.TorusGeometry(0.55, 0.05, 8, 20);
+  holoGeo.rotateX(Math.PI / 2);
+  const holoMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.7,
+  });
+  bioluminescentRef.current.push(holoMat);
+  const holo = new THREE.Mesh(holoGeo, holoMat);
+  holo.position.y = 1.7;
+  forge.add(holo);
 
   scene.add(forge);
 }
 
-function createStaticMarket(scene: THREE.Scene) {
+// 4. Solarpunk Eco-Market & Harvest Depot (Tensile solar sail canopy and bamboo trade counter)
+function createStaticMarket(scene: THREE.Scene, bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>) {
   const market = new THREE.Group();
   market.position.set(-14.0, 0, -14.0);
 
-  // Market Counter
-  const counterGeo = new THREE.BoxGeometry(3.6, 1.2, 2.2);
-  const counterMat = new THREE.MeshStandardMaterial({ color: 0x6d4c41, roughness: 0.85 });
+  // Organic curved bamboo counter
+  const counterGeo = new THREE.BoxGeometry(4.2, 1.1, 2.2);
+  const counterMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.7 });
   const counter = new THREE.Mesh(counterGeo, counterMat);
-  counter.position.y = 0.6;
+  counter.position.y = 0.55;
   counter.castShadow = true;
   market.add(counter);
 
-  // Canopy
-  const canopyGeo = new THREE.ConeGeometry(2.6, 1.2, 6);
-  const canopyMat = new THREE.MeshStandardMaterial({ color: 0xffd54f, roughness: 0.5 });
+  // Wooden produce crates
+  const crateGeo = new THREE.BoxGeometry(0.9, 0.45, 0.7);
+  const crateMat = new THREE.MeshStandardMaterial({ color: 0xa1887f });
+  [-1.2, 0, 1.2].forEach((x, i) => {
+    const crate = new THREE.Mesh(crateGeo, crateMat);
+    crate.position.set(x, 1.3, (i % 2 === 0 ? 0.2 : -0.2));
+    market.add(crate);
+
+    // Fresh produce spheres in crate
+    const produceGeo = new THREE.SphereGeometry(0.12, 6, 6);
+    const produceMat = new THREE.MeshStandardMaterial({
+      color: i === 0 ? 0xff5252 : i === 1 ? 0xffd54f : 0x69f0ae,
+    });
+    for (let p = 0; p < 3; p++) {
+      const prod = new THREE.Mesh(produceGeo, produceMat);
+      prod.position.set(x + (p - 1) * 0.22, 1.6, (i % 2 === 0 ? 0.2 : -0.2));
+      market.add(prod);
+    }
+  });
+
+  // Tensile Solar Sail Canopy (Golden yellow flexible thin-film solar)
+  const canopyGeo = new THREE.ConeGeometry(3.6, 1.4, 5);
+  const canopyMat = new THREE.MeshStandardMaterial({
+    color: 0xffb300,
+    roughness: 0.35,
+    metalness: 0.5,
+  });
   const canopy = new THREE.Mesh(canopyGeo, canopyMat);
-  canopy.position.y = 2.8;
+  canopy.position.y = 3.6;
   canopy.castShadow = true;
   market.add(canopy);
+
+  // Holographic pricing badge
+  const badgeGeo = new THREE.PlaneGeometry(0.8, 0.4);
+  const badgeMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.5,
+    transparent: true,
+    opacity: 0.85,
+  });
+  bioluminescentRef.current.push(badgeMat);
+  const badge = new THREE.Mesh(badgeGeo, badgeMat);
+  badge.position.set(0, 2.4, 1.15);
+  market.add(badge);
 
   scene.add(market);
 }
 
-function createStaticWell(scene: THREE.Scene) {
+// 5. Atmospheric Moisture Condensation Spire & Well (Sleek vertical helix tower with pure water pool)
+function createStaticWell(scene: THREE.Scene, bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>) {
   const well = new THREE.Group();
   well.position.set(8.0, 0, -3.5);
 
-  // Circular Stone Base
-  const baseGeo = new THREE.CylinderGeometry(1.2, 1.3, 1.1, 12);
-  const baseMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, roughness: 0.9 });
+  // White quartz catchment basin
+  const baseGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.9, 16);
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.3, metalness: 0.1 });
   const base = new THREE.Mesh(baseGeo, baseMat);
-  base.position.y = 0.55;
+  base.position.y = 0.45;
   base.castShadow = true;
   well.add(base);
 
-  // Wooden Roof
-  const roofGeo = new THREE.ConeGeometry(1.6, 1.1, 6);
-  const roofMat = new THREE.MeshStandardMaterial({ color: 0x4e342e });
-  const roof = new THREE.Mesh(roofGeo, roofMat);
-  roof.position.y = 2.4;
-  roof.castShadow = true;
-  well.add(roof);
+  // Pure Crystalline Water Pool
+  const waterGeo = new THREE.CylinderGeometry(1.4, 1.4, 0.1, 16);
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    roughness: 0.05,
+    metalness: 0.9,
+    transparent: true,
+    opacity: 0.85,
+  });
+  const water = new THREE.Mesh(waterGeo, waterMat);
+  water.position.y = 0.88;
+  well.add(water);
+
+  // Central Vertical Condensation Core (glass tube with internal spiral)
+  const coreGeo = new THREE.CylinderGeometry(0.4, 0.4, 3.8, 12);
+  const coreMat = new THREE.MeshStandardMaterial({
+    color: 0xb2ebf2,
+    roughness: 0.1,
+    metalness: 0.3,
+    transparent: true,
+    opacity: 0.6,
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.position.y = 2.6;
+  well.add(core);
+
+  // Atmospheric Catchment Rings
+  const ringGeo = new THREE.TorusGeometry(0.9, 0.08, 6, 16);
+  ringGeo.rotateX(Math.PI / 2);
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0x00bcd4, roughness: 0.2, metalness: 0.8 });
+  [1.8, 2.8, 3.8].forEach((y) => {
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.y = y;
+    well.add(ring);
+  });
+
+  // Aqua bioluminescent base light
+  const glowGeo = new THREE.TorusGeometry(1.7, 0.06, 6, 20);
+  glowGeo.rotateX(Math.PI / 2);
+  const glowMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.6,
+  });
+  bioluminescentRef.current.push(glowMat);
+  const glow = new THREE.Mesh(glowGeo, glowMat);
+  glow.position.y = 0.1;
+  well.add(glow);
 
   scene.add(well);
 }
 
+// 6. Solar Bio-Plasma Hearth (Clean catalytic plasma bowl with warm golden glow)
 function createCampfire(scene: THREE.Scene) {
   const campfire = new THREE.Group();
   campfire.position.set(0.0, 0, 5.0);
 
-  // Ring of stones
-  for (let i = 0; i < 8; i++) {
-    const angle = (i / 8) * Math.PI * 2;
-    const stoneGeo = new THREE.DodecahedronGeometry(0.25);
-    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x424242, roughness: 0.9 });
-    const stone = new THREE.Mesh(stoneGeo, stoneMat);
-    stone.position.set(Math.cos(angle) * 0.9, 0.15, Math.sin(angle) * 0.9);
-    campfire.add(stone);
-  }
+  // Sculptural brass and stone bowl
+  const bowlGeo = new THREE.CylinderGeometry(1.2, 0.7, 0.5, 12);
+  const bowlMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.4, metalness: 0.6 });
+  const bowl = new THREE.Mesh(bowlGeo, bowlMat);
+  bowl.position.y = 0.25;
+  bowl.castShadow = true;
+  campfire.add(bowl);
 
-  // Wood logs
-  const logGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.1, 6);
-  const logMat = new THREE.MeshStandardMaterial({ color: 0x3e2723 });
-  for (let i = 0; i < 3; i++) {
-    const log = new THREE.Mesh(logGeo, logMat);
-    log.position.y = 0.2;
-    log.rotation.z = Math.PI / 4;
-    log.rotation.y = (i * Math.PI) / 3;
-    campfire.add(log);
-  }
+  // Polished Copper Inset Ring
+  const ringGeo = new THREE.TorusGeometry(1.05, 0.08, 6, 16);
+  ringGeo.rotateX(Math.PI / 2);
+  const ringMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.85, roughness: 0.2 });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.y = 0.5;
+  campfire.add(ring);
 
-  // Glowing Fire Core
-  const fireGeo = new THREE.ConeGeometry(0.4, 0.8, 6);
-  const fireMat = new THREE.MeshBasicMaterial({ color: 0xff7043 });
-  const fire = new THREE.Mesh(fireGeo, fireMat);
-  fire.position.y = 0.45;
-  campfire.add(fire);
+  // Levitating Bio-Plasma Core (polyhedral crystal flame)
+  const coreGeo = new THREE.OctahedronGeometry(0.38, 1);
+  const coreMat = new THREE.MeshBasicMaterial({ color: 0xffa726 });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  core.position.y = 0.75;
+  campfire.add(core);
 
-  const fireLight = new THREE.PointLight(0xffa726, 1.5, 12);
+  // Soft warm ambient firelight
+  const fireLight = new THREE.PointLight(0xffb74d, 2.0, 14);
   fireLight.position.y = 1.0;
   campfire.add(fireLight);
 
   scene.add(campfire);
 }
 
-function createTreesAndFlora(scene: THREE.Scene) {
+// 7. Solarpunk Trees & Swaying Flora (Willow trees, tall bamboo, solar sunflowers, and night-glowing mushrooms)
+function createTreesAndFlora(
+  scene: THREE.Scene,
+  swayingFloraRef: React.MutableRefObject<{ group: THREE.Group; origRotZ: number; phase: number }[]>,
+  bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>
+) {
   const treePositions = [
     [-18, -12], [-22, -6], [-16, -2], [-22, 4], [-18, 12],
     [10, 6], [12, 14], [-6, -16], [4, -18], [-2, -22],
-    // Deep forest dense trees
     [-35, 50], [-15, 48], [10, 52], [32, 55], [-45, 70],
     [-25, 68], [-8, 72], [15, 70], [38, 75], [55, 80],
     [-50, 95], [-28, 98], [-2, 92], [25, 96], [48, 102],
-    // Wetland reeds and willows
     [-30, -55], [-10, -50], [15, -52], [35, -58], [-45, -75]
   ];
 
-  treePositions.forEach(([x, z]) => {
+  treePositions.forEach(([x, z], idx) => {
     const tree = new THREE.Group();
     tree.position.set(x, 0, z);
 
-    // Trunk
-    const trunkGeo = new THREE.CylinderGeometry(0.3, 0.45, 2.5, 6);
-    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.9 });
+    // Natural curved trunk
+    const trunkGeo = new THREE.CylinderGeometry(0.28, 0.5, 2.8, 8);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.85 });
     const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-    trunk.position.y = 1.25;
+    trunk.position.y = 1.4;
     trunk.castShadow = true;
     tree.add(trunk);
 
-    // Canopy (3 stacked cones)
+    // Lush Layered Solarpunk Foliage (spherical bio-canopy clusters)
+    const leafColor = z > 30 ? 0x1b5e20 : z < -30 ? 0x00695c : (idx % 2 === 0 ? 0x388e3c : 0x43a047);
     const leavesMat = new THREE.MeshStandardMaterial({
-      color: z > 30 ? 0x1b5e20 : z < -30 ? 0x00796b : 0x2e7d32,
-      roughness: 0.7,
-    });
-    [2.8, 3.8, 4.8].forEach((y, idx) => {
-      const radius = 2.2 - idx * 0.5;
-      const coneGeo = new THREE.ConeGeometry(radius, 1.6, 6);
-      const cone = new THREE.Mesh(coneGeo, leavesMat);
-      cone.position.y = y;
-      cone.castShadow = true;
-      tree.add(cone);
+      color: leafColor,
+      roughness: 0.65,
     });
 
+    const crownGroup = new THREE.Group();
+    crownGroup.position.y = 2.8;
+
+    // Multi-sphere bio-canopy
+    const offsets = [
+      [0, 0.9, 0, 1.8],
+      [-0.8, 0.4, 0.4, 1.3],
+      [0.8, 0.5, -0.4, 1.4],
+      [0.2, 0.3, 0.8, 1.2],
+      [-0.4, 0.6, -0.7, 1.3],
+    ];
+    offsets.forEach(([ox, oy, oz, r]) => {
+      const sphereGeo = new THREE.DodecahedronGeometry(r, 1);
+      const sphere = new THREE.Mesh(sphereGeo, leavesMat);
+      sphere.position.set(ox, oy, oz);
+      sphere.castShadow = true;
+      crownGroup.add(sphere);
+    });
+    tree.add(crownGroup);
+
     scene.add(tree);
+    swayingFloraRef.current.push({
+      group: tree,
+      origRotZ: 0,
+      phase: idx * 0.4,
+    });
+  });
+
+  // Radiant Solar Sunflowers
+  const sunflowerPositions = [
+    [-6, 3], [-8, 2], [-5, 6], [14, 2], [15, 5], [14, -6]
+  ];
+  sunflowerPositions.forEach(([sx, sz], sIdx) => {
+    const flower = new THREE.Group();
+    flower.position.set(sx, 0, sz);
+
+    // Stalk
+    const stalkGeo = new THREE.CylinderGeometry(0.05, 0.08, 1.8, 6);
+    const stalkMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.7 });
+    const stalk = new THREE.Mesh(stalkGeo, stalkMat);
+    stalk.position.y = 0.9;
+    flower.add(stalk);
+
+    // Golden Photovoltaic Petals
+    const headGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.1, 10);
+    headGeo.rotateX(Math.PI / 4);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xffc107, roughness: 0.3 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.set(0, 1.8, 0);
+    flower.add(head);
+
+    // Concentrator Center (glowing core)
+    const centerGeo = new THREE.SphereGeometry(0.2, 8, 8);
+    const centerMat = new THREE.MeshStandardMaterial({
+      color: 0xff6f00,
+      emissive: 0xff6f00,
+      emissiveIntensity: 0.4,
+    });
+    bioluminescentRef.current.push(centerMat);
+    const center = new THREE.Mesh(centerGeo, centerMat);
+    center.position.set(0, 1.82, 0.05);
+    flower.add(center);
+
+    scene.add(flower);
+    swayingFloraRef.current.push({
+      group: flower,
+      origRotZ: 0,
+      phase: sIdx * 0.7,
+    });
+  });
+
+  // Bioluminescent Night Mushrooms near river & shaded trees
+  const shroomPositions = [
+    [-4, -26], [-8, -32], [2, -28], [-14, -8], [-12, -4], [8, -14]
+  ];
+  shroomPositions.forEach(([mx, mz]) => {
+    const shroom = new THREE.Group();
+    shroom.position.set(mx, 0, mz);
+
+    const stemGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.45, 6);
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0xe0f7fa });
+    const stem = new THREE.Mesh(stemGeo, stemMat);
+    stem.position.y = 0.22;
+    shroom.add(stem);
+
+    // Translucent Glowing Cap
+    const capGeo = new THREE.SphereGeometry(0.22, 8, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+    const capMat = new THREE.MeshStandardMaterial({
+      color: 0x00e5ff,
+      emissive: 0x00e5ff,
+      emissiveIntensity: 0.6,
+      transparent: true,
+      opacity: 0.85,
+    });
+    bioluminescentRef.current.push(capMat);
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.position.y = 0.45;
+    shroom.add(cap);
+
+    scene.add(shroom);
   });
 }
 
+// 8. Autonomous Flying Eco-Drones (Patrol quadcopters with spinning rotors & headlights)
+function createAutonomousDrones(
+  scene: THREE.Scene,
+  dronesRef: React.MutableRefObject<
+    {
+      group: THREE.Group;
+      rotors: THREE.Mesh[];
+      speed: number;
+      phase: number;
+      radiusX: number;
+      radiusZ: number;
+      height: number;
+      centerX: number;
+      centerZ: number;
+    }[]
+  >,
+  bioluminescentRef: React.MutableRefObject<THREE.MeshStandardMaterial[]>
+) {
+  const droneConfigs = [
+    { speed: 0.014, phase: 0, radiusX: 24, radiusZ: 18, height: 7.5, centerX: 0, centerZ: 0 },
+    { speed: 0.011, phase: Math.PI, radiusX: 32, radiusZ: 26, height: 9.0, centerX: -6, centerZ: -10 },
+  ];
+
+  droneConfigs.forEach((cfg) => {
+    const droneGroup = new THREE.Group();
+    const rotors: THREE.Mesh[] = [];
+
+    // Aerodynamic Central Pod Body
+    const podGeo = new THREE.SphereGeometry(0.45, 10, 8);
+    podGeo.scale(1.2, 0.5, 1.4);
+    const podMat = new THREE.MeshStandardMaterial({
+      color: 0xf5f5f5,
+      roughness: 0.2,
+      metalness: 0.6,
+    });
+    const pod = new THREE.Mesh(podGeo, podMat);
+    pod.castShadow = true;
+    droneGroup.add(pod);
+
+    // Solar Wing Trim on top
+    const solarWingGeo = new THREE.BoxGeometry(0.7, 0.04, 0.9);
+    const solarWingMat = new THREE.MeshStandardMaterial({
+      color: 0x00bcd4,
+      roughness: 0.1,
+      metalness: 0.85,
+    });
+    const solarWing = new THREE.Mesh(solarWingGeo, solarWingMat);
+    solarWing.position.y = 0.22;
+    droneGroup.add(solarWing);
+
+    // 4 Carbon-Alloy Rotor Arms
+    const armPositions = [
+      [0.65, 0.65],
+      [-0.65, 0.65],
+      [0.65, -0.65],
+      [-0.65, -0.65],
+    ];
+    armPositions.forEach(([ax, az]) => {
+      const armGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.9, 6);
+      armGeo.rotateZ(Math.PI / 2);
+      const armMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8 });
+      const arm = new THREE.Mesh(armGeo, armMat);
+      arm.position.set(ax / 2, 0.05, az / 2);
+      arm.lookAt(new THREE.Vector3(ax, 0.05, az));
+      droneGroup.add(arm);
+
+      // Motor Hub
+      const hubGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.12, 8);
+      const hubMat = new THREE.MeshStandardMaterial({ color: 0x455a64 });
+      const hub = new THREE.Mesh(hubGeo, hubMat);
+      hub.position.set(ax, 0.1, az);
+      droneGroup.add(hub);
+
+      // Spinning 2-Blade Propeller
+      const propGeo = new THREE.BoxGeometry(0.65, 0.02, 0.08);
+      const propMat = new THREE.MeshStandardMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.85 });
+      const prop = new THREE.Mesh(propGeo, propMat);
+      prop.position.set(ax, 0.18, az);
+      droneGroup.add(prop);
+      rotors.push(prop);
+    });
+
+    // Glowing Cyan Headlight
+    const lightGeo = new THREE.SphereGeometry(0.12, 6, 6);
+    const lightMat = new THREE.MeshStandardMaterial({
+      color: 0x00e5ff,
+      emissive: 0x00e5ff,
+      emissiveIntensity: 0.9,
+    });
+    bioluminescentRef.current.push(lightMat);
+    const light = new THREE.Mesh(lightGeo, lightMat);
+    light.position.set(0, -0.1, 0.6);
+    droneGroup.add(light);
+
+    // Soft downward spot lighting
+    const downLight = new THREE.PointLight(0x00e5ff, 0.8, 8);
+    downLight.position.set(0, -0.2, 0.3);
+    droneGroup.add(downLight);
+
+    droneGroup.position.set(cfg.centerX, cfg.height, cfg.centerZ);
+    scene.add(droneGroup);
+
+    dronesRef.current.push({
+      group: droneGroup,
+      rotors,
+      speed: cfg.speed,
+      phase: cfg.phase,
+      radiusX: cfg.radiusX,
+      radiusZ: cfg.radiusZ,
+      height: cfg.height,
+      centerX: cfg.centerX,
+      centerZ: cfg.centerZ,
+    });
+  });
+}
+
+// 9. Player's Personal Companion Drone
+function createCompanionDrone(
+  scene: THREE.Scene,
+  companionRef: React.MutableRefObject<{ group: THREE.Group; rotors: THREE.Mesh[] } | null>
+) {
+  const group = new THREE.Group();
+  const rotors: THREE.Mesh[] = [];
+
+  // Orb body
+  const orbGeo = new THREE.SphereGeometry(0.24, 10, 8);
+  const orbMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.2,
+    metalness: 0.5,
+  });
+  const orb = new THREE.Mesh(orbGeo, orbMat);
+  group.add(orb);
+
+  // Cyan Eye Lens
+  const eyeGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.06, 10);
+  eyeGeo.rotateX(Math.PI / 2);
+  const eyeMat = new THREE.MeshStandardMaterial({
+    color: 0x00e5ff,
+    emissive: 0x00e5ff,
+    emissiveIntensity: 0.8,
+  });
+  const eye = new THREE.Mesh(eyeGeo, eyeMat);
+  eye.position.set(0, 0.02, 0.22);
+  group.add(eye);
+
+  // Top Aerofoil Rotor
+  const rotorGeo = new THREE.BoxGeometry(0.42, 0.02, 0.06);
+  const rotorMat = new THREE.MeshStandardMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.75 });
+  const rotor = new THREE.Mesh(rotorGeo, rotorMat);
+  rotor.position.y = 0.3;
+  group.add(rotor);
+  rotors.push(rotor);
+
+  scene.add(group);
+  companionRef.current = { group, rotors };
+}
+
 function createPoiLandmarks(scene: THREE.Scene) {
-  // Ancient Radio Tower (45, 0, 120)
+  // Ancient Solar Communication Spire (45, 0, 120)
   const tower = new THREE.Group();
   tower.position.set(45, 0, 120);
-  const towerGeo = new THREE.CylinderGeometry(0.4, 2.2, 18, 4);
+  const towerGeo = new THREE.CylinderGeometry(0.35, 2.0, 22, 6);
   const towerMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, wireframe: true });
   const towerMesh = new THREE.Mesh(towerGeo, towerMat);
-  towerMesh.position.y = 9;
+  towerMesh.position.y = 11;
   tower.add(towerMesh);
+
+  // Solar dishes on spire
+  const dishGeo = new THREE.SphereGeometry(1.6, 10, 8, 0, Math.PI * 2, 0, Math.PI / 3);
+  const dishMat = new THREE.MeshStandardMaterial({ color: 0x00bcd4, roughness: 0.2, metalness: 0.8 });
+  const dish = new THREE.Mesh(dishGeo, dishMat);
+  dish.position.set(0, 18, 0);
+  dish.rotation.x = Math.PI / 4;
+  tower.add(dish);
   scene.add(tower);
 
-  // Ancient Banyan Tree (-15, 0, -140)
+  // Ancient Sacred Bio-Banyan Tree (-15, 0, -140)
   const banyan = new THREE.Group();
   banyan.position.set(-15, 0, -140);
-  const banyanTrunkGeo = new THREE.CylinderGeometry(2.0, 3.5, 8, 8);
+  const banyanTrunkGeo = new THREE.CylinderGeometry(2.0, 3.8, 9, 8);
   const banyanTrunkMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
   const banyanTrunk = new THREE.Mesh(banyanTrunkGeo, banyanTrunkMat);
-  banyanTrunk.position.y = 4;
+  banyanTrunk.position.y = 4.5;
   banyan.add(banyanTrunk);
-  const banyanCrownGeo = new THREE.SphereGeometry(7, 8, 8);
-  const banyanCrownMat = new THREE.MeshStandardMaterial({ color: 0x004d40, roughness: 0.8 });
+  const banyanCrownGeo = new THREE.SphereGeometry(8, 12, 10);
+  const banyanCrownMat = new THREE.MeshStandardMaterial({ color: 0x004d40, roughness: 0.75 });
   const crown = new THREE.Mesh(banyanCrownGeo, banyanCrownMat);
-  crown.position.y = 11;
+  crown.position.y = 12;
   banyan.add(crown);
   scene.add(banyan);
 }
@@ -1267,11 +1993,22 @@ function createAnimalModel(group: THREE.Group, type: string, name: string) {
     group.add(comb);
   } else if (type === 'CYBER_BOVINE') {
     const bodyGeo = new THREE.BoxGeometry(1.6, 1.2, 2.4);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.8 });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.7 });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.y = 1.3;
     body.castShadow = true;
     group.add(body);
+
+    // Glowing cyber harness
+    const harnessGeo = new THREE.BoxGeometry(1.65, 0.14, 1.8);
+    const harnessMat = new THREE.MeshStandardMaterial({
+      color: 0x00e676,
+      emissive: 0x00e676,
+      emissiveIntensity: 0.5,
+    });
+    const harness = new THREE.Mesh(harnessGeo, harnessMat);
+    harness.position.y = 1.4;
+    group.add(harness);
 
     const headGeo = new THREE.BoxGeometry(0.8, 0.8, 0.9);
     const head = new THREE.Mesh(headGeo, bodyMat);
@@ -1287,7 +2024,7 @@ function createAnimalModel(group: THREE.Group, type: string, name: string) {
     group.add(fleece);
   } else if (type === 'ROBO_BEE_POLLINATOR') {
     const beeGeo = new THREE.SphereGeometry(0.2, 6, 6);
-    const beeMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+    const beeMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffa000, emissiveIntensity: 0.4 });
     const bee = new THREE.Mesh(beeGeo, beeMat);
     group.add(bee);
   } else {
@@ -1299,61 +2036,230 @@ function createAnimalModel(group: THREE.Group, type: string, name: string) {
   }
 }
 
+// 10. Placed Solarpunk Buildings (Windmills, Solar Trees, Hydroponic Domes, Bioreactors, Drone Depots)
 function createPlacedBuildingModel(
   group: THREE.Group,
   type: string,
   bladesRef: React.MutableRefObject<THREE.Group[]>
 ) {
   if (type === 'WINDMILL') {
-    // Aeolian Spire tower
-    const towerGeo = new THREE.CylinderGeometry(0.8, 1.8, 8, 8);
-    const towerMat = new THREE.MeshStandardMaterial({ color: 0xd7ccc8, roughness: 0.8 });
+    // Sleek Aerodynamic Wind Turbine
+    const towerGeo = new THREE.CylinderGeometry(0.35, 0.85, 9.5, 12);
+    const towerMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.25, metalness: 0.4 });
     const tower = new THREE.Mesh(towerGeo, towerMat);
-    tower.position.y = 4.0;
+    tower.position.y = 4.75;
     tower.castShadow = true;
     group.add(tower);
 
-    // Rotating Sails
+    // Nacelle (aerodynamic generator head)
+    const nacelleGeo = new THREE.BoxGeometry(0.9, 0.7, 1.8);
+    const nacelleMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.3, metalness: 0.6 });
+    const nacelle = new THREE.Mesh(nacelleGeo, nacelleMat);
+    nacelle.position.set(0, 9.6, 0.2);
+    group.add(nacelle);
+
+    // 3 Aerodynamic Twisted Blades
     const rotorGroup = new THREE.Group();
-    rotorGroup.position.set(0, 7.8, 0.9);
+    rotorGroup.position.set(0, 9.6, 1.15);
     group.add(rotorGroup);
     bladesRef.current.push(rotorGroup);
 
-    for (let i = 0; i < 4; i++) {
-      const sailGeo = new THREE.BoxGeometry(0.3, 3.2, 0.05);
-      sailGeo.translate(0, 1.6, 0);
-      const sailMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-      const sail = new THREE.Mesh(sailGeo, sailMat);
-      sail.rotation.z = (i * Math.PI) / 2;
-      rotorGroup.add(sail);
+    // Nose Cone
+    const coneGeo = new THREE.ConeGeometry(0.35, 0.6, 10);
+    coneGeo.rotateX(Math.PI / 2);
+    const cone = new THREE.Mesh(coneGeo, nacelleMat);
+    cone.position.set(0, 0, 0.3);
+    rotorGroup.add(cone);
+
+    for (let i = 0; i < 3; i++) {
+      const angle = (i * Math.PI * 2) / 3;
+      const bladeGeo = new THREE.BoxGeometry(0.24, 4.4, 0.05);
+      bladeGeo.translate(0, 2.2, 0);
+      const bladeMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.rotation.z = angle;
+      rotorGroup.add(blade);
     }
+  } else if (type === 'SOLAR_TREE') {
+    // Sculptural Biomimetic Solar Tree
+    const trunkGeo = new THREE.CylinderGeometry(0.35, 0.65, 4.2, 8);
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x455a64, roughness: 0.4, metalness: 0.6 });
+    const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+    trunk.position.y = 2.1;
+    trunk.castShadow = true;
+    group.add(trunk);
+
+    // Branching Photovoltaic Hexagonal Petals
+    const canopy = new THREE.Group();
+    canopy.position.y = 4.2;
+    group.add(canopy);
+
+    const petalAngles = [0, (Math.PI * 2) / 5, (Math.PI * 4) / 5, (Math.PI * 6) / 5, (Math.PI * 8) / 5];
+    petalAngles.forEach((ang) => {
+      const branchGeo = new THREE.CylinderGeometry(0.08, 0.12, 1.8, 6);
+      branchGeo.rotateZ(Math.PI / 3);
+      const branchMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.7 });
+      const branch = new THREE.Mesh(branchGeo, branchMat);
+      branch.rotation.y = ang;
+      canopy.add(branch);
+
+      // Hexagonal Solar Leaf
+      const leafGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.06, 6);
+      const leafMat = new THREE.MeshStandardMaterial({
+        color: 0x00bcd4,
+        roughness: 0.15,
+        metalness: 0.85,
+        emissive: 0x006064,
+        emissiveIntensity: 0.2,
+      });
+      const leaf = new THREE.Mesh(leafGeo, leafMat);
+      leaf.position.set(Math.cos(ang) * 1.5, 0.8, Math.sin(ang) * 1.5);
+      leaf.rotation.x = Math.PI / 6;
+      canopy.add(leaf);
+    });
+  } else if (type === 'HYDRO_DOME') {
+    // Geodesic Hydroponic Dome
+    const baseGeo = new THREE.CylinderGeometry(3.6, 3.8, 0.6, 16);
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.3 });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.position.y = 0.3;
+    group.add(base);
+
+    // Faceted Geodesic Translucent Dome
+    const domeGeo = new THREE.SphereGeometry(3.4, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+    const domeMat = new THREE.MeshStandardMaterial({
+      color: 0x80deea,
+      roughness: 0.1,
+      metalness: 0.4,
+      transparent: true,
+      opacity: 0.65,
+    });
+    const dome = new THREE.Mesh(domeGeo, domeMat);
+    dome.position.y = 0.6;
+    group.add(dome);
+
+    // Internal Concentric Hydroponic Spiral with Green Plants
+    const spiralGeo = new THREE.CylinderGeometry(0.5, 0.7, 2.6, 8);
+    const spiralMat = new THREE.MeshStandardMaterial({ color: 0x00e676 });
+    const spiral = new THREE.Mesh(spiralGeo, spiralMat);
+    spiral.position.y = 1.6;
+    group.add(spiral);
+  } else if (type === 'BIOREACTOR') {
+    // Algae Spirulina Bioreactor (Twin glass tubes with glowing green spirulina fluid)
+    const baseGeo = new THREE.BoxGeometry(2.6, 0.5, 1.4);
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.3, metalness: 0.8 });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.position.y = 0.25;
+    group.add(base);
+
+    // Twin Cylindrical Glass Tubes
+    [-0.7, 0.7].forEach((x) => {
+      const tubeGeo = new THREE.CylinderGeometry(0.48, 0.48, 3.2, 16);
+      const tubeMat = new THREE.MeshStandardMaterial({
+        color: 0x00e676,
+        roughness: 0.1,
+        metalness: 0.2,
+        transparent: true,
+        opacity: 0.85,
+        emissive: 0x00e676,
+        emissiveIntensity: 0.55,
+      });
+      const tube = new THREE.Mesh(tubeGeo, tubeMat);
+      tube.position.set(x, 1.9, 0);
+      group.add(tube);
+
+      // Brass End Caps
+      const capGeo = new THREE.CylinderGeometry(0.52, 0.52, 0.2, 16);
+      const capMat = new THREE.MeshStandardMaterial({ color: 0xb87333, metalness: 0.9, roughness: 0.2 });
+      const topCap = new THREE.Mesh(capGeo, capMat);
+      topCap.position.set(x, 3.55, 0);
+      group.add(topCap);
+    });
+  } else if (type === 'DRONE_DEPOT') {
+    // Autonomous Eco-Drone Delivery Depot
+    const padGeo = new THREE.CylinderGeometry(3.0, 3.2, 0.4, 8);
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.3, metalness: 0.6 });
+    const pad = new THREE.Mesh(padGeo, padMat);
+    pad.position.y = 0.2;
+    group.add(pad);
+
+    // Illuminated Holographic Landing Ring
+    const ringGeo = new THREE.TorusGeometry(2.4, 0.08, 6, 24);
+    ringGeo.rotateX(Math.PI / 2);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color: 0x7c4dff,
+      emissive: 0x7c4dff,
+      emissiveIntensity: 0.8,
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.position.y = 0.42;
+    group.add(ring);
+
+    // Docked Mini Patrol Drone on pad
+    const miniDroneGeo = new THREE.BoxGeometry(0.8, 0.22, 0.8);
+    const miniDroneMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+    const miniDrone = new THREE.Mesh(miniDroneGeo, miniDroneMat);
+    miniDrone.position.set(0, 0.55, 0);
+    group.add(miniDrone);
   } else if (type === 'SOLAR_PANEL' || type === 'ADVANCED_SOLAR') {
-    const standGeo = new THREE.CylinderGeometry(0.1, 0.1, 1.0);
-    const stand = new THREE.Mesh(standGeo, new THREE.MeshStandardMaterial({ color: 0x546e7a }));
-    stand.position.y = 0.5;
+    // High-Efficiency Photovoltaic Tracker Array
+    const standGeo = new THREE.CylinderGeometry(0.12, 0.16, 1.2, 8);
+    const stand = new THREE.Mesh(standGeo, new THREE.MeshStandardMaterial({ color: 0x455a64, metalness: 0.7 }));
+    stand.position.y = 0.6;
     group.add(stand);
 
-    const panelGeo = new THREE.BoxGeometry(1.8, 0.1, 1.8);
-    const panelMat = new THREE.MeshStandardMaterial({ color: 0xffd54f, roughness: 0.3, metalness: 0.7 });
+    const panelGeo = new THREE.BoxGeometry(2.4, 0.08, 1.8);
+    const panelMat = new THREE.MeshStandardMaterial({
+      color: 0x00bcd4,
+      roughness: 0.15,
+      metalness: 0.85,
+    });
     const panel = new THREE.Mesh(panelGeo, panelMat);
-    panel.position.set(0, 1.0, 0);
+    panel.position.set(0, 1.25, 0);
     panel.rotation.x = Math.PI / 6;
     panel.castShadow = true;
     group.add(panel);
+  } else if (type === 'GREENHOUSE') {
+    // Curved Bioclimatic Glass Conservatory
+    const baseGeo = new THREE.BoxGeometry(4.8, 0.4, 4.0);
+    const base = new THREE.Mesh(baseGeo, new THREE.MeshStandardMaterial({ color: 0xf5f5f5 }));
+    base.position.y = 0.2;
+    group.add(base);
+
+    const archGeo = new THREE.CylinderGeometry(2.2, 2.2, 4.4, 12, 1, false, 0, Math.PI);
+    archGeo.rotateZ(Math.PI / 2);
+    const archMat = new THREE.MeshStandardMaterial({
+      color: 0x80deea,
+      roughness: 0.1,
+      metalness: 0.3,
+      transparent: true,
+      opacity: 0.7,
+    });
+    const arch = new THREE.Mesh(archGeo, archMat);
+    arch.position.set(0, 2.2, 0);
+    group.add(arch);
   } else {
-    // Default placed cabin / building
-    const boxGeo = new THREE.BoxGeometry(3.5, 2.5, 3.5);
-    const boxMat = new THREE.MeshStandardMaterial({ color: 0x8d6e63, roughness: 0.85 });
+    // Solarpunk Eco-Cabin with Living Green Roof
+    const boxGeo = new THREE.BoxGeometry(3.6, 2.4, 3.6);
+    const boxMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.35, metalness: 0.1 });
     const box = new THREE.Mesh(boxGeo, boxMat);
-    box.position.y = 1.25;
+    box.position.y = 1.2;
     box.castShadow = true;
     group.add(box);
 
-    const roofGeo = new THREE.ConeGeometry(2.8, 1.8, 4);
-    roofGeo.rotateY(Math.PI / 4);
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x4e342e });
+    // Curved Living Moss & Solar Roof
+    const roofGeo = new THREE.CylinderGeometry(2.2, 2.2, 3.8, 10, 1, false, 0, Math.PI);
+    roofGeo.rotateZ(Math.PI / 2);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x388e3c, roughness: 0.8 });
     const roof = new THREE.Mesh(roofGeo, roofMat);
-    roof.position.y = 3.4;
+    roof.position.y = 2.4;
     group.add(roof);
+
+    // Solar Skylight
+    const skylightGeo = new THREE.BoxGeometry(2.6, 0.08, 1.2);
+    const skylightMat = new THREE.MeshStandardMaterial({ color: 0x00bcd4, metalness: 0.8 });
+    const skylight = new THREE.Mesh(skylightGeo, skylightMat);
+    skylight.position.set(0, 3.52, 0);
+    group.add(skylight);
   }
 }

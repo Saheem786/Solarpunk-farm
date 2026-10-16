@@ -13,8 +13,11 @@ import {
   LoreEntryData,
   TerminalLogData,
   CropTypeId,
+  CropStage,
   PlotType,
   LivestockTypeId,
+  FishTypeId,
+  FISH_CATALOG,
   PlayerTool,
   WeatherType,
   BuildableTypeId,
@@ -774,7 +777,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const growthPerSec = (1.0 / cropDef.growthDurationSec) * (0.8 + plot.compostLevel * 0.4) * weatherMultiplier;
           const newProgress = plot.progress + growthPerSec * (dtHours * 10);
 
-          let newStage = plot.stage;
+          let newStage: CropStage = plot.stage;
           if (newProgress >= 1.0) {
             newStage = 'HARVEST_READY';
           } else if (newProgress >= 0.75) {

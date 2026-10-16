@@ -274,7 +274,11 @@ export type BuildableTypeId =
   | 'KITCHEN'
   | 'MEDIC_STATION'
   | 'WORKSHOP'
-  | 'RESEARCH_LAB';
+  | 'RESEARCH_LAB'
+  | 'HYDRO_DOME'
+  | 'SOLAR_TREE'
+  | 'BIOREACTOR'
+  | 'DRONE_DEPOT';
 
 export interface BuildableDef {
   id: BuildableTypeId;
@@ -625,6 +629,54 @@ export const BUILDABLE_CATALOG: Record<BuildableTypeId, BuildableDef> = {
     gameplayEffect: 'Generates +2 Prestige/day. Requires 2 Mana/hr.',
     previewColor: '#80DEEA',
     size: 4.0,
+  },
+  HYDRO_DOME: {
+    id: 'HYDRO_DOME',
+    displayName: 'Geodesic Hydroponic Dome',
+    description: 'Faceted prismatic glass dome with aeroponic misting spirals. Accelerates all internal crop growth by 2.0x.',
+    costCoins: 650,
+    requiredMaterialId: 'material_solar_glass',
+    requiredMaterialQty: 5,
+    materialName: 'Solar Glass',
+    gameplayEffect: 'Internal aeroponics accelerates crop growth by 2.0x',
+    previewColor: '#00E5FF',
+    size: 4.5,
+  },
+  SOLAR_TREE: {
+    id: 'SOLAR_TREE',
+    displayName: 'Kinetic Solar-Tree Collector',
+    description: 'Sculptural biomimetic tree with photovoltaic leaf arrays tracking the sun. Gathers 25 kWh clean power/day.',
+    costCoins: 450,
+    requiredMaterialId: 'material_solar_glass',
+    requiredMaterialQty: 4,
+    materialName: 'Solar Glass',
+    gameplayEffect: 'Dynamic sun tracking generates 25 kWh clean energy/day',
+    previewColor: '#FFD54F',
+    size: 3.0,
+  },
+  BIOREACTOR: {
+    id: 'BIOREACTOR',
+    displayName: 'Algae Spirulina Bioreactor',
+    description: 'Twin bioluminescent glass tubes cultivating spirulina microalgae. Produces rich bio-fertilizer and superfood biomass.',
+    costCoins: 520,
+    requiredMaterialId: 'material_eco_alloy',
+    requiredMaterialQty: 4,
+    materialName: 'Eco Alloy',
+    gameplayEffect: 'Produces organic bio-fertilizer (+15% harvest quality)',
+    previewColor: '#00E676',
+    size: 2.5,
+  },
+  DRONE_DEPOT: {
+    id: 'DRONE_DEPOT',
+    displayName: 'Autonomous Eco-Drone Depot',
+    description: 'Solar charging pad and launch tower for automated agro-drones that patrol the sanctuary and deliver supplies.',
+    costCoins: 700,
+    requiredMaterialId: 'material_eco_alloy',
+    requiredMaterialQty: 5,
+    materialName: 'Eco Alloy',
+    gameplayEffect: 'Launches automated harvesting patrol drones across the valley',
+    previewColor: '#7C4DFF',
+    size: 3.5,
   },
 };
 
